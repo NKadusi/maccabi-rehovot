@@ -1,10 +1,9 @@
 import os
 import re
 import requests
-from bs4 import BeautifulSoup
 import google.generativeai as genai
 
-# 1. התחברות לבינה המלאכותית והגדרת מודל
+# 1. התחברות לבינה המלאכותית
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
@@ -18,37 +17,43 @@ if not valid_model_name:
     raise Exception("No suitable Gemini model found.")
 model = genai.GenerativeModel(valid_model_name)
 
-# 2. משיכת נתונים - עם "תחפושת" של דפדפן כרום אמיתי
+# 2. משיכת נתונים ישירות מהשרתים של SofaScore (ללא חסימות HTML)
 try:
-    url = "https://ibasketball.co.il/%D7%9C%D7%99%D7%92%D7%94-%D7%9C%D7%90%D7%95%D7%9E%D7%99%D7%AA-%D7%92%D7%91%D7%A8%D7%99%D7%9D/"
+    # מזהה הטורניר והעונה של הליגה הלאומית 25/26 מתוך הווידג'ט שלך
+    url = "https://api.sofascore.com/api/v1/unique-tournament/40315/season/83414/standings/total"
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json'
     }
     response = requests.get(url, headers=headers, timeout=10)
-    soup = BeautifulSoup(response.content, 'html.parser')
+    data = response.json()
     
-    tables = soup.find_all('table')
-    if tables:
-        standings_text = tables[0].get_text(separator=" | ", strip=True)
-    else:
-        standings_text = "ERROR"
+    standings_text = "טבלת הליגה הלאומית:\n"
+    # מעבר על קבוצות הטופ 10 כדי לחסוך באסימוני קריאה ל-AI
+    for row in data['standings'][0]['rows'][:10]:
+        pos = row['position']
+        team = row['team']['name']
+        matches = row['matches']
+        wins = row['wins']
+        losses = row['losses']
+        standings_text += f"מקום {pos}: {team} | משחקים: {matches} | מאזן: {wins}-{losses}\n"
+
 except Exception as e:
     standings_text = "ERROR"
+    print(f"Error fetching data: {e}")
 
-# 3. מנגנון הגנה - אם אין נתונים, אל תבקש חפירה מה-AI
-if standings_text == "ERROR" or len(standings_text) < 100:
-    new_insights = "<p>ממתין לעדכון נתונים משרתי איגוד הכדורסל...</p>"
+# 3. מנגנון הגנה
+if standings_text == "ERROR" or len(standings_text) < 50:
+    new_insights = "<p>ממתין לעדכון נתונים משרתי התוצאות...</p>"
 else:
-    # 4. בקשת המסקנות מהבינה המלאכותית
+    # 4. בקשת המסקנות
     prompt = f"""
-    אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים שנמשכו כרגע מטבלת הליגה הלאומית:
+    אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים שנמשכו כרגע מטבלת הליגה הלאומית בישראל:
     {standings_text}
 
-    כתוב 3 פסקאות קצרות ומקצועיות של מסקנות סטטיסטיות על מצבה של קבוצת 'מכבי רחובות'.
-    התייחס למאבק על המקום ה-1, ליתרון הביתיות (מקומות 1-4) ולסכנות לקראת הפלייאוף.
-    אל תנחש, תתבסס רק על מתמטיקה.
+    כתוב 3 פסקאות קצרות ומקצועיות של מסקנות סטטיסטיות על מצבה של קבוצת 'מכבי רחובות' (Maccabi Rehovot).
+    התייחס למאבק על המקום ה-1, ליתרון הביתיות (מקומות 1-4) ולסכנות מול הקבוצות שמתחתיה.
+    אל תנחש, תתבסס רק על המתמטיקה והמאזנים שמופיעים בטקסט.
     חובה להשתמש בתגיות HTML של <p> ו-<strong> בלבד.
     אל תוסיף כותרות, טקסט הקדמה או פורמט Markdown (כמו ```html). החזר אך ורק את הפסקאות.
     """
