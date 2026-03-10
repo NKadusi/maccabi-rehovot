@@ -7,7 +7,7 @@ import google.generativeai as genai
 # 1. התחברות לבינה המלאכותית
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-pro'
+model = genai.GenerativeModel('gemini-pro')
 # 2. משיכת נתונים מאיגוד הכדורסל (ליגה לאומית)
 try:
     url = "https://ibasketball.co.il/%D7%9C%D7%99%D7%92%D7%94-%D7%9C%D7%90%D7%95%D7%9E%D7%99%D7%AA-%D7%92%D7%91%D7%A8%D7%99%D7%9D/"
