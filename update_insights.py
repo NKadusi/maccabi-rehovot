@@ -17,19 +17,22 @@ if not valid_model_name:
     raise Exception("No suitable Gemini model found.")
 model = genai.GenerativeModel(valid_model_name)
 
-# 2. משיכת נתונים ישירות מהשרתים של SofaScore (ללא חסימות HTML)
+# 2. משיכת נתונים עם "תחפושת" מתקדמת לעקיפת חסימות
 try:
-    # מזהה הטורניר והעונה של הליגה הלאומית 25/26 מתוך הווידג'ט שלך
     url = "https://api.sofascore.com/api/v1/unique-tournament/40315/season/83414/standings/total"
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Origin': 'https://www.sofascore.com',
+        'Referer': 'https://www.sofascore.com/',
+        'Cache-Control': 'no-cache'
     }
-    response = requests.get(url, headers=headers, timeout=10)
+    
+    response = requests.get(url, headers=headers, timeout=15)
+    response.raise_for_status() # זורק שגיאה מפורטת אם השרת חוסם אותנו
     data = response.json()
     
     standings_text = "טבלת הליגה הלאומית:\n"
-    # מעבר על קבוצות הטופ 10 כדי לחסוך באסימוני קריאה ל-AI
     for row in data['standings'][0]['rows'][:10]:
         pos = row['position']
         team = row['team']['name']
@@ -40,7 +43,9 @@ try:
 
 except Exception as e:
     standings_text = "ERROR"
-    print(f"Error fetching data: {e}")
+    print(f"FAILED TO FETCH DATA. ERROR: {e}")
+    if 'response' in locals() and hasattr(response, 'text'):
+        print(f"Response content: {response.text[:200]}")
 
 # 3. מנגנון הגנה
 if standings_text == "ERROR" or len(standings_text) < 50:
