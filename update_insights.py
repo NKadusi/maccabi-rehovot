@@ -7,8 +7,21 @@ import google.generativeai as genai
 # 1. התחברות לבינה המלאכותית
 api_key = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-pro')
-# 2. משיכת נתונים מאיגוד הכדורסל (ליגה לאומית)
+
+# 2. מציאת המודל הזמין באופן אוטומטי (בלי לנחש שמות!)
+valid_model_name = None
+for m in genai.list_models():
+    if 'generateContent' in m.supported_generation_methods:
+        valid_model_name = m.name
+        break
+
+if not valid_model_name:
+    raise Exception("No suitable Gemini model found for this API key.")
+
+model = genai.GenerativeModel(valid_model_name)
+print(f"Using model: {valid_model_name}")
+
+# 3. משיכת נתונים מאיגוד הכדורסל (ליגה לאומית)
 try:
     url = "https://ibasketball.co.il/%D7%9C%D7%99%D7%92%D7%94-%D7%9C%D7%90%D7%95%D7%9E%D7%99%D7%AA-%D7%92%D7%91%D7%A8%D7%99%D7%9D/"
     headers = {'User-Agent': 'Mozilla/5.0'}
@@ -21,7 +34,7 @@ try:
 except Exception as e:
     standings_text = f"שגיאה במשיכת נתונים: {e}"
 
-# 3. בקשת המסקנות מהבינה המלאכותית
+# 4. בקשת המסקנות מהבינה המלאכותית
 prompt = f"""
 אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים שנמשכו כרגע מטבלת הליגה הלאומית:
 {standings_text}
@@ -36,10 +49,10 @@ prompt = f"""
 response = model.generate_content(prompt)
 new_insights = response.text.strip()
 
-# ניקוי שאריות Markdown למקרה שה-AI הוסיף אותן
+# ניקוי שאריות למקרה שה-AI הוסיף אותן
 new_insights = new_insights.replace("```html", "").replace("```", "").strip()
 
-# 4. עדכון קובץ ה-HTML של האתר
+# 5. עדכון קובץ ה-HTML של האתר
 with open('index.html', 'r', encoding='utf-8') as f:
     html_content = f.read()
 
