@@ -34,11 +34,19 @@
         .winner-highlight { background: #00ff88 !important; color: #000 !important; }
         .rehovot-highlight { color: #3399ff !important; font-weight: 900; background: rgba(51, 153, 255, 0.1) !important; }
 
+        /* לוח משחקים */
         .container { background-color: #262626; padding: 25px; border-radius: 20px; width: 100%; max-width: 1050px; border: 3px solid #00f2fe; margin-bottom: 30px; box-sizing: border-box; }
         h1 { text-align: center; color: #00f2fe; font-size: 1.8em; margin: 0 0 15px 0; }
+        .subtitle { text-align: center; color: #ccc; margin-top: -10px; font-size: 0.8em; margin-bottom: 20px; }
+        .table-responsive { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
         th { background-color: #152238; color: #00f2fe; padding: 12px; border-bottom: 2px solid #00f2fe; }
+        .game-row { cursor: pointer; transition: 0.3s; background-color: #333; }
+        .game-row:hover { background-color: #3d3d3d; }
         .game-row td { padding: 12px; text-align: center; border-bottom: 1px solid #444; font-weight: bold; }
+        .details-panel { display: none; background-color: #1a1a1a; }
+        .details-panel td { font-size: 0.9em; color: #bbb; padding: 10px; border-bottom: 1px solid #2a2a2a; }
+        .sub-header { background-color: #222; color: #00f2fe !important; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -77,17 +85,62 @@
 </div>
 
 <div class="container">
-    <h1>לוח משחקים קרובים</h1>
-    <table>
-        <thead><tr><th>מחזור</th><th>תאריך</th><th>מארחת</th><th>אורחת</th></tr></thead>
-        <tbody>
-            <tr class="game-row"><td>26</td><td>24.3</td><td>אליצור שומרון</td><td style="color:#3399ff">מכבי רחובות</td></tr>
-            <tr class="game-row"><td>23</td><td>27.3</td><td style="color:#3399ff">מכבי רחובות</td><td>מכבי חיפה</td></tr>
-        </tbody>
-    </table>
+    <h1>לוח משחקים - עונת 25/26</h1>
+    <p class="subtitle">לחץ על כל שורה כדי לראות את משחקי חיפה ונהריה באותו מחזור</p>
+    <div class="table-responsive">
+        <table>
+            <thead><tr><th>מחזור</th><th>תאריך</th><th>מארחת</th><th>אורחת</th></tr></thead>
+            <tbody>
+                <tr class="game-row" onclick="toggleDetails('d26')"><td>26</td><td>24.3</td><td>אליצור שומרון</td><td class="rehovot-highlight">מכבי רחובות</td></tr>
+                <tr class="details-panel d26 sub-header"><td colspan="4">משחקים נוספים במחזור 26</td></tr>
+                <tr class="details-panel d26"><td>26</td><td>24.3</td><td>מ.ס צפת</td><td>הפועל חיפה</td></tr>
+                <tr class="details-panel d26"><td>26</td><td>24.3</td><td>עירוני נהריה</td><td>מכבי חיפה</td></tr>
+
+                <tr class="game-row" onclick="toggleDetails('d23')"><td>23</td><td>27.3</td><td class="rehovot-highlight">מכבי רחובות</td><td>מכבי חיפה</td></tr>
+                <tr class="details-panel d23 sub-header"><td colspan="4">משחקים נוספים במחזור 23</td></tr>
+                <tr class="details-panel d23"><td>23</td><td>27.3</td><td>הפועל חיפה</td><td>אליצור יבנה</td></tr>
+                <tr class="details-panel d23"><td>23</td><td>27.3</td><td>עירוני נהריה</td><td>מגדל העמק</td></tr>
+
+                <tr class="game-row" onclick="toggleDetails('d27')"><td>27</td><td>31.3</td><td class="rehovot-highlight">מכבי רחובות</td><td>אשקלון/קרית גת</td></tr>
+                <tr class="details-panel d27 sub-header"><td colspan="4">משחקים נוספים במחזור 27</td></tr>
+                <tr class="details-panel d27"><td>27</td><td>31.3</td><td>עירוני אשקלון</td><td>הפועל חיפה</td></tr>
+                <tr class="details-panel d27"><td>27</td><td>31.3</td><td>מכבי פ"ת</td><td>עירוני נהריה</td></tr>
+
+                <tr class="game-row" onclick="toggleDetails('d28')"><td>28</td><td>6.4</td><td>עירוני נהריה</td><td class="rehovot-highlight">מכבי רחובות</td></tr>
+                <tr class="details-panel d28 sub-header"><td colspan="4">משחקים נוספים במחזור 28</td></tr>
+                <tr class="details-panel d28"><td>28</td><td>6.4</td><td>מכבי חיפה</td><td>הפועל חיפה</td></tr>
+
+                <tr class="game-row" onclick="toggleDetails('d24')"><td>24</td><td>10.4</td><td class="rehovot-highlight">מכבי רחובות</td><td>מכבי פ"ת</td></tr>
+                <tr class="details-panel d24 sub-header"><td colspan="4">משחקים נוספים במחזור 24</td></tr>
+                <tr class="details-panel d24"><td>24</td><td>10.4</td><td>מכבי אשדוד</td><td>הפועל חיפה</td></tr>
+                <tr class="details-panel d24"><td>24</td><td>10.4</td><td>מ.ס צפת</td><td>עירוני נהריה</td></tr>
+
+                <tr class="game-row" onclick="toggleDetails('d29')"><td>29</td><td>14.4</td><td class="rehovot-highlight">מכבי רחובות</td><td>מ.כ עוטף דרום</td></tr>
+                <tr class="details-panel d29 sub-header"><td colspan="4">משחקים נוספים במחזור 29</td></tr>
+                <tr class="details-panel d29"><td>29</td><td>14.4</td><td>הפועל חיפה</td><td>מכבי פ"ת</td></tr>
+                <tr class="details-panel d29"><td>29</td><td>14.4</td><td>אליצור שומרון</td><td>עירוני נהריה</td></tr>
+
+                <tr class="game-row" onclick="toggleDetails('d25')"><td>25</td><td>17.4</td><td>רמה"ש</td><td class="rehovot-highlight">מכבי רחובות</td></tr>
+                <tr class="details-panel d25 sub-header"><td colspan="4">משחקים נוספים במחזור 25</td></tr>
+                <tr class="details-panel d25"><td>25</td><td>17.4</td><td>הפועל חיפה</td><td>מגדל העמק</td></tr>
+                <tr class="details-panel d25"><td>25</td><td>17.4</td><td>עירוני נהריה</td><td>עירוני אשקלון</td></tr>
+
+                <tr class="game-row" onclick="toggleDetails('d30')"><td>30</td><td>24.4</td><td>הפועל חיפה</td><td class="rehovot-highlight">מכבי רחובות</td></tr>
+                <tr class="details-panel d30 sub-header"><td colspan="4">משחקים נוספים במחזור 30</td></tr>
+                <tr class="details-panel d30"><td>30</td><td>24.4</td><td>אשקלון/קרית גת</td><td>עירוני נהריה</td></tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
+    function toggleDetails(id) {
+        const panels = document.querySelectorAll('.' + id);
+        const isVisible = panels[0].style.display === "table-row";
+        document.querySelectorAll('.details-panel').forEach(p => p.style.display = 'none');
+        if (!isVisible) panels.forEach(p => p.style.display = 'table-row');
+    }
+
     const bracketData = {
         qf: [
             { id: 1, t1: "מכבי רחובות", s1: 0, t2: "אליצור שומרון", s2: 0, seed1: 2, seed2: 9 },
@@ -127,11 +180,11 @@
     setInterval(function() {
         const now = new Date().getTime();
         const d = countDownDate - now;
-        const days = Math.floor(d / (86400000));
+        const days = Math.floor(d / 86400000);
         const hours = Math.floor((d % 86400000) / 3600000);
         const mins = Math.floor((d % 3600000) / 60000);
         const secs = Math.floor((d % 60000) / 1000);
-        document.getElementById("timer").innerHTML = days + " ימים | " + hours + ":" + mins + ":" + secs;
+        document.getElementById("timer").innerHTML = days + " ימים | " + hours + ":" + (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
     }, 1000);
 </script>
 </body>
