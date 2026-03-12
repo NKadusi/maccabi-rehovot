@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>פורטל משחקים - מכבי רחובות 25/26</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
         body { margin: 0; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; background: radial-gradient(circle at center, #1c2833 0%, #050505 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; color: #ffffff; }
         .logo-container { margin-bottom: 15px; text-align: center; }
@@ -33,12 +35,11 @@
         .winner-highlight { background: #00ff88 !important; color: #000 !important; }
         .rehovot-highlight { color: #3399ff !important; font-weight: 900; background: rgba(51, 153, 255, 0.1) !important; }
 
-        /* לוח משחקים - התאמה לעמודות החדשות */
         .container { background-color: #262626; padding: 25px; border-radius: 20px; width: 100%; max-width: 1050px; border: 3px solid #00f2fe; margin-bottom: 30px; box-sizing: border-box; }
         h1 { text-align: center; color: #00f2fe; font-size: 1.8em; margin: 0 0 15px 0; }
         .subtitle { text-align: center; color: #ccc; margin-top: -10px; font-size: 0.8em; margin-bottom: 20px; }
         .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        table { width: 100%; border-collapse: collapse; min-width: 650px; }
         th { background-color: #152238; color: #00f2fe; padding: 12px; border-bottom: 2px solid #00f2fe; white-space: nowrap; }
         .game-row { transition: 0.3s; background-color: #333; }
         .game-row:hover { background-color: #3d3d3d; }
@@ -47,14 +48,21 @@
         .details-panel td { font-size: 0.9em; color: #bbb; padding: 10px; border-bottom: 1px solid #2a2a2a; }
         .sub-header { background-color: #222; color: #00f2fe !important; font-weight: bold; cursor: pointer;}
         
-        /* כפתורי פעולות (וויז / יומן) */
-        .action-btns { display: flex; gap: 8px; justify-content: center; }
-        .btn { padding: 5px 10px; border-radius: 5px; font-size: 0.85em; text-decoration: none; font-weight: bold; cursor: pointer; border: none; }
-        .waze-btn { background: #33ccff; color: #000; }
+        .action-btns { display: flex; gap: 8px; justify-content: center; align-items: center; }
+        .btn { padding: 6px 12px; border-radius: 5px; font-size: 0.9em; text-decoration: none; font-weight: bold; cursor: pointer; border: none; display: flex; align-items: center; gap: 5px; }
+        /* עיצוב כפתור ווייז החדש */
+        .waze-btn { background: #ffffff; color: #33ccff; border: 1px solid #33ccff; }
+        .waze-btn i { font-size: 1.2em; }
+        .waze-btn:hover { background: #e6f9ff; }
+        /* עיצוב כפתור יומן החדש */
         .cal-btn { background: #ffcc00; color: #000; }
-        .waze-btn:hover { background: #2bb8e6; }
         .cal-btn:hover { background: #e6b800; }
         .details-toggle { cursor: pointer; font-size: 0.85em; background: #444; color: #fff; padding: 5px 10px; border-radius: 5px; margin-right: 10px; border: 1px solid #666;}
+
+        /* עיצוב מעטפת הווידג'טים בתחתית */
+        .widgets-wrapper { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; max-width: 1050px; margin-bottom: 30px; }
+        .widget-box { background-color: #262626; padding: 20px; border-radius: 20px; flex: 1; min-width: 300px; border: 2px solid #00f2fe; box-sizing: border-box; }
+        .widget-content { width: 100%; border-radius: 10px; background: #ffffff; padding: 5px; box-sizing: border-box; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -103,8 +111,8 @@
                     <td>26</td><td>24.3</td><td>18:30</td><td>אליצור שומרון</td><td class="rehovot-highlight">מכבי רחובות</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+כדורסל+כפר+יונה&navigate=yes" target="_blank" class="btn waze-btn">🚘 Waze</a>
-                            <button onclick="addToCalendar('אליצור שומרון נגד מכבי רחובות', '24.03', '18:30', 'אולם כפר יונה')" class="btn cal-btn">📅 יומן</button>
+                            <a href="https://waze.com/ul?q=אולם+כדורסל+כפר+יונה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('אליצור שומרון נגד מכבי רחובות', '24.03', '18:30', 'אולם כפר יונה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                             <button class="details-toggle" onclick="toggleDetails('d26')">עוד משחקים</button>
                         </div>
                     </td>
@@ -117,8 +125,8 @@
                     <td>23</td><td>27.3</td><td>19:00</td><td class="rehovot-highlight">מכבי רחובות</td><td>מכבי חיפה</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn">🚘 Waze</a>
-                            <button onclick="addToCalendar('מכבי רחובות נגד מכבי חיפה', '27.03', '19:00', 'אולם ברזילי רחובות')" class="btn cal-btn">📅 יומן</button>
+                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('מכבי רחובות נגד מכבי חיפה', '27.03', '19:00', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                             <button class="details-toggle" onclick="toggleDetails('d23')">עוד משחקים</button>
                         </div>
                     </td>
@@ -131,8 +139,8 @@
                     <td>27</td><td>31.3</td><td>19:00</td><td class="rehovot-highlight">מכבי רחובות</td><td>אשקלון/קרית גת</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn">🚘 Waze</a>
-                            <button onclick="addToCalendar('מכבי רחובות נגד אשקלון/קרית גת', '31.03', '19:00', 'אולם ברזילי רחובות')" class="btn cal-btn">📅 יומן</button>
+                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('מכבי רחובות נגד אשקלון/קרית גת', '31.03', '19:00', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                             <button class="details-toggle" onclick="toggleDetails('d27')">עוד משחקים</button>
                         </div>
                     </td>
@@ -145,8 +153,8 @@
                     <td>28</td><td>6.4</td><td>19:00</td><td>עירוני נהריה</td><td class="rehovot-highlight">מכבי רחובות</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+ספורט+עין+שרה+נהריה&navigate=yes" target="_blank" class="btn waze-btn">🚘 Waze</a>
-                            <button onclick="addToCalendar('עירוני נהריה נגד מכבי רחובות', '06.04', '19:00', 'אולם עין שרה נהריה')" class="btn cal-btn">📅 יומן</button>
+                            <a href="https://waze.com/ul?q=אולם+ספורט+עין+שרה+נהריה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('עירוני נהריה נגד מכבי רחובות', '06.04', '19:00', 'אולם עין שרה נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                             <button class="details-toggle" onclick="toggleDetails('d28')">עוד משחקים</button>
                         </div>
                     </td>
@@ -158,8 +166,8 @@
                     <td>24</td><td>10.4</td><td>19:00</td><td class="rehovot-highlight">מכבי רחובות</td><td>מכבי פ"ת</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn">🚘 Waze</a>
-                            <button onclick="addToCalendar('מכבי רחובות נגד מכבי פתח תקווה', '10.04', '19:00', 'אולם ברזילי רחובות')" class="btn cal-btn">📅 יומן</button>
+                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('מכבי רחובות נגד מכבי פתח תקווה', '10.04', '19:00', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                             <button class="details-toggle" onclick="toggleDetails('d24')">עוד משחקים</button>
                         </div>
                     </td>
@@ -172,8 +180,8 @@
                     <td>29</td><td>14.4</td><td>19:00</td><td class="rehovot-highlight">מכבי רחובות</td><td>מ.כ עוטף דרום</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn">🚘 Waze</a>
-                            <button onclick="addToCalendar('מכבי רחובות נגד עוטף דרום', '14.04', '19:00', 'אולם ברזילי רחובות')" class="btn cal-btn">📅 יומן</button>
+                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('מכבי רחובות נגד עוטף דרום', '14.04', '19:00', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                             <button class="details-toggle" onclick="toggleDetails('d29')">עוד משחקים</button>
                         </div>
                     </td>
@@ -186,8 +194,8 @@
                     <td>25</td><td>17.4</td><td>19:00</td><td>רמה"ש</td><td class="rehovot-highlight">מכבי רחובות</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+אורנים+רמת+השרון&navigate=yes" target="_blank" class="btn waze-btn">🚘 Waze</a>
-                            <button onclick="addToCalendar('רמת השרון נגד מכבי רחובות', '17.04', '19:00', 'אולם אורנים רמת השרון')" class="btn cal-btn">📅 יומן</button>
+                            <a href="https://waze.com/ul?q=אולם+אורנים+רמת+השרון&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('רמת השרון נגד מכבי רחובות', '17.04', '19:00', 'אולם אורנים רמת השרון')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                             <button class="details-toggle" onclick="toggleDetails('d25')">עוד משחקים</button>
                         </div>
                     </td>
@@ -200,8 +208,8 @@
                     <td>30</td><td>24.4</td><td>19:00</td><td>הפועל חיפה</td><td class="rehovot-highlight">מכבי רחובות</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=היכל+הספורט+רוממה+חיפה&navigate=yes" target="_blank" class="btn waze-btn">🚘 Waze</a>
-                            <button onclick="addToCalendar('הפועל חיפה נגד מכבי רחובות', '24.04', '19:00', 'היכל הספורט רוממה חיפה')" class="btn cal-btn">📅 יומן</button>
+                            <a href="https://waze.com/ul?q=היכל+הספורט+רוממה+חיפה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('הפועל חיפה נגד מכבי רחובות', '24.04', '19:00', 'היכל הספורט רוממה חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                             <button class="details-toggle" onclick="toggleDetails('d30')">עוד משחקים</button>
                         </div>
                     </td>
@@ -213,8 +221,19 @@
     </div>
 </div>
 
+<div class="widgets-wrapper">
+    <div class="widget-box">
+        <h2 style="text-align: center; color: #00f2fe; margin-top: 0;">טבלת הליגה הלאומית</h2>
+        <div class="widget-content">
+            <iframe id="sofa-standings-embed-40315-83414" src="https://widgets.sofascore.com/embed/tournament/40315/season/83414/standings/National%20League%2025%2F26?widgetTitle=National%20League%2025%2F26&showCompetitionLogo=true" style="height:963px!important;max-width:100%!important;width:100%!important;" frameborder="0" scrolling="no"></iframe>
+            <div style="font-size:12px;font-family:Arial,sans-serif;text-align:left;margin-top:5px; color: #666;">
+                Standings provided by <a target="_blank" href="https://www.sofascore.com/basketball/tournament/israel/national-league/11499#id:83414" style="color: #666;">Sofascore</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    // תפריט מתקפל למשחקים נוספים - פתיחה רק בלחיצה על הכפתור האפור
     function toggleDetails(id) {
         const panels = document.querySelectorAll('.' + id);
         const isVisible = panels[0].style.display === "table-row";
@@ -222,7 +241,6 @@
         if (!isVisible) panels.forEach(p => p.style.display = 'table-row');
     }
 
-    // יצירת אירוע לגוגל קלנדר (מתאים ל-2026)
     function addToCalendar(title, dateStr, timeStr, location) {
         let parts = dateStr.split('.');
         let day = parts[0].padStart(2, '0');
@@ -234,14 +252,13 @@
         let min = tParts[1];
         
         let startTime = `${year}${month}${day}T${hour}${min}00`;
-        let endHour = (parseInt(hour) + 2).toString().padStart(2, '0'); // משחק אורך כשעתיים
+        let endHour = (parseInt(hour) + 2).toString().padStart(2, '0');
         let endTime = `${year}${month}${day}T${endHour}${min}00`;
         
         let url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startTime}/${endTime}&location=${encodeURIComponent(location)}`;
         window.open(url, '_blank');
     }
 
-    // נתונים לעץ פלייאוף
     const bracketData = {
         qf: [
             { id: 1, t1: "מכבי רחובות", s1: 0, t2: "אליצור שומרון", s2: 0, seed1: 2, seed2: 9 },
@@ -277,7 +294,6 @@
     }
     render();
 
-    // שעון עצר למשחק הקרוב
     const countDownDate = new Date("Mar 24, 2026 18:30:00").getTime();
     setInterval(function() {
         const now = new Date().getTime();
@@ -291,4 +307,3 @@
 </script>
 </body>
 </html>
- 
