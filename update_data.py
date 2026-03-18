@@ -71,14 +71,16 @@ def update_games(soup):
     """מגרד את לוח המשחקים מהאתר ומחזיר אותו כ-HTML."""
     games_container = soup.find('div', class_='league-games')
     if not games_container:
-        logging.warning("Games container not found.")
+        logging.warning("Games container 'div.league-games' not found in scraped HTML.")
         return ""
 
     games_by_round = defaultdict(list)
     
     # 1. איסוף וקיבוץ המשחקים לפי מחזור
     game_divs = games_container.find_all('div', class_='game-row')
-    for game_div in game_divs:
+    logging.info(f"Found {len(game_divs)} game divs in total.")
+
+    for i, game_div in enumerate(game_divs):
         try:
             mahzor = game_div.find('div', class_='game-round-gamecycle').text.strip()
             date = game_div.find('div', class_='game-date').text.strip()
@@ -87,15 +89,19 @@ def update_games(soup):
             away_team = game_div.find('div', class_='away-team').find('div', 'team-name').text.strip()
             arena = game_div.find('div', class_='game-hall').text.strip()
             
-            games_by_round[mahzor].append({
+            game_data = {
                 'date': date, 'time': time, 'home': home_team, 'away': away_team, 'arena': arena
-            })
-        except AttributeError:
-            # דילוג על שורות משחק לא תקינות
+            }
+            games_by_round[mahzor].append(game_data)
+            logging.info(f"Processed game {i+1}: Mahzor {mahzor}, {home_team} vs {away_team}")
+
+        except AttributeError as e:
+            logging.warning(f"Could not parse game div #{i+1}. It might be a malformed entry. Error: {e}")
             continue
 
     # 2. בניית ה-HTML
     html = ""
+    logging.info(f"Rendering HTML for {len(games_by_round)} rounds.")
     for mahzor, games in sorted(games_by_round.items()):
         rehovot_game = None
         # מצא את המשחק של רחובות
@@ -104,6 +110,11 @@ def update_games(soup):
                 rehovot_game = games.pop(i)
                 break
         
+        # אם אין משחק של רחובות, וודא שיש משחקים זמינים לפני שאתה קופץ
+        if not games and not rehovot_game:
+            logging.warning(f"No games to display for Mahzor {mahzor}.")
+            continue
+
         # אם אין משחק של רחובות, קח את המשחק הראשון כראשי
         main_game = rehovot_game if rehovot_game else games.pop(0)
         
@@ -113,7 +124,10 @@ def update_games(soup):
         waze_link = ARENA_WAZE_LINKS.get(main_game['arena'], "https://waze.com/ul?navigate=yes")
         
         # פורמט תאריך ליומן
-        date_for_cal = '.'.join(reversed(main_game['date'].split('/')))
+        try:
+            date_for_cal = '.'.join(reversed(main_game['date'].split('/')))
+        except:
+            date_for_cal = main_game['date'] # Fallback
         
         html += f'''
         <tr class="game-row">
@@ -121,7 +135,7 @@ def update_games(soup):
             <td>
                 <div class="action-btns">
                     <a href="{waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                    <button onclick="addToCalendar('{main_game['home']} נגד {main_game['away']}', '{date_for_cal}', '{main_game['time']}', '{main_game['arena']}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                    <button onclick="addToCalendar('{main_game['home'].replace("'", "\\'")} נגד {main_game['away'].replace("'", "\\'")}', '{date_for_cal}', '{main_game['time']}', '{main_game['arena'].replace("'", "\\'")}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                     <button class="details-toggle" onclick="toggleDetails('d{mahzor}')">עוד משחקים</button>
                 </div>
             </td>
