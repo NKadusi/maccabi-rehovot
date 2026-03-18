@@ -73,12 +73,30 @@
             color: #333;
             border-bottom: 2px solid #999;
         }
-        .game-row { background-color: #fff; }
+        .game-row { background-color: #fff; transition: background-color 0.3s; }
         .game-row:hover { background-color: var(--row-hover-light); }
         .game-row td { border-bottom: 1px solid var(--border-color-light); }
-        .details-panel { background-color: #f8f9fa; }
+        .details-panel { 
+            background-color: #f8f9fa; 
+            display: none; 
+        }
+        .details-panel.open-anim { 
+            display: table-row; 
+            animation: fadeInRow 0.4s ease-out forwards;
+        }
+        .details-panel.closing-anim { 
+            display: table-row; 
+            animation: fadeOutRow 0.3s ease-in forwards;
+        }
+        @keyframes fadeInRow {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOutRow {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
         .details-panel td { color: #555; border-bottom: 1px solid var(--border-color-light); }
-        .sub-header { background-color: #e9ecef; color: var(--main-blue) !important; }
         .insights-content p { color: #495057; }
         .insights-content strong { color: var(--main-blue); }
         .series-label { color: #6c757d; }
@@ -108,7 +126,6 @@
         .dark-mode .game-row td { border-bottom: 1px solid #444; }
         .dark-mode .details-panel { background-color: var(--details-bg-dark); }
         .dark-mode .details-panel td { color: #bbb; border-bottom: 1px solid #2a2a2a; }
-        .dark-mode .sub-header { background-color: #222; color: var(--main-blue) !important; }
         .dark-mode .insights-header { color: #a64dff; }
         .dark-mode .insights-content p { color: #e6e6e6; }
         .dark-mode .insights-content strong { color: var(--main-blue); }
@@ -224,13 +241,29 @@
                         <div class="action-btns">
                             <a href="https://waze.com/ul?q=אולם+ספורט+רמת+אלון+חיפה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
                             <button onclick="addToCalendar('מכבי גיא נתן חיפה נגד מכבי רחובות', '27.03', '13:00', 'אולם ספורט רמת אלון חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d23')">עוד משחקים</button>
                         </div>
                     </td>
                 </tr>
-                <tr class="details-panel d23 sub-header" onclick="toggleDetails('d23')"><td colspan="6">סגור משחקים במחזור 23</td></tr>
-                <tr class="details-panel d23"><td>23</td><td>27.3</td><td>13:00</td><td>הפועל אסטרל אילת</td><td>מכבי מעלה אדומים</td><td></td></tr>
-                <tr class="details-panel d23"><td>23</td><td>27.3</td><td>13:45</td><td>הפועל מגדל העמק/יזרעאל</td><td>עירוני נהריה</td><td></td></tr>
+                <tr class="game-row">
+                    <td>23</td><td>27.3</td><td>13:00</td><td>הפועל אסטרל אילת</td><td>מכבי מעלה אדומים</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('הפועל אסטרל אילת נגד מכבי מעלה אדומים', '27.03', '13:00', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="game-row">
+                    <td>23</td><td>27.3</td><td>13:45</td><td>הפועל מגדל העמק/יזרעאל</td><td>עירוני נהריה</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('הפועל מגדל העמק/יזרעאל נגד עירוני נהריה', '27.03', '13:45', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                            <button class="details-toggle" onclick="toggleDetails('d23')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d23"><td>23</td><td>27.3</td><td>14:00</td><td>משחק נוסף א'</td><td>משחק נוסף ב'</td><td></td></tr>
 
                 <tr class="game-row">
                     <td>27</td><td>31.3</td><td>17:30</td><td class="rehovot-highlight">מכבי רחובות</td><td>א.ס. אשקלון/קרית גת</td>
@@ -373,42 +406,29 @@
 
 <script>
     function toggleDetails(id) {
-        const topTeamKeywords = ["אילת", "הפועל חיפה", "עירוני נהריה"];
-        const allRows = document.querySelectorAll('#games-table-body tr');
-        const isTopView = document.body.classList.contains('top-games-view');
-        const buttons = document.querySelectorAll('.details-toggle');
+        const panels = document.querySelectorAll('.details-panel.' + id);
+        if (panels.length === 0) return;
+        
+        const isOpening = !panels[0].classList.contains('open-anim');
+        
+        panels.forEach(panel => {
+            if (isOpening) {
+                panel.classList.remove('closing-anim');
+                panel.classList.add('open-anim');
+            } else {
+                panel.classList.remove('open-anim');
+                panel.classList.add('closing-anim');
+                setTimeout(() => {
+                    if (panel.classList.contains('closing-anim')) {
+                        panel.classList.remove('closing-anim');
+                    }
+                }, 280);
+            }
+        });
 
-        if (isTopView) {
-            document.body.classList.remove('top-games-view');
-            // Restore normal view: show main games, hide details
-            allRows.forEach(row => {
-                if (row.classList.contains('game-row')) {
-                    row.style.display = 'table-row';
-                } else { // details-panel and sub-header
-                    row.style.display = 'none';
-                }
-            });
-            buttons.forEach(btn => btn.textContent = 'עוד משחקים');
-        } else {
-            document.body.classList.add('top-games-view');
-            // Show top games view
-            allRows.forEach(row => {
-                // Hide round-specific "close" headers
-                if (row.classList.contains('sub-header')) {
-                    row.style.display = 'none';
-                    return;
-                }
-                const rowText = row.innerText || row.textContent;
-                const isRehovotGame = row.querySelector('.rehovot-highlight');
-                const isTopTeamGame = topTeamKeywords.some(keyword => rowText.includes(keyword));
-
-                if (isRehovotGame || isTopTeamGame) {
-                    row.style.display = 'table-row';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            buttons.forEach(btn => btn.textContent = 'כל המשחקים');
+        const btn = document.querySelector(`button[onclick="toggleDetails('${id}')"]`);
+        if (btn) {
+            btn.innerHTML = isOpening ? 'סגור משחקים <i class="fa-solid fa-chevron-up"></i>' : 'עוד משחקים <i class="fa-solid fa-chevron-down"></i>';
         }
     }
 
