@@ -79,22 +79,23 @@
         .details-panel { 
             background-color: #f8f9fa; 
             display: none; 
+            opacity: 0;
         }
         .details-panel.open-anim { 
             display: table-row; 
-            animation: fadeInRow 0.4s ease-out forwards;
+            animation: fadeInRow 0.3s ease-out forwards;
         }
         .details-panel.closing-anim { 
             display: table-row; 
-            animation: fadeOutRow 0.3s ease-in forwards;
+            animation: fadeOutRow 0.2s ease-in forwards;
         }
         @keyframes fadeInRow {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
         @keyframes fadeOutRow {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-10px); }
+            0% { opacity: 1; }
+            100% { opacity: 0; }
         }
         .details-panel td { color: #555; border-bottom: 1px solid var(--border-color-light); }
         .insights-content p { color: #495057; }
@@ -241,10 +242,11 @@
                         <div class="action-btns">
                             <a href="https://waze.com/ul?q=אולם+ספורט+רמת+אלון+חיפה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
                             <button onclick="addToCalendar('מכבי גיא נתן חיפה נגד מכבי רחובות', '27.03', '13:00', 'אולם ספורט רמת אלון חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                            <button class="details-toggle" onclick="toggleDetails('d23')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
                         </div>
                     </td>
                 </tr>
-                <tr class="game-row">
+                <tr class="details-panel d23">
                     <td>23</td><td>27.3</td><td>13:00</td><td>הפועל אסטרל אילת</td><td>מכבי מעלה אדומים</td>
                     <td>
                         <div class="action-btns">
@@ -253,45 +255,15 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="game-row">
+                <tr class="details-panel d23">
                     <td>23</td><td>27.3</td><td>13:45</td><td>הפועל מגדל העמק/יזרעאל</td><td>עירוני נהריה</td>
                     <td>
                         <div class="action-btns">
                             <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
                             <button onclick="addToCalendar('הפועל מגדל העמק/יזרעאל נגד עירוני נהריה', '27.03', '13:45', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d23')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
                         </div>
                     </td>
                 </tr>
-                <tr class="details-panel d23"><td>23</td><td>27.3</td><td>14:00</td><td>משחק נוסף א'</td><td>משחק נוסף ב'</td><td></td></tr>
-
-                <tr class="game-row">
-                    <td>27</td><td>31.3</td><td>17:30</td><td class="rehovot-highlight">מכבי רחובות</td><td>א.ס. אשקלון/קרית גת</td>
-                    <td>
-                        <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                            <button onclick="addToCalendar('מכבי רחובות נגד אשקלון/קרית גת', '31.03', '17:30', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d27')">עוד משחקים</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="details-panel d27 sub-header" onclick="toggleDetails('d27')"><td colspan="6">סגור משחקים במחזור 27</td></tr>
-                <tr class="details-panel d27"><td>27</td><td>31.3</td><td>17:45</td><td>עירוני נהריה</td><td>מכבי מנדל פ"ת</td><td></td></tr>
-                <tr class="details-panel d27"><td>27</td><td>31.3</td><td>18:00</td><td>הפועל מגדל העמק/יזרעאל</td><td>הפועל אסטרל אילת</td><td></td></tr>
-
-                <tr class="game-row">
-                    <td>28</td><td>6.4</td><td>19:00</td><td>עירוני נהריה</td><td class="rehovot-highlight">מכבי רחובות</td>
-                    <td>
-                        <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+ספורט+עין+שרה+נהריה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                            <button onclick="addToCalendar('עירוני נהריה נגד מכבי רחובות', '06.04', '19:00', 'אולם עין שרה נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d28')">עוד משחקים</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="details-panel d28 sub-header" onclick="toggleDetails('d28')"><td colspan="6">סגור משחקים במחזור 28</td></tr>
-                <tr class="details-panel d28"><td>28</td><td>6.4</td><td>18:30</td><td>הפועל אסטרל אילת</td><td>מ.ס צפת</td><td></td></tr>
-                <tr class="details-panel d28"><td>28</td><td>6.4</td><td>19:00</td><td>הפועל חיפה נווה שאנן שובל</td><td>מכבי גיא נתן חיפה</td><td></td></tr>
 
                 <tr class="game-row">
                     <td>24</td><td>10.4</td><td>14:00</td><td class="rehovot-highlight">מכבי רחובות</td><td>מכבי מנדל פ"ת</td>
@@ -299,27 +271,28 @@
                         <div class="action-btns">
                             <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
                             <button onclick="addToCalendar('מכבי רחובות נגד מכבי מנדל פתח תקווה', '10.04', '14:00', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d24')">עוד משחקים</button>
+                            <button class="details-toggle" onclick="toggleDetails('d24')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
                         </div>
                     </td>
                 </tr>
-                <tr class="details-panel d24 sub-header" onclick="toggleDetails('d24')"><td colspan="6">סגור משחקים במחזור 24</td></tr>
-                <tr class="details-panel d24"><td>24</td><td>10.4</td><td>13:00</td><td>א.ס רמה"ש ירק השדה</td><td>הפועל אסטרל אילת</td><td></td></tr>
-                <tr class="details-panel d24"><td>24</td><td>10.4</td><td>13:45</td><td>עירוני נהריה</td><td>מ.ס צפת</td><td></td></tr>
-
-                <tr class="game-row">
-                    <td>29</td><td>14.4</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td><td>מ.כ עוטף דרום</td>
+                <tr class="details-panel d24">
+                    <td>24</td><td>10.4</td><td>13:00</td><td>א.ס רמה"ש ירק השדה</td><td>הפועל אסטרל אילת</td>
                     <td>
                         <div class="action-btns">
-                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                            <button onclick="addToCalendar('מכבי רחובות נגד עוטף דרום', '14.04', '18:30', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d29')">עוד משחקים</button>
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('א.ס רמהש ירק השדה נגד הפועל אסטרל אילת', '10.04', '13:00', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                         </div>
                     </td>
                 </tr>
-                <tr class="details-panel d29 sub-header" onclick="toggleDetails('d29')"><td colspan="6">סגור משחקים במחזור 29</td></tr>
-                <tr class="details-panel d29"><td>29</td><td>14.4</td><td>18:30</td><td>אליצור שומרון</td><td>עירוני נהריה</td><td></td></tr>
-                <tr class="details-panel d29"><td>29</td><td>14.4</td><td>19:00</td><td>א.ס. עירוני אשקלון</td><td>הפועל אסטרל אילת</td><td></td></tr>
+                <tr class="details-panel d24">
+                    <td>24</td><td>10.4</td><td>13:45</td><td>עירוני נהריה</td><td>מ.ס צפת</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('עירוני נהריה נגד מ.ס צפת', '10.04', '13:45', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
 
                 <tr class="game-row">
                     <td>25</td><td>17.4</td><td>14:00</td><td class="rehovot-highlight">מכבי רחובות</td><td>א.ס רמה"ש ירק השדה</td>
@@ -327,13 +300,28 @@
                         <div class="action-btns">
                             <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
                             <button onclick="addToCalendar('מכבי רחובות נגד רמת השרון', '17.04', '14:00', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d25')">עוד משחקים</button>
+                            <button class="details-toggle" onclick="toggleDetails('d25')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
                         </div>
                     </td>
                 </tr>
-                <tr class="details-panel d25 sub-header" onclick="toggleDetails('d25')"><td colspan="6">סגור משחקים במחזור 25</td></tr>
-                <tr class="details-panel d25"><td>25</td><td>17.4</td><td>13:00</td><td>אליצור יבנה</td><td>הפועל אסטרל אילת</td><td></td></tr>
-                <tr class="details-panel d25"><td>25</td><td>17.4</td><td>13:30</td><td>א.ס. עירוני אשקלון</td><td>עירוני נהריה</td><td></td></tr>
+                <tr class="details-panel d25">
+                    <td>25</td><td>17.4</td><td>13:00</td><td>אליצור יבנה</td><td>הפועל אסטרל אילת</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('אליצור יבנה נגד הפועל אסטרל אילת', '17.04', '13:00', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d25">
+                    <td>25</td><td>17.4</td><td>13:30</td><td>א.ס. עירוני אשקלון</td><td>עירוני נהריה</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('אשקלון נגד עירוני נהריה', '17.04', '13:30', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
 
                 <tr class="game-row">
                     <td>26</td><td>24.4</td><td>13:30</td><td>אליצור שומרון</td><td class="rehovot-highlight">מכבי רחובות</td>
@@ -341,13 +329,115 @@
                         <div class="action-btns">
                             <a href="https://waze.com/ul?q=אולם+כדורסל+כפר+יונה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
                             <button onclick="addToCalendar('אליצור שומרון נגד מכבי רחובות', '24.04', '13:30', 'אולם כפר יונה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d26')">עוד משחקים</button>
+                            <button class="details-toggle" onclick="toggleDetails('d26')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
                         </div>
                     </td>
                 </tr>
-                <tr class="details-panel d26 sub-header" onclick="toggleDetails('d26')"><td colspan="6">סגור משחקים במחזור 26</td></tr>
-                <tr class="details-panel d26"><td>26</td><td>24.4</td><td>13:15</td><td>הפועל אסטרל אילת</td><td>מכבי רוטשטיין אשדוד</td><td></td></tr>
-                <tr class="details-panel d26"><td>26</td><td>24.4</td><td>14:00</td><td>מכבי גיא נתן חיפה</td><td>עירוני נהריה</td><td></td></tr>
+                <tr class="details-panel d26">
+                    <td>26</td><td>24.4</td><td>13:15</td><td>הפועל אסטרל אילת</td><td>מכבי רוטשטיין אשדוד</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('הפועל אסטרל אילת נגד אשדוד', '24.04', '13:15', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d26">
+                    <td>26</td><td>24.4</td><td>14:00</td><td>מכבי גיא נתן חיפה</td><td>עירוני נהריה</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('מכבי גיא נתן חיפה נגד עירוני נהריה', '24.04', '14:00', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr class="game-row">
+                    <td>27</td><td>31.3</td><td>17:30</td><td class="rehovot-highlight">מכבי רחובות</td><td>א.ס. אשקלון/קרית גת</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('מכבי רחובות נגד אשקלון/קרית גת', '31.03', '17:30', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                            <button class="details-toggle" onclick="toggleDetails('d27')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d27">
+                    <td>27</td><td>31.3</td><td>17:45</td><td>עירוני נהריה</td><td>מכבי מנדל פ"ת</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('עירוני נהריה נגד פתח תקווה', '31.03', '17:45', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d27">
+                    <td>27</td><td>31.3</td><td>18:00</td><td>הפועל מגדל העמק/יזרעאל</td><td>הפועל אסטרל אילת</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('הפועל מגדל העמק נגד הפועל אסטרל אילת', '31.03', '18:00', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr class="game-row">
+                    <td>28</td><td>6.4</td><td>19:00</td><td>עירוני נהריה</td><td class="rehovot-highlight">מכבי רחובות</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?q=אולם+ספורט+עין+שרה+נהריה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('עירוני נהריה נגד מכבי רחובות', '06.04', '19:00', 'אולם עין שרה נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                            <button class="details-toggle" onclick="toggleDetails('d28')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d28">
+                    <td>28</td><td>6.4</td><td>18:30</td><td>הפועל אסטרל אילת</td><td>מ.ס צפת</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('הפועל אסטרל אילת נגד מ.ס צפת', '06.04', '18:30', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d28">
+                    <td>28</td><td>6.4</td><td>19:00</td><td>הפועל חיפה נווה שאנן שובל</td><td>מכבי גיא נתן חיפה</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('הפועל חיפה נגד מכבי גיא נתן חיפה', '06.04', '19:00', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr class="game-row">
+                    <td>29</td><td>14.4</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td><td>מ.כ עוטף דרום</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?q=אולם+ברזילי+רחובות&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('מכבי רחובות נגד עוטף דרום', '14.04', '18:30', 'אולם ברזילי רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                            <button class="details-toggle" onclick="toggleDetails('d29')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d29">
+                    <td>29</td><td>14.4</td><td>18:30</td><td>אליצור שומרון</td><td>עירוני נהריה</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('אליצור שומרון נגד עירוני נהריה', '14.04', '18:30', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d29">
+                    <td>29</td><td>14.4</td><td>19:00</td><td>א.ס. עירוני אשקלון</td><td>הפועל אסטרל אילת</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('אשקלון נגד הפועל אסטרל אילת', '14.04', '19:00', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
 
                 <tr class="game-row">
                     <td>30</td><td>28.4</td><td>18:30</td><td>הפועל חיפה נווה שאנן שובל</td><td class="rehovot-highlight">מכבי רחובות</td>
@@ -355,13 +445,28 @@
                         <div class="action-btns">
                             <a href="https://waze.com/ul?q=היכל+הספורט+רוממה+חיפה&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
                             <button onclick="addToCalendar('הפועל חיפה נגד מכבי רחובות', '28.04', '18:30', 'היכל הספורט רוממה חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                            <button class="details-toggle" onclick="toggleDetails('d30')">עוד משחקים</button>
+                            <button class="details-toggle" onclick="toggleDetails('d30')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>
                         </div>
                     </td>
                 </tr>
-                <tr class="details-panel d30 sub-header" onclick="toggleDetails('d30')"><td colspan="6">סגור משחקים במחזור 30</td></tr>
-                <tr class="details-panel d30"><td>30</td><td>28.4</td><td>18:30</td><td>הפועל אסטרל אילת</td><td>מכבי גיא נתן חיפה</td><td></td></tr>
-                <tr class="details-panel d30"><td>30</td><td>28.4</td><td>18:30</td><td>עירוני נהריה</td><td>א.ס. אשקלון/קרית גת</td><td></td></tr>
+                <tr class="details-panel d30">
+                    <td>30</td><td>28.4</td><td>18:30</td><td>הפועל אסטרל אילת</td><td>מכבי גיא נתן חיפה</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('הפועל אסטרל אילת נגד מכבי גיא נתן חיפה', '28.04', '18:30', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="details-panel d30">
+                    <td>30</td><td>28.4</td><td>18:30</td><td>עירוני נהריה</td><td>א.ס. אשקלון/קרית גת</td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="https://waze.com/ul?navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                            <button onclick="addToCalendar('עירוני נהריה נגד אשקלון/קרית גת', '28.04', '18:30', '')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -422,7 +527,7 @@
                     if (panel.classList.contains('closing-anim')) {
                         panel.classList.remove('closing-anim');
                     }
-                }, 280);
+                }, 190);
             }
         });
 

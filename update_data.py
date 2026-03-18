@@ -102,55 +102,62 @@ def update_games(soup):
     # 2. בניית ה-HTML
     html = ""
     logging.info(f"Rendering HTML for {len(games_by_round)} rounds.")
+    top_teams_keywords = ["אילת", "נהריה", "הפועל חיפה"]
+    
     for mahzor, games in sorted(games_by_round.items()):
-        featured_games = []
-        other_games = []
+        rehovot_game = None
+        top_games = []
         
         for game in games:
-            home, away = game['home'], game['away']
-            is_featured = any(t in home or t in away for t in ["רחובות", "אילת", "נהריה", "הפועל חיפה"])
-            if is_featured:
-                featured_games.append(game)
-            else:
-                other_games.append(game)
+            if "רחובות" in game['home'] or "רחובות" in game['away']:
+                rehovot_game = game
+            elif any(t in game['home'] or t in game['away'] for t in top_teams_keywords):
+                top_games.append(game)
         
-        if not featured_games and other_games:
-            featured_games.append(other_games.pop(0))
-            
-        if not featured_games and not other_games:
+        if not rehovot_game and not top_games:
             continue
 
-        for i, game in enumerate(featured_games):
-            home_highlight = 'rehovot-highlight' if "רחובות" in game['home'] else ''
-            away_highlight = 'rehovot-highlight' if "רחובות" in game['away'] else ''
-            waze_link = ARENA_WAZE_LINKS.get(game['arena'], "https://waze.com/ul?navigate=yes")
+        main_game = rehovot_game if rehovot_game else top_games.pop(0)
+        home_hi = 'rehovot-highlight' if 'רחובות' in main_game['home'] else ''
+        away_hi = 'rehovot-highlight' if 'רחובות' in main_game['away'] else ''
+        main_waze = ARENA_WAZE_LINKS.get(main_game['arena'], "https://waze.com/ul?navigate=yes")
             
-            try:
-                date_for_cal = '.'.join(reversed(game['date'].split('/')))
-            except:
-                date_for_cal = game['date'] # Fallback
+        try:
+            main_date_cal = '.'.join(reversed(main_game['date'].split('/')))
+        except:
+            main_date_cal = main_game['date']
             
-            toggle_btn = ""
-            if i == len(featured_games) - 1 and other_games:
-                toggle_btn = f'<button class="details-toggle" onclick="toggleDetails(\'d{mahzor}\')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>'
+        toggle_btn = ""
+        if top_games:
+            toggle_btn = f'<button class="details-toggle" onclick="toggleDetails(\'d{mahzor}\')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>'
             
-            html += f'''
+        html += f'''
         <tr class="game-row">
-            <td>{mahzor}</td><td>{game['date']}</td><td>{game['time']}</td><td class="{home_highlight}">{game['home']}</td><td class="{away_highlight}">{game['away']}</td>
+            <td>{mahzor}</td><td>{main_game['date']}</td><td>{main_game['time']}</td><td class="{home_hi}">{main_game['home']}</td><td class="{away_hi}">{main_game['away']}</td>
             <td>
                 <div class="action-btns">
-                    <a href="{waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                    <button onclick="addToCalendar('{game['home'].replace("'", "\\'")} נגד {game['away'].replace("'", "\\'")}', '{date_for_cal}', '{game['time']}', '{game['arena'].replace("'", "\\'")}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                    <a href="{main_waze}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                    <button onclick="addToCalendar('{main_game['home'].replace("'", "\\'")} נגד {main_game['away'].replace("'", "\\'")}', '{main_date_cal}', '{main_game['time']}', '{main_game['arena'].replace("'", "\\'")}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                     {toggle_btn}
                 </div>
             </td>
         </tr>'''
         
-        # בניית שורות המשחקים הנוספים
-        for game in other_games:
+        for game in top_games:
+            try:
+                date_cal = '.'.join(reversed(game['date'].split('/')))
+            except:
+                date_cal = game['date']
+            waze_link = ARENA_WAZE_LINKS.get(game['arena'], "https://waze.com/ul?navigate=yes")
             html += f'''
         <tr class="details-panel d{mahzor}">
-            <td>{mahzor}</td><td>{game['date']}</td><td>{game['time']}</td><td>{game['home']}</td><td>{game['away']}</td><td></td>
+            <td>{mahzor}</td><td>{game['date']}</td><td>{game['time']}</td><td>{game['home']}</td><td>{game['away']}</td>
+            <td>
+                <div class="action-btns">
+                    <a href="{waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
+                    <button onclick="addToCalendar('{game['home'].replace("'", "\\'")} נגד {game['away'].replace("'", "\\'")}', '{date_cal}', '{game['time']}', '{game['arena'].replace("'", "\\'")}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                </div>
+            </td>
         </tr>'''
             
     return html
