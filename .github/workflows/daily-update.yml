@@ -1,4 +1,4 @@
-name: Daily Insights Update
+name: Daily Data Update
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # מאפשר הפעלה ידנית לצורך בדיקות
 
 jobs:
-  update-insights:
+  update-data:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -23,14 +23,14 @@ jobs:
         run: |
           pip install requests beautifulsoup4 google-generativeai
 
-      - name: Run Insights Generator
+      - name: Run Data Update Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python update_insights.py
+        run: python update_data.py
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git commit -am "Auto-update basketball insights" || echo "No changes to commit"
+          git commit -am "Auto-update site data" || echo "No changes to commit"
           git push
