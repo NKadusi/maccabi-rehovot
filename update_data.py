@@ -242,7 +242,9 @@ def update_games(excel_url):
         
         html += f'''
         <tr class="game-row">
-            <td>{mahzor}</td><td>{full_date_str}</td><td>{main_game['time']}</td>
+            <td>{mahzor}</td>
+            <td>{full_date_str}</td>
+            <td>{main_game['time']}</td>
             <td class="{home_hi}">{main_game['home']}</td>
             {result_display}
             <td class="{away_hi}">{main_game['away']}</td>
@@ -273,7 +275,9 @@ def update_games(excel_url):
 
             html += f'''
         <tr class="details-panel d{mahzor}">
-            <td>{mahzor}</td><td>{full_date_str_top}</td><td>{game['time']}</td>
+            <td>{mahzor}</td>
+            <td>{full_date_str_top}</td>
+            <td>{game['time']}</td>
             <td>{game['home']}</td>
             {result_display_top}
             <td>{game['away']}</td>
