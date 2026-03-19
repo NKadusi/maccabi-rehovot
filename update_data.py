@@ -150,7 +150,6 @@ def update_games(excel_url):
     # איתור עמודות התוצאות הספציפיות למארחת ולאורחת
     home_score_col = find_col(['Home Score', 'Home score', 'HOME SCORE', 'תוצאה קבוצה א', 'תוצאת מארחת'])
     away_score_col = find_col(['Away Score', 'Away score', 'AWAY SCORE', 'תוצאה קבוצה ב', 'תוצאת אורחת'])
-    single_result_col = find_col(['תוצאה', 'Score', 'Result']) if not (home_score_col and away_score_col) else None
 
     games_by_round = defaultdict(list)
     
@@ -193,23 +192,21 @@ def update_games(excel_url):
         away = str(row[away_col]).strip() if not pd.isna(row[away_col]) else ''
         arena = str(row[arena_col]).strip() if arena_col and not pd.isna(row[arena_col]) else ''
         
-        result = ""
-        if home_score_col and away_score_col:
+        home_score, away_score = "", ""
+        if home_score_col:
             hs = str(row[home_score_col]).strip()
-            aws = str(row[away_score_col]).strip()
-            if hs and hs != 'nan' and aws and aws != 'nan':
+            if hs and hs != 'nan':
                 if hs.endswith('.0'): hs = hs[:-2]
+                home_score = hs
+        if away_score_col:
+            aws = str(row[away_score_col]).strip()
+            if aws and aws != 'nan':
                 if aws.endswith('.0'): aws = aws[:-2]
-                result = f"{hs} - {aws}"
-        elif single_result_col:
-            res = str(row[single_result_col]).strip()
-            if res and res != 'nan':
-                if res.endswith('.0'): res = res[:-2]
-                result = res
+                away_score = aws
 
         if not home or not away or home == 'nan' or away == 'nan': continue
 
-        games_by_round[mahzor].append({'date': date_str, 'day': day_he, 'time': time_str, 'home': home, 'away': away, 'arena': arena, 'result': result})
+        games_by_round[mahzor].append({'date': date_str, 'day': day_he, 'time': time_str, 'home': home, 'away': away, 'arena': arena, 'home_score': home_score, 'away_score': away_score})
 
     html = ""
     logging.info(f"Rendering HTML for {len(games_by_round)} rounds.")
@@ -258,14 +255,16 @@ def update_games(excel_url):
         main_away_esc = main_game['away'].replace("'", "\\'").replace('"', '&quot;')
         main_arena_esc = main_game['arena'].replace("'", "\\'").replace('"', '&quot;')
 
-        result_display = f'<td class="game-result" dir="ltr">{main_game["result"]}</td>' if main_game.get('result') and main_game['result'] != 'nan' else '<td>-</td>'
+        home_score_display = f'<td class="game-result">{main_game["home_score"]}</td>' if main_game.get('home_score') else '<td>-</td>'
+        away_score_display = f'<td class="game-result">{main_game["away_score"]}</td>' if main_game.get('away_score') else '<td>-</td>'
         
         html += f'''
         <tr class="game-row">
             <td>{mahzor}</td>
             <td>{date_display}</td>
             <td class="{home_hi}">{main_game['home']}</td>
-            {result_display}
+            {home_score_display}
+            {away_score_display}
             <td class="{away_hi}">{main_game['away']}</td>
             <td>
                 <div class="action-btns">
@@ -294,14 +293,16 @@ def update_games(excel_url):
             game_away_esc = game['away'].replace("'", "\\'").replace('"', '&quot;')
             game_arena_esc = game['arena'].replace("'", "\\'").replace('"', '&quot;')
             
-            result_display_top = f'<td class="game-result" dir="ltr">{game["result"]}</td>' if game.get('result') and game['result'] != 'nan' else '<td>-</td>'
+            home_score_display_top = f'<td class="game-result">{game["home_score"]}</td>' if game.get('home_score') else '<td>-</td>'
+            away_score_display_top = f'<td class="game-result">{game["away_score"]}</td>' if game.get('away_score') else '<td>-</td>'
 
             html += f'''
         <tr class="details-panel d{mahzor}">
             <td>{mahzor}</td>
             <td>{date_display_top}</td>
             <td>{game['home']}</td>
-            {result_display_top}
+            {home_score_display_top}
+            {away_score_display_top}
             <td>{game['away']}</td>
             <td>
                 <div class="action-btns">
