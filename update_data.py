@@ -133,10 +133,12 @@ def update_games(excel_url):
 
     cols = list(df.columns)
     def find_col(keywords):
+        keywords_lower = [k.lower().strip() for k in keywords]
         for c in cols:
             if isinstance(c, str):
-                c_clean = str(c).replace('"', '').replace("'", "").strip()
-                if any(k in c_clean for k in keywords):
+                c_clean = str(c).replace('"', '').replace("'", "").strip().lower()
+                c_clean = re.sub(r'\s+', ' ', c_clean) # מנקה רווחים כפולים
+                if any(k in c_clean for k in keywords_lower):
                     return c
         return None
         
@@ -195,12 +197,12 @@ def update_games(excel_url):
         home_score, away_score = "", ""
         if home_score_col:
             hs = str(row[home_score_col]).strip()
-            if hs and hs != 'nan':
+            if hs and hs.lower() not in ['nan', 'none', '-', 'null', '']:
                 if hs.endswith('.0'): hs = hs[:-2]
                 home_score = hs
         if away_score_col:
             aws = str(row[away_score_col]).strip()
-            if aws and aws != 'nan':
+            if aws and aws.lower() not in ['nan', 'none', '-', 'null', '']:
                 if aws.endswith('.0'): aws = aws[:-2]
                 away_score = aws
 
@@ -330,6 +332,10 @@ def main():
         with open('index.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
             
+        # ניקוי אוטומטי של שורות ישנות (כולל "שורות רפאים" שהשתכפלו מחוץ לטבלה)
+        cleanup_pattern = r'(<tbody id="games-table-body">).*?(</table>)'
+        html_content = re.sub(cleanup_pattern, r'\1\n</tbody>\n        \2', html_content, flags=re.DOTALL)
+
         # בדיקה האם יש שינויים בלוח המשחקים (משחקים חדשים או שינוי זמנים)
         if new_games_html:
             check_pattern = r'(<tbody id="games-table-body">)(.*?)(</tbody>)'
