@@ -146,7 +146,14 @@ def update_games(excel_url):
     home_col = find_col(['מארחת', 'קבוצה א', 'Home', 'קבוצהא'])
     away_col = find_col(['אורחת', 'קבוצה ב', 'Away', 'קבוצהב'])
     arena_col = find_col(['אולם', 'מגרש', 'Venue', 'Arena'])
-    result_col = find_col(['תוצאה', 'Score', 'Result'])
+    
+    # מציאת כל עמודות התוצאה (מאחר ולעתים יש עמודה נפרדת לכל קבוצה)
+    result_cols = []
+    for c in cols:
+        if isinstance(c, str):
+            c_clean = str(c).replace('"', '').replace("'", "").strip()
+            if any(k in c_clean for k in ['תוצאה', 'Score', 'Result']):
+                result_cols.append(c)
 
     games_by_round = defaultdict(list)
     
@@ -188,13 +195,16 @@ def update_games(excel_url):
         home = str(row[home_col]).strip() if not pd.isna(row[home_col]) else ''
         away = str(row[away_col]).strip() if not pd.isna(row[away_col]) else ''
         arena = str(row[arena_col]).strip() if arena_col and not pd.isna(row[arena_col]) else ''
-        result = str(row[result_col]).strip() if result_col and not pd.isna(row[result_col]) else ''
+        
+        res_parts = []
+        for rc in result_cols:
+            val = str(row[rc]).strip()
+            if val and val != 'nan':
+                if val.endswith('.0'): val = val[:-2]
+                res_parts.append(val)
+        result = " - ".join(res_parts) if res_parts else ""
 
         if not home or not away or home == 'nan' or away == 'nan': continue
-        
-        # Skip games with results
-        if result and result != 'nan':
-            continue
 
         games_by_round[mahzor].append({'date': date_str, 'day': day_he, 'time': time_str, 'home': home, 'away': away, 'arena': arena, 'result': result})
 
@@ -245,7 +255,7 @@ def update_games(excel_url):
         main_away_esc = main_game['away'].replace("'", "\\'").replace('"', '&quot;')
         main_arena_esc = main_game['arena'].replace("'", "\\'").replace('"', '&quot;')
 
-        result_display = f'<td class="game-result">{main_game["result"]}</td>' if main_game.get('result') and main_game['result'] != 'nan' else '<td>-</td>'
+        result_display = f'<td class="game-result" dir="ltr">{main_game["result"]}</td>' if main_game.get('result') and main_game['result'] != 'nan' else '<td>-</td>'
         
         html += f'''
         <tr class="game-row">
@@ -281,7 +291,7 @@ def update_games(excel_url):
             game_away_esc = game['away'].replace("'", "\\'").replace('"', '&quot;')
             game_arena_esc = game['arena'].replace("'", "\\'").replace('"', '&quot;')
             
-            result_display_top = f'<td class="game-result">{game["result"]}</td>' if game.get('result') and game['result'] != 'nan' else '<td>-</td>'
+            result_display_top = f'<td class="game-result" dir="ltr">{game["result"]}</td>' if game.get('result') and game['result'] != 'nan' else '<td>-</td>'
 
             html += f'''
         <tr class="details-panel d{mahzor}">
