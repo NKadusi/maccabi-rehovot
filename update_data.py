@@ -136,7 +136,7 @@ def update_games(excel_url):
         keywords_lower = [k.lower().strip() for k in keywords]
         for c in cols:
             if isinstance(c, str):
-                c_clean = str(c).replace('"', '').replace("'", "").strip().lower()
+                c_clean = re.sub(r"['\"`׳’´]", "", str(c)).strip().lower()
                 c_clean = re.sub(r'\s+', ' ', c_clean) # מנקה רווחים כפולים
                 if any(k in c_clean for k in keywords_lower):
                     return c
@@ -149,9 +149,10 @@ def update_games(excel_url):
     away_col = find_col(['אורחת', 'קבוצה ב', 'Away', 'קבוצהב'])
     arena_col = find_col(['אולם', 'מגרש', 'Venue', 'Arena'])
     
-    # איתור עמודות התוצאות הספציפיות למארחת ולאורחת
-    home_score_col = find_col(['Home Score', 'Home score', 'HOME SCORE', 'תוצאה קבוצה א', 'תוצאת מארחת'])
-    away_score_col = find_col(['Away Score', 'Away score', 'AWAY SCORE', 'תוצאה קבוצה ב', 'תוצאת אורחת'])
+    # איתור עמודות התוצאות הספציפיות למארחת ולאורחת (כולל תמיכה בעמודה משולבת)
+    home_score_col = find_col(['home score', 'תוצאה קבוצה א', 'תוצאת מארחת', 'תוצאה א', 'נקודות קבוצה א', 'נקודות בית'])
+    away_score_col = find_col(['away score', 'תוצאה קבוצה ב', 'תוצאת אורחת', 'תוצאה ב', 'נקודות קבוצה ב', 'נקודות חוץ'])
+    single_result_col = find_col(['תוצאה', 'score', 'result', 'תוצאת משחק'])
 
     games_by_round = defaultdict(list)
     
@@ -205,6 +206,22 @@ def update_games(excel_url):
             if aws and aws.lower() not in ['nan', 'none', '-', 'null', '']:
                 if aws.endswith('.0'): aws = aws[:-2]
                 away_score = aws
+                
+        # טיפול חכם: אם שתי התוצאות הוזנו בטעות לעמודת המארחת, או שיש רק עמודת תוצאה אחת
+        if home_score and not away_score and any(char in home_score for char in ['-', ':']):
+            parts = re.split(r'[-:]', home_score)
+            if len(parts) >= 2:
+                home_score = parts[0].strip()
+                away_score = parts[1].strip()
+        elif not home_score and not away_score and single_result_col and pd.notna(row[single_result_col]):
+            res = str(row[single_result_col]).strip()
+            if res and res.lower() not in ['nan', 'none', '-', 'null', '']:
+                parts = re.split(r'[-:]', res)
+                if len(parts) >= 2:
+                    home_score = parts[0].strip()
+                    away_score = parts[1].strip()
+                else:
+                    home_score = res
 
         if not home or not away or home == 'nan' or away == 'nan': continue
 
