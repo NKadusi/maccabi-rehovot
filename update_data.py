@@ -131,13 +131,17 @@ def update_games(soup):
         if top_games:
             toggle_btn = f'<button class="details-toggle" onclick="toggleDetails(\'d{mahzor}\')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>'
             
+        main_home_esc = main_game['home'].replace("'", "\\'")
+        main_away_esc = main_game['away'].replace("'", "\\'")
+        main_arena_esc = main_game['arena'].replace("'", "\\'")
+        
         html += f'''
         <tr class="game-row">
             <td>{mahzor}</td><td>{main_game['date']}</td><td>{main_game['time']}</td><td class="{home_hi}">{main_game['home']}</td><td class="{away_hi}">{main_game['away']}</td>
             <td>
                 <div class="action-btns">
                     <a href="{main_waze}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                    <button onclick="addToCalendar('{main_game['home'].replace("'", "\\'")} נגד {main_game['away'].replace("'", "\\'")}', '{main_date_cal}', '{main_game['time']}', '{main_game['arena'].replace("'", "\\'")}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                    <button onclick="addToCalendar('{main_home_esc} נגד {main_away_esc}', '{main_date_cal}', '{main_game['time']}', '{main_arena_esc}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                     {toggle_btn}
                 </div>
             </td>
@@ -149,13 +153,16 @@ def update_games(soup):
             except:
                 date_cal = game['date']
             waze_link = ARENA_WAZE_LINKS.get(game['arena'], "https://waze.com/ul?navigate=yes")
+            game_home_esc = game['home'].replace("'", "\\'")
+            game_away_esc = game['away'].replace("'", "\\'")
+            game_arena_esc = game['arena'].replace("'", "\\'")
             html += f'''
         <tr class="details-panel d{mahzor}">
             <td>{mahzor}</td><td>{game['date']}</td><td>{game['time']}</td><td>{game['home']}</td><td>{game['away']}</td>
             <td>
                 <div class="action-btns">
                     <a href="{waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                    <button onclick="addToCalendar('{game['home'].replace("'", "\\'")} נגד {game['away'].replace("'", "\\'")}', '{date_cal}', '{game['time']}', '{game['arena'].replace("'", "\\'")}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
+                    <button onclick="addToCalendar('{game_home_esc} נגד {game_away_esc}', '{date_cal}', '{game['time']}', '{game_arena_esc}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
                 </div>
             </td>
         </tr>'''
