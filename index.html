@@ -188,6 +188,25 @@
         .table-responsive { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 650px; }
         th { padding: 12px; white-space: nowrap; }
+        .date-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .date-cell .day-he {
+            font-weight: bold;
+        }
+        .date-cell .date-str {
+            font-size: 0.9em;
+        }
+        .date-cell .time-str {
+            font-size: 0.8em;
+            color: #555;
+        }
+        .dark-mode .date-cell .time-str {
+            color: #bbb;
+        }
         
         .action-btns { display: flex; gap: 8px; justify-content: center; align-items: center; }
         .btn { padding: 6px 12px; border-radius: 5px; font-size: 0.9em; text-decoration: none; font-weight: bold; cursor: pointer; border: none; display: flex; align-items: center; gap: 5px; }
@@ -234,7 +253,7 @@
     <p class="subtitle">הוסף ישר ליומן שלך או נווט לאולם בקליק!</p>
     <div class="table-responsive">
         <table>
-            <thead><tr><th>מחזור</th><th>תאריך</th><th>שעה</th><th>מארחת</th><th>תוצאה</th><th>אורחת</th><th></th></tr></thead>
+            <thead><tr><th>מחזור</th><th>תאריך וזמן</th><th>מארחת</th><th>תוצאה</th><th>אורחת</th><th></th></tr></thead>
             <tbody id="games-table-body">
 <<<<<<< HEAD
             </tbody>

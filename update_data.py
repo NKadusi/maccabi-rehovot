@@ -163,10 +163,9 @@ def update_games(excel_url):
         if isinstance(raw_date, datetime.datetime):
             date_obj = raw_date
         else:
-            # ננסה להמיר מחרוזת לתאריך
             try:
                 date_obj = pd.to_datetime(raw_date, dayfirst=True, errors='coerce')
-                if pd.isna(date_obj): # אם נכשל, ננסה פורמט אמריקאי
+                if pd.isna(date_obj):
                     date_obj = pd.to_datetime(raw_date, errors='coerce')
             except Exception:
                 date_obj = None
@@ -190,6 +189,10 @@ def update_games(excel_url):
         result = str(row[result_col]).strip() if result_col and not pd.isna(row[result_col]) else ''
 
         if not home or not away or home == 'nan' or away == 'nan': continue
+        
+        # Skip games with results
+        if result and result != 'nan':
+            continue
 
         games_by_round[mahzor].append({'date': date_str, 'day': day_he, 'time': time_str, 'home': home, 'away': away, 'arena': arena, 'result': result})
 
@@ -218,8 +221,11 @@ def update_games(excel_url):
         home_hi = 'rehovot-highlight' if 'רחובות' in main_game['home'] else ''
         away_hi = 'rehovot-highlight' if 'רחובות' in main_game['away'] else ''
         
-        # בניית מחרוזת התאריך המלאה
-        full_date_str = f"יום {main_game['day']}, {main_game['date']}" if main_game['day'] else main_game['date']
+        date_display = f"""<div class='date-cell'>
+                                <span class='day-he'>{main_game['day']}</span>
+                                <span class='date-str'>{main_game['date']}</span>
+                                <span class='time-str'>{main_game['time']}</span>
+                           </div>"""
 
         main_arena_safe = urllib.parse.quote_plus(main_game['arena']) if main_game['arena'] else ""
         main_waze = ARENA_WAZE_LINKS.get(main_game['arena'], f"https://waze.com/ul?q={main_arena_safe}&navigate=yes" if main_arena_safe else "https://waze.com/ul?navigate=yes")
@@ -237,14 +243,12 @@ def update_games(excel_url):
         main_away_esc = main_game['away'].replace("'", "\\'")
         main_arena_esc = main_game['arena'].replace("'", "\\'")
 
-        # הצגת תוצאה אם קיימת
-        result_display = f'<td class="game-result">{main_game["result"]}</td>' if main_game.get('result') and main_game['result'] != 'nan' else '<td></td>'
+        result_display = f'<td class="game-result">{main_game["result"]}</td>' if main_game.get('result') and main_game['result'] != 'nan' else '<td>-</td>'
         
         html += f'''
         <tr class="game-row">
             <td>{mahzor}</td>
-            <td>{full_date_str}</td>
-            <td>{main_game['time']}</td>
+            <td>{date_display}</td>
             <td class="{home_hi}">{main_game['home']}</td>
             {result_display}
             <td class="{away_hi}">{main_game['away']}</td>
@@ -263,7 +267,11 @@ def update_games(excel_url):
             except:
                 date_cal = game['date']
             
-            full_date_str_top = f"יום {game['day']}, {game['date']}" if game['day'] else game['date']
+            date_display_top = f"""<div class='date-cell'>
+                               <span class='day-he'>{game['day']}</span>
+                               <span class='date-str'>{game['date']}</span>
+                               <span class='time-str'>{game['time']}</span>
+                           </div>"""
 
             game_arena_safe = urllib.parse.quote_plus(game['arena']) if game['arena'] else ""
             waze_link = ARENA_WAZE_LINKS.get(game['arena'], f"https://waze.com/ul?q={game_arena_safe}&navigate=yes" if game_arena_safe else "https://waze.com/ul?navigate=yes")
@@ -271,13 +279,12 @@ def update_games(excel_url):
             game_away_esc = game['away'].replace("'", "\\'")
             game_arena_esc = game['arena'].replace("'", "\\'")
             
-            result_display_top = f'<td class="game-result">{game["result"]}</td>' if game.get('result') and game['result'] != 'nan' else '<td></td>'
+            result_display_top = f'<td class="game-result">{game["result"]}</td>' if game.get('result') and game['result'] != 'nan' else '<td>-</td>'
 
             html += f'''
         <tr class="details-panel d{mahzor}">
             <td>{mahzor}</td>
-            <td>{full_date_str_top}</td>
-            <td>{game['time']}</td>
+            <td>{date_display_top}</td>
             <td>{game['home']}</td>
             {result_display_top}
             <td>{game['away']}</td>
