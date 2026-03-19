@@ -2,9 +2,8 @@ name: Update Basketball Schedule
 
 on:
   schedule:
-    # רץ כל יומיים בחצות
     - cron: '0 0 */2 * *'
-  workflow_dispatch: # מאפשר לך להריץ גם ידנית בלחיצת כפתור בגיטהאב
+  workflow_dispatch:
 
 jobs:
   update-data:
