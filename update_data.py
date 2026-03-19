@@ -83,7 +83,9 @@ def update_insights(model):
         אל תוסיף כותרות, טקסט הקדמה או פורמט Markdown. החזר אך ורק את הפסקאות.
         """
         response = model.generate_content(prompt)
-        new_insights = response.text.strip().replace("```html", "").replace("```", "").strip()
+        new_insights = response.text.strip()
+        new_insights = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights, flags=re.IGNORECASE)
+        new_insights = re.sub(r'\s*```$', '', new_insights).strip()
         return new_insights
     except Exception as e:
         logging.error(f"Error generating insights: {e}")
@@ -239,9 +241,9 @@ def update_games(excel_url):
         if top_games:
             toggle_btn = f'<button class="details-toggle" onclick="toggleDetails(\'d{mahzor}\')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>'
             
-        main_home_esc = main_game['home'].replace("'", "\\'")
-        main_away_esc = main_game['away'].replace("'", "\\'")
-        main_arena_esc = main_game['arena'].replace("'", "\\'")
+        main_home_esc = main_game['home'].replace("'", "\\'").replace('"', '&quot;')
+        main_away_esc = main_game['away'].replace("'", "\\'").replace('"', '&quot;')
+        main_arena_esc = main_game['arena'].replace("'", "\\'").replace('"', '&quot;')
 
         result_display = f'<td class="game-result">{main_game["result"]}</td>' if main_game.get('result') and main_game['result'] != 'nan' else '<td>-</td>'
         
@@ -275,9 +277,9 @@ def update_games(excel_url):
 
             game_arena_safe = urllib.parse.quote_plus(game['arena']) if game['arena'] else ""
             waze_link = ARENA_WAZE_LINKS.get(game['arena'], f"https://waze.com/ul?q={game_arena_safe}&navigate=yes" if game_arena_safe else "https://waze.com/ul?navigate=yes")
-            game_home_esc = game['home'].replace("'", "\\'")
-            game_away_esc = game['away'].replace("'", "\\'")
-            game_arena_esc = game['arena'].replace("'", "\\'")
+            game_home_esc = game['home'].replace("'", "\\'").replace('"', '&quot;')
+            game_away_esc = game['away'].replace("'", "\\'").replace('"', '&quot;')
+            game_arena_esc = game['arena'].replace("'", "\\'").replace('"', '&quot;')
             
             result_display_top = f'<td class="game-result">{game["result"]}</td>' if game.get('result') and game['result'] != 'nan' else '<td>-</td>'
 
@@ -331,7 +333,7 @@ def main():
 
         if new_insights_html:
             insights_pattern = r'(<div class="insights-content">).*?(</div>)'
-            html_content = re.sub(insights_pattern, rf'\1\n{new_insights_html}\n\2', html_content, flags=re.DOTALL)
+            html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
             logging.info("Insights section prepared for update.")
         else:
             logging.warning("Insights update skipped due to missing data or error.")
@@ -339,7 +341,7 @@ def main():
         # עדכון לוח המשחקים
         if new_games_html:
             games_pattern = r'(<tbody id="games-table-body">).*?(</tbody>)'
-            html_content = re.sub(games_pattern, rf'\1\n{new_games_html}\n\2', html_content, flags=re.DOTALL)
+            html_content = re.sub(games_pattern, lambda m: f"{m.group(1)}\n{new_games_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
             logging.info("Games schedule prepared for update.")
         else:
             logging.warning("Games schedule is empty. HTML will not be updated for games.")
