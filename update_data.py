@@ -38,25 +38,39 @@ def get_gemini_model():
         logging.error(f"Error connecting to Gemini: {e}")
     return None
 
-def update_insights(soup, model):
+def update_insights(model):
     """מפיק תובנות סטטיסטיות על הקבוצה ומחזיר אותן כ-HTML."""
     if not model:
-        return "<p>ממתין לעדכון נתונים (שירות ניתוח לא זמין)...</p>"
+        return None
     
+    standings_text = ""
+    # משיכת טבלת הדירוג הרשמית מאתר איגוד הכדורסל 
+    # עקיפת זיכרון מטמון (Cache) כדי לקבל נתונים טריים כמו באקסל
     try:
-        table = soup.find('table')
-        if not table:
-            return "<p>לא נמצאה טבלת ליגה בתוכן האתר.</p>"
-        
-        standings_text = table.get_text(separator=" | ", strip=True)
-        if len(standings_text) < 100:
-            return "<p>ממתין לעדכון נתונים משרתי איגוד הכדורסל...</p>"
+        timestamp = int(datetime.datetime.now().timestamp())
+        url = f"https://ibasketball.co.il/league/2025-2/?nocache={timestamp}"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code == 200:
+            tables = pd.read_html(io.BytesIO(r.content))
+            for df in tables:
+                text_rep = df.to_string()
+                if 'קבוצה' in text_rep and ('נצחונות' in text_rep or 'נקודות' in text_rep):
+                    standings_text = df.to_string(index=False)
+                    break
+    except Exception as e:
+        logging.warning(f"Failed to fetch standings from association site: {e}")
 
+    if not standings_text:
+        logging.error("No standings data found.")
+        return None # מחזיר None כדי לא לדרוס את הקיים במקרה של שגיאה
+
+    try:
         prompt = f"""
-        אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים שנמשכו כרגע מטבלת הליגה הלאומית בישראל:
+        אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים ומעודכנים מהטבלה הרשמית של איגוד הכדורסל בישראל:
         {standings_text}
 
-        כתוב 3 פסקאות קצרות ומקצועיות של מסקנות סטטיסטיות על מצבה של קבוצת 'מכבי רחובות'.
+        כתוב 3 פסקאות קצרות ומקצועיות של מסקנות סטטיסטיות על מצבה של קבוצת 'מכבי רחובות' (או מכבי ברק רחובות).
         התייחס למאבק על המקום ה-1, ליתרון הביתיות (מקומות 1-4) ולסכנות מול הקבוצות שמתחתיה לקראת הפלייאוף.
         אל תנחש, תתבסס רק על המתמטיקה והמאזנים שמופיעים בטקסט.
         חובה להשתמש בתגיות HTML של <p> ו-<strong> בלבד.
@@ -67,7 +81,7 @@ def update_insights(soup, model):
         return new_insights
     except Exception as e:
         logging.error(f"Error generating insights: {e}")
-        return "<p>שגיאה בניתוח הנתונים. אנא נסה שוב מאוחר יותר.</p>"
+        return None
 
 
 def update_games(excel_url):
@@ -78,11 +92,33 @@ def update_games(excel_url):
     try:
         response = requests.get(excel_url, headers=headers, timeout=20)
         response.raise_for_status()
+            
+        # ניסיון קריאה ללא כותרות כדי למצוא את השורה האמיתית
         try:
-            df = pd.read_excel(io.BytesIO(response.content))
+            df_raw = pd.read_excel(io.BytesIO(response.content), header=None, engine='openpyxl')
         except Exception as e:
-            logging.warning(f"Could not read as Excel, trying HTML fallback. Error: {e}")
-            df = pd.read_html(io.StringIO(response.content.decode('utf-8')))[0]
+            logging.warning(f"Could not read as Excel with openpyxl, trying HTML fallback. Error: {e}")
+            try:
+                html_content = response.content.decode('utf-8', errors='ignore')
+                df_raw = pd.read_html(io.StringIO(html_content), header=None)[0]
+            except Exception as ex:
+                logging.error(f"HTML fallback failed: {ex}")
+                return ""
+                
+        header_idx = -1
+        for idx, row in df_raw.head(20).iterrows():
+            row_str = ' '.join([str(x) for x in row.values if pd.notna(x)])
+            if 'מחזור' in row_str and ('תאריך' in row_str or 'מארחת' in row_str or 'קבוצה' in row_str):
+                header_idx = idx
+                break
+                
+        if header_idx == -1:
+            logging.error("Could not find header row in Excel.")
+            return ""
+            
+        df = df_raw.iloc[header_idx + 1:].copy()
+        df.columns = df_raw.iloc[header_idx]
+            
     except Exception as e:
         logging.error(f"Failed to fetch or parse Excel data: {e}")
         return ""
@@ -90,21 +126,23 @@ def update_games(excel_url):
     cols = list(df.columns)
     def find_col(keywords):
         for c in cols:
-            if isinstance(c, str) and any(k in c for k in keywords):
-                return c
+            if isinstance(c, str):
+                c_clean = str(c).replace('"', '').replace("'", "").strip()
+                if any(k in c_clean for k in keywords):
+                    return c
         return None
         
     mahzor_col = find_col(['מחזור', 'Round', 'Cycle'])
     date_col = find_col(['תאריך', 'Date'])
     time_col = find_col(['שעה', 'Time'])
-    home_col = find_col(['מארחת', 'קבוצה א', 'Home'])
-    away_col = find_col(['אורחת', 'קבוצה ב', 'Away'])
+    home_col = find_col(['מארחת', 'קבוצה א', 'Home', 'קבוצהא'])
+    away_col = find_col(['אורחת', 'קבוצה ב', 'Away', 'קבוצהב'])
     arena_col = find_col(['אולם', 'מגרש', 'Venue', 'Arena'])
 
     games_by_round = defaultdict(list)
     
     if not (mahzor_col and date_col and home_col and away_col):
-        logging.error(f"Missing essential columns. Found: {cols}")
+        logging.error(f"Missing essential columns. Found headers: {cols}")
         return ""
 
     for index, row in df.iterrows():
@@ -216,22 +254,9 @@ def main():
     """הפונקציה הראשית שמריצה את תהליך העדכון."""
     logging.info("Starting data update process.")
     
-    # 1. משיכת תוכן האתר לטובת התובנות (טבלה)
-    try:
-        url = "https://ibasketball.co.il/league/2025-2/"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-        }
-        response = requests.get(url, headers=headers, timeout=20)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
-    except requests.RequestException as e:
-        logging.error(f"Failed to fetch website data: {e}")
-        soup = None
-
-    # 2. עדכון התובנות מהטבלה והמשחקים ישירות מקובץ האקסל!
+    # עדכון התובנות מהטבלה הרשמית והמשחקים מקובץ האקסל
     gemini_model = get_gemini_model()
-    new_insights_html = update_insights(soup, gemini_model) if soup else "<p>שגיאה בשליפת טבלה.</p>"
+    new_insights_html = update_insights(gemini_model)
     
     excel_url = "https://ibasketball.co.il/league/2025-2/?feed=xlsx&league_id=119474"
     new_games_html = update_games(excel_url)
@@ -256,10 +281,12 @@ def main():
                 else:
                     logging.info("לוח המשחקים נשאר ללא שינוי.")
 
-        # עדכון תובנות
-        insights_pattern = r'(<div class="insights-content">).*?(</div>)'
-        html_content = re.sub(insights_pattern, rf'\1\n{new_insights_html}\n\2', html_content, flags=re.DOTALL)
-        logging.info("Insights section prepared for update.")
+        if new_insights_html:
+            insights_pattern = r'(<div class="insights-content">).*?(</div>)'
+            html_content = re.sub(insights_pattern, rf'\1\n{new_insights_html}\n\2', html_content, flags=re.DOTALL)
+            logging.info("Insights section prepared for update.")
+        else:
+            logging.warning("Insights update skipped due to missing data or error.")
 
         # עדכון לוח המשחקים
         if new_games_html:
