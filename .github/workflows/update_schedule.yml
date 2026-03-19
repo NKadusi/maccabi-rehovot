@@ -1,0 +1,40 @@
+name: Update Basketball Schedule
+
+on:
+  schedule:
+    # רץ כל יומיים בחצות
+    - cron: '0 0 */2 * *'
+  workflow_dispatch: # מאפשר לך להריץ גם ידנית בלחיצת כפתור בגיטהאב
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 google-generativeai
+
+      - name: Run update script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python update_data.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m "Automated update of games schedule and insights" || exit 0
+          git push
