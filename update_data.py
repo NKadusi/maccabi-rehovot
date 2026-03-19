@@ -9,6 +9,7 @@ import logging
 import pandas as pd
 import io
 import datetime
+import urllib.parse
 
 # הגדרת לוגינג בסיסי
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -201,7 +202,8 @@ def update_games(excel_url):
         main_game = rehovot_game if rehovot_game else top_games.pop(0)
         home_hi = 'rehovot-highlight' if 'רחובות' in main_game['home'] else ''
         away_hi = 'rehovot-highlight' if 'רחובות' in main_game['away'] else ''
-        main_waze = ARENA_WAZE_LINKS.get(main_game['arena'], "https://waze.com/ul?navigate=yes")
+        main_arena_safe = urllib.parse.quote_plus(main_game['arena']) if main_game['arena'] else ""
+        main_waze = ARENA_WAZE_LINKS.get(main_game['arena'], f"https://waze.com/ul?q={main_arena_safe}&navigate=yes" if main_arena_safe else "https://waze.com/ul?navigate=yes")
             
         try:
             main_date_cal = '.'.join(reversed(main_game['date'].split('.')))
@@ -233,7 +235,8 @@ def update_games(excel_url):
                 date_cal = '.'.join(reversed(game['date'].split('.')))
             except:
                 date_cal = game['date']
-            waze_link = ARENA_WAZE_LINKS.get(game['arena'], "https://waze.com/ul?navigate=yes")
+            game_arena_safe = urllib.parse.quote_plus(game['arena']) if game['arena'] else ""
+            waze_link = ARENA_WAZE_LINKS.get(game['arena'], f"https://waze.com/ul?q={game_arena_safe}&navigate=yes" if game_arena_safe else "https://waze.com/ul?navigate=yes")
             game_home_esc = game['home'].replace("'", "\\'")
             game_away_esc = game['away'].replace("'", "\\'")
             game_arena_esc = game['arena'].replace("'", "\\'")
