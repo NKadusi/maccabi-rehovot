@@ -6,6 +6,9 @@ from bs4 import BeautifulSoup
 import google.generativeai as genai
 from collections import defaultdict
 import logging
+import pandas as pd
+import io
+import datetime
 
 # הגדרת לוגינג בסיסי
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -67,44 +70,84 @@ def update_insights(soup, model):
         return "<p>שגיאה בניתוח הנתונים. אנא נסה שוב מאוחר יותר.</p>"
 
 
-def update_games(soup):
-    """מגרד את לוח המשחקים מהאתר ומחזיר אותו כ-HTML."""
-    games_container = soup.find('div', class_='league-games')
-    if not games_container:
-        logging.warning("Games container 'div.league-games' not found in scraped HTML.")
+def update_games(excel_url):
+    """קורא את לוח המשחקים ישירות מקובץ האקסל הרשמי ומחזיר אותו כ-HTML."""
+    logging.info(f"Fetching games from Excel: {excel_url}")
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    
+    try:
+        response = requests.get(excel_url, headers=headers, timeout=20)
+        response.raise_for_status()
+        try:
+            df = pd.read_excel(io.BytesIO(response.content))
+        except Exception as e:
+            logging.warning(f"Could not read as Excel, trying HTML fallback. Error: {e}")
+            df = pd.read_html(io.StringIO(response.content.decode('utf-8')))[0]
+    except Exception as e:
+        logging.error(f"Failed to fetch or parse Excel data: {e}")
         return ""
+
+    cols = list(df.columns)
+    def find_col(keywords):
+        for c in cols:
+            if isinstance(c, str) and any(k in c for k in keywords):
+                return c
+        return None
+        
+    mahzor_col = find_col(['מחזור', 'Round', 'Cycle'])
+    date_col = find_col(['תאריך', 'Date'])
+    time_col = find_col(['שעה', 'Time'])
+    home_col = find_col(['מארחת', 'קבוצה א', 'Home'])
+    away_col = find_col(['אורחת', 'קבוצה ב', 'Away'])
+    arena_col = find_col(['אולם', 'מגרש', 'Venue', 'Arena'])
 
     games_by_round = defaultdict(list)
     
-    # 1. איסוף וקיבוץ המשחקים לפי מחזור
-    game_divs = games_container.find_all('div', class_='game-row')
-    logging.info(f"Found {len(game_divs)} game divs in total.")
+    if not (mahzor_col and date_col and home_col and away_col):
+        logging.error(f"Missing essential columns. Found: {cols}")
+        return ""
 
-    for i, game_div in enumerate(game_divs):
-        try:
-            mahzor = game_div.find('div', class_='game-round-gamecycle').text.strip()
-            date = game_div.find('div', class_='game-date').text.strip()
-            time = game_div.find('div', class_='game-hour').text.strip()
-            home_team = game_div.find('div', class_='home-team').find('div', class_='team-name').text.strip()
-            away_team = game_div.find('div', class_='away-team').find('div', 'team-name').text.strip()
-            arena = game_div.find('div', class_='game-hall').text.strip()
+    for index, row in df.iterrows():
+        mahzor = str(row[mahzor_col]).strip()
+        if mahzor == 'nan' or not mahzor: continue
+        if mahzor.endswith('.0'): mahzor = mahzor[:-2]
             
-            game_data = {
-                'date': date, 'time': time, 'home': home_team, 'away': away_team, 'arena': arena
-            }
-            games_by_round[mahzor].append(game_data)
-            logging.info(f"Processed game {i+1}: Mahzor {mahzor}, {home_team} vs {away_team}")
+        raw_date = row[date_col]
+        if pd.isna(raw_date): continue
+            
+        if isinstance(raw_date, datetime.datetime):
+            date_str = raw_date.strftime('%d.%m')
+        else:
+            date_str = str(raw_date).strip()
+            if '/' in date_str:
+                parts = date_str.split('/')
+                if len(parts) >= 2: date_str = f"{parts[0].zfill(2)}.{parts[1].zfill(2)}"
+            elif '-' in date_str:
+                parts = date_str.split('-')
+                if len(parts) >= 3: date_str = f"{parts[2].zfill(2)}.{parts[1].zfill(2)}"
+            
+        raw_time = row[time_col] if time_col else ''
+        if pd.isna(raw_time): time_str = "00:00"
+        elif isinstance(raw_time, datetime.time): time_str = raw_time.strftime('%H:%M')
+        else: time_str = str(raw_time).strip()[:5]
 
-        except AttributeError as e:
-            logging.warning(f"Could not parse game div #{i+1}. It might be a malformed entry. Error: {e}")
-            continue
+        home = str(row[home_col]).strip() if not pd.isna(row[home_col]) else ''
+        away = str(row[away_col]).strip() if not pd.isna(row[away_col]) else ''
+        arena = str(row[arena_col]).strip() if arena_col and not pd.isna(row[arena_col]) else ''
 
-    # 2. בניית ה-HTML
+        if not home or not away or home == 'nan' or away == 'nan': continue
+
+        games_by_round[mahzor].append({'date': date_str, 'time': time_str, 'home': home, 'away': away, 'arena': arena})
+
     html = ""
     logging.info(f"Rendering HTML for {len(games_by_round)} rounds.")
     top_teams_keywords = ["אילת", "נהריה", "הפועל חיפה"]
     
-    for mahzor, games in sorted(games_by_round.items()):
+    def sort_key(k):
+        try: return int(re.search(r'\d+', k).group())
+        except: return 999
+
+    for mahzor, games in sorted(games_by_round.items(), key=lambda item: sort_key(item[0])):
         rehovot_game = None
         top_games = []
         
@@ -123,7 +166,7 @@ def update_games(soup):
         main_waze = ARENA_WAZE_LINKS.get(main_game['arena'], "https://waze.com/ul?navigate=yes")
             
         try:
-            main_date_cal = '.'.join(reversed(main_game['date'].split('/')))
+            main_date_cal = '.'.join(reversed(main_game['date'].split('.')))
         except:
             main_date_cal = main_game['date']
             
@@ -149,7 +192,7 @@ def update_games(soup):
         
         for game in top_games:
             try:
-                date_cal = '.'.join(reversed(game['date'].split('/')))
+                date_cal = '.'.join(reversed(game['date'].split('.')))
             except:
                 date_cal = game['date']
             waze_link = ARENA_WAZE_LINKS.get(game['arena'], "https://waze.com/ul?navigate=yes")
@@ -173,29 +216,45 @@ def main():
     """הפונקציה הראשית שמריצה את תהליך העדכון."""
     logging.info("Starting data update process.")
     
-    # 1. משיכת תוכן האתר
+    # 1. משיכת תוכן האתר לטובת התובנות (טבלה)
     try:
         url = "https://ibasketball.co.il/league/2025-2/"
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept-Language': 'he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
         }
         response = requests.get(url, headers=headers, timeout=20)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
     except requests.RequestException as e:
         logging.error(f"Failed to fetch website data: {e}")
-        return # יציאה אם אין אפשרות למשוך נתונים
+        soup = None
 
-    # 2. עדכון התובנות והמשחקים
+    # 2. עדכון התובנות מהטבלה והמשחקים ישירות מקובץ האקסל!
     gemini_model = get_gemini_model()
-    new_insights_html = update_insights(soup, gemini_model)
-    new_games_html = update_games(soup)
+    new_insights_html = update_insights(soup, gemini_model) if soup else "<p>שגיאה בשליפת טבלה.</p>"
+    
+    excel_url = "https://ibasketball.co.il/league/2025-2/?feed=xlsx&league_id=119474"
+    new_games_html = update_games(excel_url)
 
     # 3. עדכון קובץ ה-HTML
     try:
         with open('index.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
+            
+        # בדיקה האם יש שינויים בלוח המשחקים (משחקים חדשים או שינוי זמנים)
+        if new_games_html:
+            check_pattern = r'(<tbody id="games-table-body">)(.*?)(</tbody>)'
+            old_match = re.search(check_pattern, html_content, flags=re.DOTALL)
+            if old_match:
+                old_html = old_match.group(2).strip()
+                if old_html != new_games_html.strip():
+                    logging.info("🚨 התראה: זוהו משחקים חדשים או שינויים בלוח המשחקים!")
+                    step_summary = os.environ.get('GITHUB_STEP_SUMMARY')
+                    if step_summary:
+                        with open(step_summary, 'a', encoding='utf-8') as sf:
+                            sf.write("### 🚨 לוח המשחקים עודכן!\nהסקריפט מצא משחקים חדשים או עדכוני שעות/תאריכים בקובץ האקסל ועדכן את האתר בהתאם.\n")
+                else:
+                    logging.info("לוח המשחקים נשאר ללא שינוי.")
 
         # עדכון תובנות
         insights_pattern = r'(<div class="insights-content">).*?(</div>)'
