@@ -147,13 +147,10 @@ def update_games(excel_url):
     away_col = find_col(['אורחת', 'קבוצה ב', 'Away', 'קבוצהב'])
     arena_col = find_col(['אולם', 'מגרש', 'Venue', 'Arena'])
     
-    # מציאת כל עמודות התוצאה (מאחר ולעתים יש עמודה נפרדת לכל קבוצה)
-    result_cols = []
-    for c in cols:
-        if isinstance(c, str):
-            c_clean = str(c).replace('"', '').replace("'", "").strip()
-            if any(k in c_clean for k in ['תוצאה', 'Score', 'Result']):
-                result_cols.append(c)
+    # איתור עמודות התוצאות הספציפיות למארחת ולאורחת
+    home_score_col = find_col(['Home Score', 'Home score', 'HOME SCORE', 'תוצאה קבוצה א', 'תוצאת מארחת'])
+    away_score_col = find_col(['Away Score', 'Away score', 'AWAY SCORE', 'תוצאה קבוצה ב', 'תוצאת אורחת'])
+    single_result_col = find_col(['תוצאה', 'Score', 'Result']) if not (home_score_col and away_score_col) else None
 
     games_by_round = defaultdict(list)
     
@@ -196,13 +193,19 @@ def update_games(excel_url):
         away = str(row[away_col]).strip() if not pd.isna(row[away_col]) else ''
         arena = str(row[arena_col]).strip() if arena_col and not pd.isna(row[arena_col]) else ''
         
-        res_parts = []
-        for rc in result_cols:
-            val = str(row[rc]).strip()
-            if val and val != 'nan':
-                if val.endswith('.0'): val = val[:-2]
-                res_parts.append(val)
-        result = " - ".join(res_parts) if res_parts else ""
+        result = ""
+        if home_score_col and away_score_col:
+            hs = str(row[home_score_col]).strip()
+            aws = str(row[away_score_col]).strip()
+            if hs and hs != 'nan' and aws and aws != 'nan':
+                if hs.endswith('.0'): hs = hs[:-2]
+                if aws.endswith('.0'): aws = aws[:-2]
+                result = f"{hs} - {aws}"
+        elif single_result_col:
+            res = str(row[single_result_col]).strip()
+            if res and res != 'nan':
+                if res.endswith('.0'): res = res[:-2]
+                result = res
 
         if not home or not away or home == 'nan' or away == 'nan': continue
 
