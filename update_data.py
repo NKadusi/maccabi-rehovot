@@ -212,7 +212,7 @@ def update_games(excel_url):
 
     html = ""
     logging.info(f"Rendering HTML for {len(games_by_round)} rounds.")
-    top_teams_keywords = ["אילת", "נהריה", "הפועל חיפה"]
+    top_teams_keywords = ["נהריה", "הפועל חיפה"]
     
     def sort_key(k):
         try: return int(re.search(r'\d+', k).group())
@@ -228,53 +228,50 @@ def update_games(excel_url):
             elif any(t in game['home'] or t in game['away'] for t in top_teams_keywords):
                 top_games.append(game)
         
-        if not rehovot_game and not top_games:
+        # Per user request, only show rounds where Maccabi Rehovot plays
+        if not rehovot_game:
             continue
 
-        main_game = rehovot_game if rehovot_game else top_games.pop(0)
+        main_game = rehovot_game
         home_hi = 'rehovot-highlight' if 'רחובות' in main_game['home'] else ''
         away_hi = 'rehovot-highlight' if 'רחובות' in main_game['away'] else ''
         
-        date_display = f"""<div class='date-cell'>
-                                <span class='day-he'>{main_game['day']}</span>
-                                <span class='date-str'>{main_game['date']}</span>
-                                <span class='time-str'>{main_game['time']}</span>
-                           </div>"""
+        # New combined date format
+        date_display = f"{main_game['day']}, {main_game['date']} - {main_game['time']}"
 
         main_arena_safe = urllib.parse.quote_plus(main_game['arena']) if main_game['arena'] else ""
-        main_waze = ARENA_WAZE_LINKS.get(main_game['arena'], f"https://waze.com/ul?q={main_arena_safe}&navigate=yes" if main_arena_safe else "https://waze.com/ul?navigate=yes")
+        main_waze_link = ARENA_WAZE_LINKS.get(main_game['arena'], f"https://waze.com/ul?q={main_arena_safe}&navigate=yes" if main_arena_safe else "https://waze.com/ul?navigate=yes")
             
         try:
             main_date_cal = '.'.join(reversed(main_game['date'].split('.')))
         except:
             main_date_cal = main_game['date']
             
-        toggle_btn = ""
-        if top_games:
-            toggle_btn = f'<button class="details-toggle" onclick="toggleDetails(\'d{mahzor}\')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>'
-            
         main_home_esc = main_game['home'].replace("'", "\\'").replace('"', '&quot;')
         main_away_esc = main_game['away'].replace("'", "\\'").replace('"', '&quot;')
         main_arena_esc = main_game['arena'].replace("'", "\\'").replace('"', '&quot;')
 
-        home_score_display = f'<td class="game-result">{main_game["home_score"]}</td>' if main_game.get('home_score') else '<td>-</td>'
-        away_score_display = f'<td class="game-result">{main_game["away_score"]}</td>' if main_game.get('away_score') else '<td>-</td>'
+        home_score_val = main_game["home_score"] if main_game.get('home_score') else '-'
+        away_score_val = main_game["away_score"] if main_game.get('away_score') else '-'
+        
+        waze_btn = f'<a href="{main_waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> ניווט</a>'
+        cal_btn = f'<button onclick="addToCalendar(\'{main_home_esc} נגד {main_away_esc}\', \'{main_date_cal}\', \'{main_game["time"]}\', \'{main_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> ליומן</button>'
+        
+        toggle_btn = ""
+        if top_games:
+            toggle_btn = f'<button class="details-toggle" onclick="toggleDetails(\'d{mahzor}\')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>'
         
         html += f'''
         <tr class="game-row">
             <td>{mahzor}</td>
             <td>{date_display}</td>
             <td class="{home_hi}">{main_game['home']}</td>
-            {home_score_display}
-            {away_score_display}
+            <td class="game-result">{home_score_val}</td>
+            <td class="game-result">{away_score_val}</td>
             <td class="{away_hi}">{main_game['away']}</td>
-            <td>
-                <div class="action-btns">
-                    <a href="{main_waze}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                    <button onclick="addToCalendar('{main_home_esc} נגד {main_away_esc}', '{main_date_cal}', '{main_game['time']}', '{main_arena_esc}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                    {toggle_btn}
-                </div>
-            </td>
+            <td class="action-col">{waze_btn}</td>
+            <td class="action-col">{cal_btn}</td>
+            <td class="action-col">{toggle_btn}</td>
         </tr>'''
         
         for game in top_games:
@@ -283,35 +280,31 @@ def update_games(excel_url):
             except:
                 date_cal = game['date']
             
-            date_display_top = f"""<div class='date-cell'>
-                               <span class='day-he'>{game['day']}</span>
-                               <span class='date-str'>{game['date']}</span>
-                               <span class='time-str'>{game['time']}</span>
-                           </div>"""
+            date_display_top = f"{game['day']}, {game['date']} - {game['time']}"
 
             game_arena_safe = urllib.parse.quote_plus(game['arena']) if game['arena'] else ""
             waze_link = ARENA_WAZE_LINKS.get(game['arena'], f"https://waze.com/ul?q={game_arena_safe}&navigate=yes" if game_arena_safe else "https://waze.com/ul?navigate=yes")
             game_home_esc = game['home'].replace("'", "\\'").replace('"', '&quot;')
             game_away_esc = game['away'].replace("'", "\\'").replace('"', '&quot;')
             game_arena_esc = game['arena'].replace("'", "\\'").replace('"', '&quot;')
-            
-            home_score_display_top = f'<td class="game-result">{game["home_score"]}</td>' if game.get('home_score') else '<td>-</td>'
-            away_score_display_top = f'<td class="game-result">{game["away_score"]}</td>' if game.get('away_score') else '<td>-</td>'
+
+            home_score_val_top = game["home_score"] if game.get('home_score') else '-'
+            away_score_val_top = game["away_score"] if game.get('away_score') else '-'
+
+            waze_btn_top = f'<a href="{waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> ניווט</a>'
+            cal_btn_top = f'<button onclick="addToCalendar(\'{game_home_esc} נגד {game_away_esc}\', \'{date_cal}\', \'{game["time"]}\', \'{game_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> ליומן</button>'
 
             html += f'''
         <tr class="details-panel d{mahzor}">
             <td>{mahzor}</td>
             <td>{date_display_top}</td>
             <td>{game['home']}</td>
-            {home_score_display_top}
-            {away_score_display_top}
+            <td class="game-result">{home_score_val_top}</td>
+            <td class="game-result">{away_score_val_top}</td>
             <td>{game['away']}</td>
-            <td>
-                <div class="action-btns">
-                    <a href="{waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
-                    <button onclick="addToCalendar('{game_home_esc} נגד {game_away_esc}', '{date_cal}', '{game['time']}', '{game_arena_esc}')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> יומן</button>
-                </div>
-            </td>
+            <td class="action-col">{waze_btn_top}</td>
+            <td class="action-col">{cal_btn_top}</td>
+            <td class="action-col"></td>
         </tr>'''
             
     return html

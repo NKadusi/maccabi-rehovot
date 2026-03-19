@@ -223,6 +223,11 @@
         .widgets-wrapper { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; max-width: 1050px; margin-bottom: 30px; }
         .widget-box { padding: 20px; border-radius: 20px; flex: 1; min-width: 300px; box-sizing: border-box; }
         footer { text-align: center; margin-top: 20px; font-size: 0.8em; }
+        .action-col {
+            text-align: center;
+            vertical-align: middle;
+            width: 1%; /* Prevent columns from taking too much space */
+        }
     </style>
 </head>
 <body>
@@ -252,7 +257,7 @@
     <h1>לוח משחקים - עונת 25/26</h1>
     <div class="table-responsive">
         <table>
-            <thead><tr><th>מחזור</th><th>תאריך וזמן</th><th>מארחת</th><th>תוצאת בית</th><th>תוצאת חוץ</th><th>אורחת</th><th></th></tr></thead>
+            <thead><tr><th>מחזור</th><th>תאריך וזמן</th><th>מארחת</th><th>ניקוד בית</th><th>ניקוד חוץ</th><th>אורחת</th><th class="action-col">ניווט</th><th class="action-col">יומן</th><th class="action-col">משחקים נוספים</th></tr></thead>
             <tbody id="games-table-body">
 
         <tr class="game-row">
