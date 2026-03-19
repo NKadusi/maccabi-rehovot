@@ -24,6 +24,11 @@ ARENA_WAZE_LINKS = {
     # הוסף עוד אולמות לפי הצורך
 }
 
+HEBREW_WEEKDAYS = {
+    "Monday": "שני", "Tuesday": "שלישי", "Wednesday": "רביעי", 
+    "Thursday": "חמישי", "Friday": "שישי", "Saturday": "שבת", "Sunday": "ראשון"
+}
+
 def get_gemini_model():
     """מחבר למודל השפה של ג'מיני ומחזיר אובייקט מודל."""
     try:
@@ -139,6 +144,7 @@ def update_games(excel_url):
     home_col = find_col(['מארחת', 'קבוצה א', 'Home', 'קבוצהא'])
     away_col = find_col(['אורחת', 'קבוצה ב', 'Away', 'קבוצהב'])
     arena_col = find_col(['אולם', 'מגרש', 'Venue', 'Arena'])
+    result_col = find_col(['תוצאה', 'Score', 'Result'])
 
     games_by_round = defaultdict(list)
     
@@ -155,16 +161,24 @@ def update_games(excel_url):
         if pd.isna(raw_date): continue
             
         if isinstance(raw_date, datetime.datetime):
-            date_str = raw_date.strftime('%d.%m')
+            date_obj = raw_date
         else:
+            # ננסה להמיר מחרוזת לתאריך
+            try:
+                date_obj = pd.to_datetime(raw_date, dayfirst=True, errors='coerce')
+                if pd.isna(date_obj): # אם נכשל, ננסה פורמט אמריקאי
+                    date_obj = pd.to_datetime(raw_date, errors='coerce')
+            except Exception:
+                date_obj = None
+
+        if pd.isna(date_obj):
             date_str = str(raw_date).strip()
-            if '/' in date_str:
-                parts = date_str.split('/')
-                if len(parts) >= 2: date_str = f"{parts[0].zfill(2)}.{parts[1].zfill(2)}"
-            elif '-' in date_str:
-                parts = date_str.split('-')
-                if len(parts) >= 3: date_str = f"{parts[2].zfill(2)}.{parts[1].zfill(2)}"
-            
+            day_he = ""
+        else:
+            date_str = date_obj.strftime('%d.%m.%Y')
+            day_en = date_obj.strftime('%A')
+            day_he = HEBREW_WEEKDAYS.get(day_en, "")
+
         raw_time = row[time_col] if time_col else ''
         if pd.isna(raw_time): time_str = "00:00"
         elif isinstance(raw_time, datetime.time): time_str = raw_time.strftime('%H:%M')
@@ -173,10 +187,11 @@ def update_games(excel_url):
         home = str(row[home_col]).strip() if not pd.isna(row[home_col]) else ''
         away = str(row[away_col]).strip() if not pd.isna(row[away_col]) else ''
         arena = str(row[arena_col]).strip() if arena_col and not pd.isna(row[arena_col]) else ''
+        result = str(row[result_col]).strip() if result_col and not pd.isna(row[result_col]) else ''
 
         if not home or not away or home == 'nan' or away == 'nan': continue
 
-        games_by_round[mahzor].append({'date': date_str, 'time': time_str, 'home': home, 'away': away, 'arena': arena})
+        games_by_round[mahzor].append({'date': date_str, 'day': day_he, 'time': time_str, 'home': home, 'away': away, 'arena': arena, 'result': result})
 
     html = ""
     logging.info(f"Rendering HTML for {len(games_by_round)} rounds.")
@@ -202,6 +217,10 @@ def update_games(excel_url):
         main_game = rehovot_game if rehovot_game else top_games.pop(0)
         home_hi = 'rehovot-highlight' if 'רחובות' in main_game['home'] else ''
         away_hi = 'rehovot-highlight' if 'רחובות' in main_game['away'] else ''
+        
+        # בניית מחרוזת התאריך המלאה
+        full_date_str = f"יום {main_game['day']}, {main_game['date']}" if main_game['day'] else main_game['date']
+
         main_arena_safe = urllib.parse.quote_plus(main_game['arena']) if main_game['arena'] else ""
         main_waze = ARENA_WAZE_LINKS.get(main_game['arena'], f"https://waze.com/ul?q={main_arena_safe}&navigate=yes" if main_arena_safe else "https://waze.com/ul?navigate=yes")
             
@@ -217,10 +236,16 @@ def update_games(excel_url):
         main_home_esc = main_game['home'].replace("'", "\\'")
         main_away_esc = main_game['away'].replace("'", "\\'")
         main_arena_esc = main_game['arena'].replace("'", "\\'")
+
+        # הצגת תוצאה אם קיימת
+        result_display = f'<td class="game-result">{main_game["result"]}</td>' if main_game.get('result') and main_game['result'] != 'nan' else '<td></td>'
         
         html += f'''
         <tr class="game-row">
-            <td>{mahzor}</td><td>{main_game['date']}</td><td>{main_game['time']}</td><td class="{home_hi}">{main_game['home']}</td><td class="{away_hi}">{main_game['away']}</td>
+            <td>{mahzor}</td><td>{full_date_str}</td><td>{main_game['time']}</td>
+            <td class="{home_hi}">{main_game['home']}</td>
+            {result_display}
+            <td class="{away_hi}">{main_game['away']}</td>
             <td>
                 <div class="action-btns">
                     <a href="{main_waze}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
@@ -235,14 +260,23 @@ def update_games(excel_url):
                 date_cal = '.'.join(reversed(game['date'].split('.')))
             except:
                 date_cal = game['date']
+            
+            full_date_str_top = f"יום {game['day']}, {game['date']}" if game['day'] else game['date']
+
             game_arena_safe = urllib.parse.quote_plus(game['arena']) if game['arena'] else ""
             waze_link = ARENA_WAZE_LINKS.get(game['arena'], f"https://waze.com/ul?q={game_arena_safe}&navigate=yes" if game_arena_safe else "https://waze.com/ul?navigate=yes")
             game_home_esc = game['home'].replace("'", "\\'")
             game_away_esc = game['away'].replace("'", "\\'")
             game_arena_esc = game['arena'].replace("'", "\\'")
+            
+            result_display_top = f'<td class="game-result">{game["result"]}</td>' if game.get('result') and game['result'] != 'nan' else '<td></td>'
+
             html += f'''
         <tr class="details-panel d{mahzor}">
-            <td>{mahzor}</td><td>{game['date']}</td><td>{game['time']}</td><td>{game['home']}</td><td>{game['away']}</td>
+            <td>{mahzor}</td><td>{full_date_str_top}</td><td>{game['time']}</td>
+            <td>{game['home']}</td>
+            {result_display_top}
+            <td>{game['away']}</td>
             <td>
                 <div class="action-btns">
                     <a href="{waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> Waze</a>
