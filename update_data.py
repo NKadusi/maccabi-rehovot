@@ -93,238 +93,163 @@ def update_insights(model):
 
 
 def update_games(excel_url):
-    """קורא את לוח המשחקים ישירות מקובץ האקסל הרשמי ומחזיר אותו כ-HTML."""
+    """קורא את לוח המשחקים, ממיין לפי תאריך, ומקבץ משחקי עבר."""
     logging.info(f"Fetching games from Excel: {excel_url}")
     headers = {'User-Agent': 'Mozilla/5.0'}
     
     try:
         response = requests.get(excel_url, headers=headers, timeout=20)
         response.raise_for_status()
-            
-        # ניסיון קריאה ללא כותרות כדי למצוא את השורה האמיתית
-        try:
-            df_raw = pd.read_excel(io.BytesIO(response.content), header=None, engine='openpyxl')
-        except Exception as e:
-            logging.warning(f"Could not read as Excel with openpyxl, trying HTML fallback. Error: {e}")
-            try:
-                html_content = response.content.decode('utf-8', errors='ignore')
-                df_raw = pd.read_html(io.StringIO(html_content), header=None)[0]
-            except Exception as ex:
-                logging.error(f"HTML fallback failed: {ex}")
-                return ""
-                
-        header_idx = -1
-        for idx, row in df_raw.head(20).iterrows():
-            row_str = ' '.join([str(x) for x in row.values if pd.notna(x)])
-            if 'מחזור' in row_str and ('תאריך' in row_str or 'מארחת' in row_str or 'קבוצה' in row_str):
-                header_idx = idx
-                break
-                
-        if header_idx == -1:
-            logging.error("Could not find header row in Excel.")
-            return ""
-            
-        df = df_raw.iloc[header_idx + 1:].copy()
-        df.columns = df_raw.iloc[header_idx]
-            
+        df_raw = pd.read_excel(io.BytesIO(response.content), header=None, engine='openpyxl')
     except Exception as e:
         logging.error(f"Failed to fetch or parse Excel data: {e}")
         return ""
 
+    header_idx = -1
+    for idx, row in df_raw.head(20).iterrows():
+        row_str = ' '.join([str(x) for x in row.values if pd.notna(x)])
+        if 'מחזור' in row_str and 'תאריך' in row_str:
+            header_idx = idx
+            break
+    
+    if header_idx == -1:
+        logging.error("Could not find header row in Excel.")
+        return ""
+        
+    df = df_raw.iloc[header_idx + 1:].copy()
+    df.columns = df_raw.iloc[header_idx]
+    
     cols = list(df.columns)
     def find_col(keywords):
         keywords_lower = [k.lower().strip() for k in keywords]
         for c in cols:
             if isinstance(c, str):
                 c_clean = re.sub(r"['\"`׳’´]", "", str(c)).strip().lower()
-                c_clean = re.sub(r'\s+', ' ', c_clean) # מנקה רווחים כפולים
+                c_clean = re.sub(r'\s+', ' ', c_clean)
                 if any(k in c_clean for k in keywords_lower):
                     return c
         return None
-        
-    mahzor_col = find_col(['מחזור', 'Round', 'Cycle'])
-    date_col = find_col(['תאריך', 'Date'])
-    time_col = find_col(['שעה', 'Time'])
-    home_col = find_col(['מארחת', 'קבוצה א', 'Home', 'קבוצהא'])
-    away_col = find_col(['אורחת', 'קבוצה ב', 'Away', 'קבוצהב'])
-    arena_col = find_col(['אולם', 'מגרש', 'Venue', 'Arena'])
-    
-    # איתור עמודות התוצאות הספציפיות למארחת ולאורחת (כולל תמיכה בעמודה משולבת)
+
+    mahzor_col = find_col(['מחזור', 'round', 'cycle'])
+    date_col = find_col(['תאריך', 'date'])
+    time_col = find_col(['שעה', 'time'])
+    home_col = find_col(['מארחת', 'קבוצה א', 'home', 'קבוצהא'])
+    away_col = find_col(['אורחת', 'קבוצה ב', 'away', 'קבוצהב'])
+    arena_col = find_col(['אולם', 'מגרש', 'venue', 'arena'])
     home_score_col = find_col(['home score', 'תוצאה קבוצה א', 'תוצאת מארחת', 'תוצאה א', 'נקודות קבוצה א', 'נקודות בית'])
     away_score_col = find_col(['away score', 'תוצאה קבוצה ב', 'תוצאת אורחת', 'תוצאה ב', 'נקודות קבוצה ב', 'נקודות חוץ'])
-    single_result_col = find_col(['תוצאה', 'score', 'result', 'תוצאת משחק'])
 
-    games_by_round = defaultdict(list)
-    
-    if not (mahzor_col and date_col and home_col and away_col):
-        logging.error(f"Missing essential columns. Found headers: {cols}")
-        return ""
-
+    all_games = []
     for index, row in df.iterrows():
-        mahzor = str(row[mahzor_col]).strip()
-        if mahzor == 'nan' or not mahzor: continue
-        if mahzor.endswith('.0'): mahzor = mahzor[:-2]
-            
-        raw_date = row[date_col]
-        if pd.isna(raw_date): continue
-            
-        if isinstance(raw_date, datetime.datetime):
-            date_obj = raw_date
-        else:
-            try:
-                date_obj = pd.to_datetime(raw_date, dayfirst=True, errors='coerce')
-                if pd.isna(date_obj):
-                    date_obj = pd.to_datetime(raw_date, errors='coerce')
-            except Exception:
-                date_obj = None
+        try:
+            mahzor = str(row[mahzor_col]).strip()
+            if mahzor.endswith('.0'): mahzor = mahzor[:-2]
 
-        if pd.isna(date_obj):
-            date_str = str(raw_date).strip()
-            day_he = ""
-        else:
-            date_str = date_obj.strftime('%d.%m.%Y')
-            day_en = date_obj.strftime('%A')
-            day_he = HEBREW_WEEKDAYS.get(day_en, "")
+            raw_date = row[date_col]
+            if pd.isna(raw_date): continue
 
-        raw_time = row[time_col] if time_col else ''
-        if pd.isna(raw_time): time_str = "00:00"
-        elif isinstance(raw_time, datetime.time): time_str = raw_time.strftime('%H:%M')
-        else: time_str = str(raw_time).strip()[:5]
+            date_obj = pd.to_datetime(raw_date, dayfirst=True, errors='coerce').to_pydatetime()
+            if pd.isna(date_obj): continue
 
-        home = str(row[home_col]).strip() if not pd.isna(row[home_col]) else ''
-        away = str(row[away_col]).strip() if not pd.isna(row[away_col]) else ''
-        arena = str(row[arena_col]).strip() if arena_col and not pd.isna(row[arena_col]) else ''
-        
-        home_score, away_score = "", ""
-        if home_score_col:
-            hs = str(row[home_score_col]).strip()
-            if hs and hs.lower() not in ['nan', 'none', '-', 'null', '']:
-                if hs.endswith('.0'): hs = hs[:-2]
-                home_score = hs
-        if away_score_col:
-            aws = str(row[away_score_col]).strip()
-            if aws and aws.lower() not in ['nan', 'none', '-', 'null', '']:
-                if aws.endswith('.0'): aws = aws[:-2]
-                away_score = aws
-                
-        # טיפול חכם: אם שתי התוצאות הוזנו בטעות לעמודת המארחת, או שיש רק עמודת תוצאה אחת
-        if home_score and not away_score and any(char in home_score for char in ['-', ':']):
-            parts = re.split(r'[-:]', home_score)
-            if len(parts) >= 2:
-                home_score = parts[0].strip()
-                away_score = parts[1].strip()
-        elif not home_score and not away_score and single_result_col and pd.notna(row[single_result_col]):
-            res = str(row[single_result_col]).strip()
-            if res and res.lower() not in ['nan', 'none', '-', 'null', '']:
-                parts = re.split(r'[-:]', res)
-                if len(parts) >= 2:
-                    home_score = parts[0].strip()
-                    away_score = parts[1].strip()
+            time_str = "00:00"
+            if time_col and pd.notna(row[time_col]):
+                time_val = row[time_col]
+                if isinstance(time_val, datetime.time):
+                    time_str = time_val.strftime('%H:%M')
                 else:
-                    home_score = res
+                    time_str = str(time_val).strip()[:5]
 
-        if not home or not away or home == 'nan' or away == 'nan': continue
+            home_score = str(row[home_score_col]).strip() if home_score_col and pd.notna(row[home_score_col]) else "-"
+            if home_score.endswith('.0'): home_score = home_score[:-2]
+            
+            away_score = str(row[away_score_col]).strip() if away_score_col and pd.notna(row[away_score_col]) else "-"
+            if away_score.endswith('.0'): away_score = away_score[:-2]
 
-        games_by_round[mahzor].append({'date': date_str, 'day': day_he, 'time': time_str, 'home': home, 'away': away, 'arena': arena, 'home_score': home_score, 'away_score': away_score})
-
-    html = ""
-    logging.info(f"Rendering HTML for {len(games_by_round)} rounds.")
-    top_teams_keywords = ["נהריה", "הפועל חיפה"]
-    
-    def sort_key(k):
-        try: return int(re.search(r'\d+', k).group())
-        except: return 999
-
-    for mahzor, games in sorted(games_by_round.items(), key=lambda item: sort_key(item[0])):
-        rehovot_game = None
-        top_games = []
-        
-        for game in games:
-            if "רחובות" in game['home'] or "רחובות" in game['away']:
-                rehovot_game = game
-            elif any(t in game['home'] or t in game['away'] for t in top_teams_keywords):
-                top_games.append(game)
-        
-        # Per user request, only show rounds where Maccabi Rehovot plays
-        if not rehovot_game:
+            all_games.append({
+                'mahzor': mahzor, 'date_obj': date_obj, 'time': time_str,
+                'home': str(row[home_col]), 'away': str(row[away_col]), 'arena': str(row.get(arena_col, '')),
+                'home_score': home_score if home_score not in ['nan', ''] else '-',
+                'away_score': away_score if away_score not in ['nan', ''] else '-'
+            })
+        except (KeyError, ValueError, TypeError) as e:
+            logging.warning(f"Skipping row {index} due to parsing error: {e}")
             continue
 
-        main_game = rehovot_game
+    rehovot_games = sorted([g for g in all_games if 'רחובות' in g['home'] or 'רחובות' in g['away']], key=lambda x: x['date_obj'])
+    
+    other_games_by_round = defaultdict(list)
+    top_teams_keywords = ["נהריה", "הפועל חיפה"]
+    for g in all_games:
+        is_rehovot_game = 'רחובות' in g['home'] or 'רחובות' in g['away']
+        is_top_game = any(t in g['home'] or t in g['away'] for t in top_teams_keywords)
+        if not is_rehovot_game and is_top_game:
+            other_games_by_round[g['mahzor']].append(g)
+
+    past_html, future_html = "", ""
+    today = datetime.datetime.now()
+
+    for main_game in rehovot_games:
+        is_past = main_game['date_obj'] < today
+        row_class = "game-row past-game" if is_past else "game-row"
+        details_row_class = "details-panel past-game" if is_past else "details-panel"
+
+        date_str = main_game['date_obj'].strftime('%d.%m.%Y')
+        day_he = HEBREW_WEEKDAYS.get(main_game['date_obj'].strftime('%A'), "")
+        date_display = f"{day_he}, {date_str} - {main_game['time']}"
+
         home_hi = 'rehovot-highlight' if 'רחובות' in main_game['home'] else ''
         away_hi = 'rehovot-highlight' if 'רחובות' in main_game['away'] else ''
         
-        # New combined date format
-        date_display = f"{main_game['day']}, {main_game['date']} - {main_game['time']}"
+        main_arena_safe = urllib.parse.quote_plus(main_game['arena'])
+        main_waze_link = f"https://waze.com/ul?q={main_arena_safe}&navigate=yes"
+        main_date_cal = main_game['date_obj'].strftime('%Y.%m.%d')
 
-        main_arena_safe = urllib.parse.quote_plus(main_game['arena']) if main_game['arena'] else ""
-        main_waze_link = ARENA_WAZE_LINKS.get(main_game['arena'], f"https://waze.com/ul?q={main_arena_safe}&navigate=yes" if main_arena_safe else "https://waze.com/ul?navigate=yes")
-            
-        try:
-            main_date_cal = '.'.join(reversed(main_game['date'].split('.')))
-        except:
-            main_date_cal = main_game['date']
-            
-        main_home_esc = main_game['home'].replace("'", "\\'").replace('"', '&quot;')
-        main_away_esc = main_game['away'].replace("'", "\\'").replace('"', '&quot;')
-        main_arena_esc = main_game['arena'].replace("'", "\\'").replace('"', '&quot;')
+        main_home_esc, main_away_esc, main_arena_esc = [s.replace("'", "\\'").replace('"', '&quot;') for s in [main_game['home'], main_game['away'], main_game['arena']]]
 
-        home_score_val = main_game["home_score"] if main_game.get('home_score') else '-'
-        away_score_val = main_game["away_score"] if main_game.get('away_score') else '-'
+        top_games = other_games_by_round.get(main_game['mahzor'], [])
+        toggle_btn = f'<button class="details-toggle" onclick="toggleDetails(\'d{main_game["mahzor"]}\')">עוד <i class="fa-solid fa-chevron-down"></i></button>' if top_games else ""
+        waze_btn = f'<a href="{main_waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a>'
+        cal_btn = f'<button onclick="addToCalendar(\'{main_home_esc} נגד {main_away_esc}\', \'{main_date_cal}\', \'{main_game["time"]}\', \'{main_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button>'
         
-        waze_btn = f'<a href="{main_waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> ניווט</a>'
-        cal_btn = f'<button onclick="addToCalendar(\'{main_home_esc} נגד {main_away_esc}\', \'{main_date_cal}\', \'{main_game["time"]}\', \'{main_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> ליומן</button>'
-        
-        toggle_btn = ""
-        if top_games:
-            toggle_btn = f'<button class="details-toggle" onclick="toggleDetails(\'d{mahzor}\')">עוד משחקים <i class="fa-solid fa-chevron-down"></i></button>'
-        
-        html += f'''
-        <tr class="game-row">
-            <td>{mahzor}</td>
-            <td>{date_display}</td>
-            <td class="{home_hi}">{main_game['home']}</td>
-            <td class="game-result">{home_score_val}</td>
-            <td class="game-result">{away_score_val}</td>
-            <td class="{away_hi}">{main_game['away']}</td>
-            <td class="action-col">{waze_btn}</td>
-            <td class="action-col">{cal_btn}</td>
-            <td class="action-col">{toggle_btn}</td>
-        </tr>'''
-        
+        current_game_html = f'''<tr class="{row_class}">
+            <td>{main_game['mahzor']}</td><td>{date_display}</td><td class="{home_hi}">{main_game['home']}</td>
+            <td class="game-result">{main_game["home_score"]}</td><td class="game-result">{main_game["away_score"]}</td>
+            <td class="{away_hi}">{main_game['away']}</td><td class="action-col">{waze_btn}</td>
+            <td class="action-col">{cal_btn}</td><td class="action-col">{toggle_btn}</td></tr>'''
+
         for game in top_games:
-            try:
-                date_cal = '.'.join(reversed(game['date'].split('.')))
-            except:
-                date_cal = game['date']
+            date_cal_top = game['date_obj'].strftime('%Y.%m.%d')
+            day_he_top = HEBREW_WEEKDAYS.get(game['date_obj'].strftime('%A'), "")
+            date_display_top = f"{day_he_top}, {game['date_obj'].strftime('%d.%m.%Y')} - {game['time']}"
             
-            date_display_top = f"{game['day']}, {game['date']} - {game['time']}"
-
-            game_arena_safe = urllib.parse.quote_plus(game['arena']) if game['arena'] else ""
-            waze_link = ARENA_WAZE_LINKS.get(game['arena'], f"https://waze.com/ul?q={game_arena_safe}&navigate=yes" if game_arena_safe else "https://waze.com/ul?navigate=yes")
-            game_home_esc = game['home'].replace("'", "\\'").replace('"', '&quot;')
-            game_away_esc = game['away'].replace("'", "\\'").replace('"', '&quot;')
-            game_arena_esc = game['arena'].replace("'", "\\'").replace('"', '&quot;')
-
-            home_score_val_top = game["home_score"] if game.get('home_score') else '-'
-            away_score_val_top = game["away_score"] if game.get('away_score') else '-'
-
-            waze_btn_top = f'<a href="{waze_link}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i> ניווט</a>'
-            cal_btn_top = f'<button onclick="addToCalendar(\'{game_home_esc} נגד {game_away_esc}\', \'{date_cal}\', \'{game["time"]}\', \'{game_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i> ליומן</button>'
-
-            html += f'''
-        <tr class="details-panel d{mahzor}">
-            <td>{mahzor}</td>
-            <td>{date_display_top}</td>
-            <td>{game['home']}</td>
-            <td class="game-result">{home_score_val_top}</td>
-            <td class="game-result">{away_score_val_top}</td>
-            <td>{game['away']}</td>
-            <td class="action-col">{waze_btn_top}</td>
-            <td class="action-col">{cal_btn_top}</td>
-            <td class="action-col"></td>
+            game_arena_safe = urllib.parse.quote_plus(game['arena'])
+            waze_link_top = f"https://waze.com/ul?q={game_arena_safe}&navigate=yes"
+            game_home_esc, game_away_esc, game_arena_esc = [s.replace("'", "\\'").replace('"', '&quot;') for s in [game['home'], game['away'], game['arena']]]
+            
+            waze_btn_top = f'<a href="{waze_link_top}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a>'
+            cal_btn_top = f'<button onclick="addToCalendar(\'{game_home_esc} נגד {game_away_esc}\', \'{date_cal_top}\', \'{game["time"]}\', \'{game_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button>'
+            
+            current_game_html += f'''<tr class="{details_row_class} d{game['mahzor']}">
+                <td>{game['mahzor']}</td><td>{date_display_top}</td><td>{game['home']}</td>
+                <td class="game-result">{game["home_score"]}</td><td class="game-result">{game["away_score"]}</td>
+                <td>{game['away']}</td><td class="action-col">{waze_btn_top}</td>
+                <td class="action-col">{cal_btn_top}</td><td class="action-col"></td></tr>'''
+        
+        if is_past:
+            past_html += current_game_html
+        else:
+            future_html += current_game_html
+            
+    final_html = future_html
+    if past_html:
+        toggle_row = f'''<tr class="game-row" id="past-games-toggle-row">
+            <td colspan="9" style="text-align: center; cursor: pointer;" onclick="togglePastGames()">
+                <button id="past-games-toggle-btn" class="details-toggle">הצג משחקים קודמים</button>
+            </td>
         </tr>'''
-            
-    return html
+        final_html = toggle_row + past_html + future_html
+        
+    return final_html
 
 def main():
     """הפונקציה הראשית שמריצה את תהליך העדכון."""
