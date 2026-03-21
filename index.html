@@ -211,9 +211,9 @@
         .widgets-wrapper { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; max-width: 1050px; margin-bottom: 30px; }
         .widget-box { padding: 20px; border-radius: 20px; flex: 1; min-width: 300px; box-sizing: border-box; }
         .action-col {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
             width: 1%;
         }
         .past-game, .past-game-details { display: none; }
@@ -644,6 +644,15 @@
     </div>
 </div>
 
+
+<button id="theme-fab" class="theme-fab">
+    <i class="fas fa-moon"></i>
+</button>
+
+<footer>
+    <p>גרסה 1.0.0</p>
+</footer>
+
 <script>
     function togglePastGames() {
         const main_past_games = document.querySelectorAll('.past-game');
@@ -793,13 +802,5 @@
     });
 
 </script>
-
-<button id="theme-fab" class="theme-fab">
-    <i class="fas fa-moon"></i>
-</button>
-
-<footer>
-    <p>גרסה 1.0.0</p>
-</footer>
 </body>
 </html>
