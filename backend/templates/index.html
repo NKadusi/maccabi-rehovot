@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maccabi Rehovot - Fleet Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Maccabi Rehovot - Fleet Management</h1>
+
+    <a href="/dashboard">Dashboard</a>
+    <a href="/expenses">View Expenses</a>
+    <a href="/vehicles">View Vehicles</a>
+    <a href="/presentation">Download Report</a>
+
+    <div id="drop-area">
+        <form class="my-form">
+            <p>Upload multiple files with the file dialog or by dragging and dropping them onto the dashed region</p>
+            <input type="text" id="supplier_name" placeholder="Supplier Name">
+            <input type="file" id="fileElem" multiple onchange="handleFiles(this.files)">
+            <label class="button" for="fileElem">Select some files</label>
+        </form>
+    </div>
+
+    <script>
+        let dropArea = document.getElementById('drop-area');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false)
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false)
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false)
+        });
+
+        function highlight(e) {
+            dropArea.classList.add('highlight')
+        }
+
+        function unhighlight(e) {
+            dropArea.classList.remove('highlight')
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            ([...files]).forEach(uploadFile);
+        }
+
+        function uploadFile(file) {
+            let url = '/upload';
+            let formData = new FormData();
+            let supplierName = document.getElementById('supplier_name').value;
+
+            formData.append('file', file);
+            formData.append('supplier_name', supplierName);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert('File uploaded and processed successfully!');
+            })
+            .catch(error => {
+                console.error(error);
+                alert('An error occurred during file upload and processing.');
+            });
+        }
+    </script>
+</body>
+</html>
