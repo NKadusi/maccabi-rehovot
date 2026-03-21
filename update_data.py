@@ -10,6 +10,10 @@ import pandas as pd
 import io
 import datetime
 import urllib.parse
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # הגדרת לוגינג בסיסי
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -190,8 +194,11 @@ def update_games(excel_url):
 
     for main_game in rehovot_games:
         is_past = main_game['date_obj'] < today
-        row_class = "game-row past-game" if is_past else "game-row"
-        details_row_class = "details-panel past-game" if is_past else "details-panel"
+        row_class = "game-row"
+        details_row_class = "details-panel"
+        if is_past:
+            row_class += " past-game"
+            details_row_class += " past-game-details"
 
         date_str = main_game['date_obj'].strftime('%d.%m.%Y')
         day_he = HEBREW_WEEKDAYS.get(main_game['date_obj'].strftime('%A'), "")
@@ -229,6 +236,7 @@ def update_games(excel_url):
             waze_btn_top = f'<a href="{waze_link_top}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a>'
             cal_btn_top = f'<button onclick="addToCalendar(\'{game_home_esc} נגד {game_away_esc}\', \'{date_cal_top}\', \'{game["time"]}\', \'{game_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button>'
             
+            # Add the mahzor-specific class `d{mahzor}` for toggleDetails
             current_game_html += f'''<tr class="{details_row_class} d{game['mahzor']}">
                 <td>{game['mahzor']}</td><td>{date_display_top}</td><td>{game['home']}</td>
                 <td class="game-result">{game["home_score"]}</td><td class="game-result">{game["away_score"]}</td>
