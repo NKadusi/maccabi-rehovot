@@ -36,7 +36,7 @@ HEBREW_WEEKDAYS = {
 def get_gemini_model():
     """מחבר למודל השפה של ג'מיני ומחזיר אובייקט מודל."""
     try:
-        api_key = os.environ.get(AIzaSyA2CplKhJYAdqmDZX0IbxQ0YC8EX72E4-c)
+        api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key:
             logging.error("GEMINI_API_KEY not found in environment variables.")
             return None
