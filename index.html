@@ -217,6 +217,23 @@
             white-space: nowrap;
             width: 1%;
         }
+        
+        html[lang="en"] .lang-he { display: none; }
+        html[lang="he"] .lang-en { display: none; }
+
+        #lang-toggle {
+            background: transparent;
+            border: 2px solid var(--text-light);
+            color: var(--text-light);
+            border-radius: 8px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .dark-mode #lang-toggle { border-color: var(--dark-text-primary); color: var(--dark-text-primary); }
+        #lang-toggle:hover { background: var(--main-blue); color: white; border-color: var(--main-blue); }
         .past-game, .past-game-details { display: none; }
 
         /* --- Mobile Responsiveness --- */
@@ -240,6 +257,7 @@
 <body>
 
 <div class="header-utilities">
+    <button id="lang-toggle" aria-label="Toggle Language">EN</button>
     <div class="social-icons">
         <a href="https://www.facebook.com/rehovotbc" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
         <a href="https://www.instagram.com/maccabi_rehovot_bc/" target="_blank" aria-label="Instagram" style="margin-right: 15px;"><i class="fab fa-instagram"></i></a>
@@ -251,14 +269,14 @@
 </div>
 
 <div class="countdown-box">
-    <div class="timer-display" id="timer">טוען שעון...</div>
+    <div class="timer-display" id="timer" data-i18n="timer_loading">טוען שעון...</div>
 </div>
 
 <div class="container">
-    <h1>לוח משחקים - עונת 25/26</h1>
+    <h1 data-i18n="schedule_title">לוח משחקים - עונת 25/26</h1>
     <div class="table-responsive">
         <table>
-            <thead><tr><th>מחזור</th><th>תאריך</th><th>שעת משחק</th><th>מארחת</th><th>ניקוד בית</th><th>ניקוד חוץ</th><th>אורחת</th><th class="action-col">ניווט</th><th class="action-col">יומן</th><th class="action-col">משחקים נוספים</th></tr></thead>
+            <thead><tr><th data-i18n="th_round">מחזור</th><th data-i18n="th_date">תאריך</th><th data-i18n="th_time">שעת משחק</th><th data-i18n="th_home">מארחת</th><th data-i18n="th_home_score">ניקוד בית</th><th data-i18n="th_away_score">ניקוד חוץ</th><th data-i18n="th_away">אורחת</th><th class="action-col" data-i18n="th_nav">ניווט</th><th class="action-col" data-i18n="th_cal">יומן</th><th class="action-col" data-i18n="th_more">משחקים נוספים</th></tr></thead>
             <tbody id="games-table-body">
 <tr class="game-row" id="past-games-toggle-row">
             <td colspan="10" style="text-align: center; cursor: pointer;" onclick="togglePastGames()">
@@ -607,23 +625,24 @@
 </div>
 
 <div class="insights-box">
-    <div class="insights-header">ניתוח סטטיסטי וסיכויי פלייאוף</div>
+    <div class="insights-header" data-i18n="insights_title">ניתוח סטטיסטי וסיכויי פלייאוף</div>
     <div class="insights-content">
-<p>סטטיסטית, קבוצת <strong>מכבי רחובות</strong>, הממוקמת במקום השני עם מאזן 18 ניצחונות ו-4 הפסדים (40 נקודות), ניצבת בפני אתגר כמעט בלתי עביר במאבק על המקום הראשון. הפועל אסטרל אילת מובילה את הליגה בפער משמעותי עם 21 ניצחונות והפסד בודד (43 נקודות). פער של שלושה ניצחונות ושלוש נקודות, בצירוף הפרש סלים נחות (293+ לרחובות לעומת 328+ לאילת), ממקם את אילת בעמדה דומיננטית במיוחד, ולמעשה הופך את סיכוייה של רחובות לסיים במקום הראשון לסטטיסטית נמוכים מאוד, אם לא אפסיים, בהתבסס על הנתונים הקיימים.</p>
-
-<p>מאידך, <strong>מכבי רחובות</strong> מבוססת היטב בעמדה שמבטיחה לה יתרון ביתיות לקראת הפלייאוף. מיקומה השני בטבלה, עם 18 ניצחונות, מציב אותה בבטחה בארבעת המקומות הראשונים המקנים יתרון זה. הקבוצה שבמקום החמישי, א.ס. עירוני אשקלון, מרוחקת ארבעה ניצחונות (14-8) וארבע נקודות (36 נקודות) מרחובות. פער זה, המודגש גם על ידי הפרש הסלים העדיף של רחובות (+293), מבטיח לה נוחות סטטיסטית משמעותית בשמירה על יתרון הביתיות לקראת השלבים המכריעים של העונה.</p>
-
-<p>לקראת הפלייאוף, <strong>מכבי רחובות</strong> מציגה נתונים מרשימים המעידים על חוסן ועומק. הקבוצה מדורגת שנייה בליגה בהפרש הסלים (293+) והשנייה בנקודות זכות (1993) והשנייה בנקודות חובה (1700), מה שמצביע על איזון מצוין בין התקפה להגנה. קבוצות הממוקמות מתחתיה, כמו עירוני נהריה (מקום 3, הפרש סלים +212) או הפועל חיפה (מקום 4, הפרש סלים +72), נמצאות פער ניכר בנתונים אלה. גם קבוצות כמו מכבי רוטשטיין אשדוד (מקום 6, הפרש סלים +165) אינן מציגות מאזן נקודות דומה. הנתונים הסטטיסטיים מצביעים על כך שרחובות היא קבוצה חזקה ועקבית, וסכנות משמעותיות מקבוצות המדורגות מתחתיה נראות, מבחינה מספרית, פחותות יחסית.</p>
+<p class="lang-he">סטטיסטית, קבוצת <strong>מכבי רחובות</strong>, הממוקמת במקום השני עם מאזן 18 ניצחונות ו-4 הפסדים (40 נקודות), ניצבת בפני אתגר כמעט בלתי עביר במאבק על המקום הראשון. הפועל אסטרל אילת מובילה את הליגה בפער משמעותי עם 21 ניצחונות והפסד בודד (43 נקודות). פער של שלושה ניצחונות ושלוש נקודות, בצירוף הפרש סלים נחות (293+ לרחובות לעומת 328+ לאילת), ממקם את אילת בעמדה דומיננטית במיוחד, ולמעשה הופך את סיכוייה של רחובות לסיים במקום הראשון לסטטיסטית נמוכים מאוד, אם לא אפסיים, בהתבסס על הנתונים הקיימים.</p>
+<p class="lang-he">מאידך, <strong>מכבי רחובות</strong> מבוססת היטב בעמדה שמבטיחה לה יתרון ביתיות לקראת הפלייאוף. מיקומה השני בטבלה, עם 18 ניצחונות, מציב אותה בבטחה בארבעת המקומות הראשונים המקנים יתרון זה. הקבוצה שבמקום החמישי, א.ס. עירוני אשקלון, מרוחקת ארבעה ניצחונות (14-8) וארבע נקודות (36 נקודות) מרחובות. פער זה, המודגש גם על ידי הפרש הסלים העדיף של רחובות (+293), מבטיח לה נוחות סטטיסטית משמעותית בשמירה על יתרון הביתיות לקראת השלבים המכריעים של העונה.</p>
+<p class="lang-he">לקראת הפלייאוף, <strong>מכבי רחובות</strong> מציגה נתונים מרשימים המעידים על חוסן ועומק. הקבוצה מדורגת שנייה בליגה בהפרש הסלים (293+) והשנייה בנקודות זכות (1993) והשנייה בנקודות חובה (1700), מה שמצביע על איזון מצוין בין התקפה להגנה. קבוצות הממוקמות מתחתיה, כמו עירוני נהריה (מקום 3, הפרש סלים +212) או הפועל חיפה (מקום 4, הפרש סלים +72), נמצאות פער ניכר בנתונים אלה. גם קבוצות כמו מכבי רוטשטיין אשדוד (מקום 6, הפרש סלים +165) אינן מציגות מאזן נקודות דומה. הנתונים הסטטיסטיים מצביעים על כך שרחובות היא קבוצה חזקה ועקבית, וסכנות משמעותיות מקבוצות המדורגות מתחתיה נראות, מבחינה מספרית, פחותות יחסית.</p>
+<p class="lang-en">Statistically, <strong>Maccabi Rehovot</strong>, currently ranked second with a record of 18 wins and 4 losses (40 points), faces an almost insurmountable challenge in the race for first place. Hapoel Astral Eilat leads the league by a significant margin with 21 wins and only a single loss (43 points). The three-win, three-point gap, combined with an inferior point differential (+293 for Rehovot compared to +328 for Eilat), puts Eilat in a highly dominant position, making Rehovot's chances of finishing first statistically very low.</p>
+<p class="lang-en">On the other hand, <strong>Maccabi Rehovot</strong> is well-positioned to secure home-court advantage for the playoffs. Their second-place standing comfortably places them in the top four. The fifth-place team, A.S. Ashkelon, is four wins (14-8) and four points (36 points) behind Rehovot. This gap, further emphasized by Rehovot's superior point differential, provides them with substantial statistical comfort in maintaining home-court advantage heading into the decisive stages of the season.</p>
+<p class="lang-en">Approaching the playoffs, <strong>Maccabi Rehovot</strong> displays impressive statistics indicating resilience and depth. The team ranks second in the league in point differential (+293), points scored (1993), and fewest points allowed (1700), highlighting an excellent balance between offense and defense. The data suggests that Rehovot is a strong and consistent team, and the immediate statistical threat from teams below them appears relatively minor.</p>
 </div>
 </div>
 
 <div class="bracket-container">
-    <h1>תמונת הפלייאוף (מקומות 2-9)</h1>
+    <h1 data-i18n="bracket_title">תמונת הפלייאוף (מקומות 2-9)</h1>
     <div class="bracket-wrapper">
         <div class="bracket-headers">
-            <div class="round-title">רבע גמר (2 נצ')</div>
-            <div class="round-title">חצי גמר (3 נצ')</div>
-            <div class="round-title">גמר (3 נצ')</div>
+            <div class="round-title" data-i18n="qf">רבע גמר (2 נצ')</div>
+            <div class="round-title" data-i18n="sf">חצי גמר (3 נצ')</div>
+            <div class="round-title" data-i18n="final">גמר (3 נצ')</div>
         </div>
         <div class="bracket-body">
             <div class="bracket-column" id="qf-col"></div>
@@ -635,7 +654,7 @@
 
 <div class="widgets-wrapper">
     <div class="widget-box">
-        <h2 style="text-align: center; color: #00f2fe; margin-top: 0;">טבלת הליגה הלאומית</h2>
+        <h2 style="text-align: center; color: #00f2fe; margin-top: 0;" data-i18n="standings_title">טבלת הליגה הלאומית</h2>
         <div class="widget-content">
             <iframe id="sofa-standings-embed-40315-83414" src="https://widgets.sofascore.com/embed/tournament/40315/season/83414/standings/National%20League%2025%2F26?widgetTitle=National%20League%2025%2F26&showCompetitionLogo=true" style="height:963px!important;max-width:100%!important;width:100%!important;" frameborder="0" scrolling="no"></iframe>
             <div style="font-size:12px;font-family:Arial,sans-serif;text-align:left;margin-top:5px; color: #666;">
@@ -651,10 +670,166 @@
 </button>
 
 <footer>
-    <p>גרסה 1.0.0</p>
+    <p data-i18n="footer_ver">גרסה 1.0.0</p>
 </footer>
 
 <script>
+    const translations = {
+        he: {
+            title: "פורטל משחקים - מכבי רחובות 25/26",
+            schedule_title: "לוח משחקים - עונת 25/26",
+            th_round: "מחזור",
+            th_date: "תאריך",
+            th_time: "שעת משחק",
+            th_home: "מארחת",
+            th_home_score: "ניקוד בית",
+            th_away_score: "ניקוד חוץ",
+            th_away: "אורחת",
+            th_nav: "ניווט",
+            th_cal: "יומן",
+            th_more: "משחקים נוספים",
+            insights_title: "ניתוח סטטיסטי וסיכויי פלייאוף",
+            bracket_title: "תמונת הפלייאוף (מקומות 2-9)",
+            qf: "רבע גמר (2 נצ')",
+            sf: "חצי גמר (3 נצ')",
+            final: "גמר (3 נצ')",
+            standings_title: "טבלת הליגה הלאומית",
+            footer_ver: "גרסה 1.0.0",
+            show_past: "הצג משחקים קודמים",
+            hide_past: "הסתר משחקים קודמים",
+            more_games: "עוד",
+            close_games: "סגור",
+            timer_loading: "טוען שעון...",
+            timer_days: " ימים | ",
+            series: "סדרה"
+        },
+        en: {
+            title: "Games Portal - Maccabi Rehovot",
+            schedule_title: "Game Schedule - 25/26 Season",
+            th_round: "Round",
+            th_date: "Date",
+            th_time: "Time",
+            th_home: "Home",
+            th_home_score: "Home Score",
+            th_away_score: "Away Score",
+            th_away: "Away",
+            th_nav: "Navigate",
+            th_cal: "Calendar",
+            th_more: "More Games",
+            insights_title: "Statistical Analysis & Playoff Chances",
+            bracket_title: "Playoff Bracket (Seeds 2-9)",
+            qf: "Quarter Finals (Best of 3)",
+            sf: "Semi Finals (Best of 5)",
+            final: "Finals (Best of 5)",
+            standings_title: "National League Standings",
+            footer_ver: "Version 1.0.0",
+            show_past: "Show Past Games",
+            hide_past: "Hide Past Games",
+            more_games: "More",
+            close_games: "Close",
+            timer_loading: "Loading timer...",
+            timer_days: " Days | ",
+            series: "Series"
+        }
+    };
+
+    const teamTranslations = {
+        "א.ס רמה\"ש ירק השדה": "AS Ramat Hasharon",
+        "א.ס רמה\"ש": "AS Ramat Hasharon",
+        "א.ס. אשקלון-קרית גת": "Maccabi Kiryat Gat/Ashkelon",
+        "א.ס. עירוני אשקלון": "A.S Ashkelon",
+        "אליצור יבנה": "Elitzur Yavne",
+        "אליצור שומרון": "Elitzur Shomron Hlp",
+        "הפועל אסטרל אילת": "Hapoel Eilat",
+        "הפועל חיפה נווה שאנן שובל": "Hapoel Haifa BC",
+        "הפועל חיפה": "Hapoel Haifa BC",
+        "הפועל מגדל העמק-יזרעאל": "Hapoel Migdal Haemek",
+        "מ.כ עוטף דרום": "Otef Darom BC",
+        "מ.ס צפת": "Hapoel Safed",
+        "מכבי גיא נתן חיפה": "Maccabi Haifa BC",
+        "מכבי מנדל פ\"ת": "Maccabi Petah Tikva Elitzur",
+        "מכבי מעלה אדומים": "Maccabi Maale Adumim",
+        "מכבי רוטשטיין אשדוד": "Maccabi Ashdod",
+        "מכבי אשדוד": "Maccabi Ashdod",
+        "מכבי רחובות": "Maccabi Rehovot",
+        "עירוני נהריה": "Ironi Nahariya"
+    };
+
+    const dayTranslations = {
+        "ראשון": "Sunday", "שני": "Monday", "שלישי": "Tuesday", "רביעי": "Wednesday",
+        "חמישי": "Thursday", "שישי": "Friday", "שבת": "Saturday"
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'he';
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem('lang', lang);
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'en' ? 'ltr' : 'rtl';
+        
+        const langToggle = document.getElementById('lang-toggle');
+        if (langToggle) langToggle.innerText = lang === 'en' ? 'HE' : 'EN';
+        document.title = translations[lang].title;
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang][key]) el.innerText = translations[lang][key];
+        });
+
+        const pastBtn = document.getElementById('past-games-toggle-btn');
+        if (pastBtn) {
+            const isHidden = document.querySelector('.past-game') && getComputedStyle(document.querySelector('.past-game')).display === 'none';
+            pastBtn.innerHTML = isHidden ? translations[lang].show_past : translations[lang].hide_past;
+        }
+
+        document.querySelectorAll('.details-toggle').forEach(btn => {
+            if (btn.id === 'past-games-toggle-btn') return;
+            const isClosing = btn.innerHTML.includes('fa-chevron-up');
+            btn.innerHTML = isClosing ? `${translations[lang].close_games} <i class="fa-solid fa-chevron-up"></i>` : `${translations[lang].more_games} <i class="fa-solid fa-chevron-down"></i>`;
+        });
+
+        // Translate Table Dates and Teams
+        const rows = document.querySelectorAll('#games-table-body tr:not(#past-games-toggle-row)');
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 7) {
+                // Translate Date
+                const dateCell = cells[1];
+                if (dateCell) {
+                    if (!dateCell.hasAttribute('data-date-he')) {
+                        dateCell.setAttribute('data-date-he', dateCell.innerText.trim());
+                    }
+                    const heDate = dateCell.getAttribute('data-date-he');
+                    if (lang === 'en') {
+                        let enDate = heDate;
+                        Object.keys(dayTranslations).forEach(day => { enDate = enDate.replace(day, dayTranslations[day]); });
+                        dateCell.innerText = enDate;
+                    } else {
+                        dateCell.innerText = heDate;
+                    }
+                }
+
+                // Translate Teams
+                [3, 6].forEach(idx => {
+                    const cell = cells[idx];
+                    if (!cell) return;
+                    if (!cell.hasAttribute('data-team-he')) {
+                        cell.setAttribute('data-team-he', cell.innerText.trim());
+                    }
+                    const heName = cell.getAttribute('data-team-he');
+                    if (lang === 'en' && teamTranslations[heName]) {
+                        cell.innerText = teamTranslations[heName];
+                    } else {
+                        cell.innerText = heName;
+                    }
+                });
+            }
+        });
+
+        render(); // Update JS-generated Bracket titles
+    }
+
     function togglePastGames() {
         const main_past_games = document.querySelectorAll('.past-game');
         const btn = document.getElementById('past-games-toggle-btn');
@@ -664,7 +839,7 @@
 
         if (is_hidden) { // Show main rows
             main_past_games.forEach(row => row.style.display = 'table-row');
-            btn.innerHTML = 'הסתר משחקים קודמים';
+            btn.innerHTML = translations[currentLang].hide_past;
         } else { // Hide all past-related rows
             main_past_games.forEach(row => row.style.display = 'none');
             document.querySelectorAll('.past-game-details').forEach(row => {
@@ -673,9 +848,9 @@
             });
             // Reset all 'more' buttons inside the hidden past games
             document.querySelectorAll('.past-game .details-toggle').forEach(toggleBtn => {
-                toggleBtn.innerHTML = 'עוד משחקים <i class="fa-solid fa-chevron-down"></i>';
+                toggleBtn.innerHTML = `${translations[currentLang].more_games} <i class="fa-solid fa-chevron-down"></i>`;
             });
-            btn.innerHTML = 'הצג משחקים קודמים';
+            btn.innerHTML = translations[currentLang].show_past;
         }
     }
 
@@ -702,7 +877,7 @@
 
         const btn = document.querySelector(`button[onclick="toggleDetails('${id}')"]`);
         if (btn) {
-            btn.innerHTML = isOpening ? 'סגור משחקים <i class="fa-solid fa-chevron-up"></i>' : 'עוד משחקים <i class="fa-solid fa-chevron-down"></i>';
+            btn.innerHTML = isOpening ? `${translations[currentLang].close_games} <i class="fa-solid fa-chevron-up"></i>` : `${translations[currentLang].more_games} <i class="fa-solid fa-chevron-down"></i>`;
         }
     }
 
@@ -742,22 +917,31 @@
         const draw = (data, id, limit, label) => {
             let h = "";
             data.forEach(m => {
+                let t1Name = currentLang === 'en' && teamTranslations[m.t1] ? teamTranslations[m.t1] : m.t1;
+                let t2Name = currentLang === 'en' && teamTranslations[m.t2] ? teamTranslations[m.t2] : m.t2;
+                
+                if (currentLang === 'en') {
+                    if (t1Name.startsWith('מנצחת סדרה')) t1Name = t1Name.replace('מנצחת סדרה', 'Winner Series');
+                    if (t2Name.startsWith('מנצחת סדרה')) t2Name = t2Name.replace('מנצחת סדרה', 'Winner Series');
+                    if (t1Name.startsWith('מנצחת חצי גמר')) t1Name = t1Name.replace('מנצחת חצי גמר', 'Winner Semi Final');
+                    if (t2Name.startsWith('מנצחת חצי גמר')) t2Name = t2Name.replace('מנצחת חצי גמר', 'Winner Semi Final');
+                }
+
                 h += `<div class="matchup-slot"><div class="series-label">${label} ${m.id}</div><div class="matchup">
                     <div class="team-slot ${m.t1.includes('רחובות')?'rehovot-highlight':''}">
-                        <span class="seed-badge">${m.seed1}</span><span class="team-name">${m.t1}</span><span class="series-score ${m.s1>=limit?'winner-highlight':''}">${m.s1}</span>
+                        <span class="seed-badge">${m.seed1}</span><span class="team-name">${t1Name}</span><span class="series-score ${m.s1>=limit?'winner-highlight':''}">${m.s1}</span>
                     </div>
                     <div class="team-slot ${m.t2.includes('רחובות')?'rehovot-highlight':''}">
-                        <span class="seed-badge">${m.seed2}</span><span class="team-name">${m.t2}</span><span class="series-score ${m.s2>=limit?'winner-highlight':''}">${m.s2}</span>
+                        <span class="seed-badge">${m.seed2}</span><span class="team-name">${t2Name}</span><span class="series-score ${m.s2>=limit?'winner-highlight':''}">${m.s2}</span>
                     </div>
                 </div></div>`;
             });
             document.getElementById(id).innerHTML = h;
         };
-        draw(bracketData.qf, 'qf-col', 2, 'סדרה');
-        draw(bracketData.sf, 'sf-col', 3, 'סדרה');
-        draw(bracketData.final, 'final-col', 3, 'סדרה');
+        draw(bracketData.qf, 'qf-col', 2, translations[currentLang].series);
+        draw(bracketData.sf, 'sf-col', 3, translations[currentLang].series);
+        draw(bracketData.final, 'final-col', 3, translations[currentLang].series);
     }
-    render();
 
     const countDownDate = new Date("Mar 27, 2026 13:00:00").getTime();
     setInterval(function() {
@@ -767,7 +951,7 @@
         const hours = Math.floor((d % 86400000) / 3600000);
         const mins = Math.floor((d % 3600000) / 60000);
         const secs = Math.floor((d % 60000) / 1000);
-        document.getElementById("timer").innerHTML = days + " ימים | " + hours + ":" + (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
+        document.getElementById("timer").innerHTML = days + translations[currentLang].timer_days + hours + ":" + (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
     }, 1000);
 
 
@@ -802,6 +986,12 @@
         setTheme(theme);
     });
 
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+        setLanguage(currentLang === 'en' ? 'he' : 'en');
+    });
+
+    // Init lang logic on page load
+    setLanguage(currentLang);
 </script>
 </body>
 </html>

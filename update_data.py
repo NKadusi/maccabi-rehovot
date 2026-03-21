@@ -49,51 +49,34 @@ def get_gemini_model():
     return None
 
 def update_insights(model):
-    """
-    מפיק תובנות סטטיסטיות או מציג טבלת דירוג כגיבוי.
-    מחזיר HTML עם התוכן המעודכן, או None במקרה של כשל מוחלט.
-    """
-    standings_text = ""
-    standings_df = None
+    """מפיק תובנות סטטיסטיות על הקבוצה ומחזיר אותן כ-HTML."""
+    if not model:
+        return None
     
+    standings_text = ""
+    # משיכת טבלת הדירוג הרשמית מאתר איגוד הכדורסל 
+    # עקיפת זיכרון מטמון (Cache) כדי לקבל נתונים טריים כמו באקסל
     try:
         timestamp = int(datetime.datetime.now().timestamp())
         url = f"https://ibasketball.co.il/league/2025-2/?nocache={timestamp}"
         headers = {'User-Agent': 'Mozilla/5.0'}
-        r = requests.get(url, headers=headers, timeout=15)
-        r.raise_for_status()
-        
-        tables = pd.read_html(io.BytesIO(r.content))
-        for df in tables:
-            # Clean column names
-            cleaned_columns = [re.sub(r"['\"`׳’´]", "", str(col)).strip() for col in df.columns]
-            df.columns = cleaned_columns
-
-            # Check for essential columns after cleaning
-            if 'קבוצה' in df.columns and ('נצ' in df.columns or 'נק' in df.columns):
-                standings_df = df
-                standings_text = df.to_string(index=False)
-                logging.info("Successfully fetched and parsed league standings.")
-                break
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code == 200:
+            tables = pd.read_html(io.BytesIO(r.content))
+            for df in tables:
+                text_rep = df.to_string()
+                if 'קבוצה' in text_rep and ('ניצ' in text_rep or 'נק' in text_rep):
+                    standings_text = df.to_string(index=False)
+                    break
     except Exception as e:
-        logging.error(f"Failed to fetch or parse standings from association site: {e}")
-        return None # כשל קריטי, אין נתונים להציג
+        logging.warning(f"Failed to fetch standings from association site: {e}")
 
-    # אם לא נמצאה טבלת דירוג, החזר None
-    if standings_df is None or not standings_text:
-        logging.error("No valid standings data found on the page.")
-        return None
-
-    # הכנת HTML חלופי של הטבלה למקרה שה-API ייכשל
-    fallback_html = "<p><strong>טבלת הליגה העדכנית:</strong></p>" + standings_df.to_html(index=False, classes='table table-striped', border=0)
-    
-    # נסיון לקבל תובנות מה-API של Gemini
-    if not model:
-        logging.warning("Gemini model not available. Returning fallback standings table.")
-        return fallback_html
+    if not standings_text:
+        logging.error("No standings data found.")
+        return None # מחזיר None כדי לא לדרוס את הקיים במקרה של שגיאה
 
     try:
-        prompt = f"""
+        prompt_he = f"""
         אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים ומעודכנים מהטבלה הרשמית של איגוד הכדורסל בישראל:
         {standings_text}
 
@@ -103,23 +86,35 @@ def update_insights(model):
         חובה להשתמש בתגיות HTML של <p> ו-<strong> בלבד.
         אל תוסיף כותרות, טקסט הקדמה או פורמט Markdown. החזר אך ורק את הפסקאות.
         """
-        response = model.generate_content(prompt, request_options={'timeout': 45})
-        new_insights = response.text.strip()
-        
-        # ניקוי תגיות Markdown אפשריות
-        new_insights = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights, flags=re.IGNORECASE)
-        new_insights = re.sub(r'\s*```$', '', new_insights).strip()
 
-        # בדיקה אם התשובה מה-API מכילה תוכן ממשי
-        if len(new_insights) < 50:
-             logging.warning("Gemini response was too short, likely an error. Returning fallback.")
-             return fallback_html
+        prompt_en = f"""
+        You are a statistical basketball commentator. Below is raw, updated data from the official Israeli Basketball Association standings:
+        {standings_text}
 
-        logging.info("Successfully generated AI insights.")
+        Write 3 short, professional paragraphs of statistical conclusions regarding the status of the team 'Maccabi Rehovot' (or Maccabi Barak Rehovot).
+        Address the battle for 1st place, home-court advantage (places 1-4), and the threats from teams ranked below them approaching the playoffs.
+        Do not guess; base your conclusions solely on the math and records shown in the text.
+        You must use ONLY <p> and <strong> HTML tags.
+        Do not add headers, introductory text, or Markdown formatting. Return strictly the paragraphs.
+        """
+
+        response_he = model.generate_content(prompt_he)
+        new_insights_he = response_he.text.strip()
+        new_insights_he = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights_he, flags=re.IGNORECASE)
+        new_insights_he = re.sub(r'\s*```$', '', new_insights_he).strip()
+        new_insights_he = re.sub(r'<p>', '<p class="lang-he">', new_insights_he, flags=re.IGNORECASE)
+
+        response_en = model.generate_content(prompt_en)
+        new_insights_en = response_en.text.strip()
+        new_insights_en = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights_en, flags=re.IGNORECASE)
+        new_insights_en = re.sub(r'\s*```$', '', new_insights_en).strip()
+        new_insights_en = re.sub(r'<p>', '<p class="lang-en">', new_insights_en, flags=re.IGNORECASE)
+
+        new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
     except Exception as e:
-        logging.error(f"Error generating insights with Gemini: {e}. Returning fallback standings table.")
-        return fallback_html
+        logging.error(f"Error generating insights: {e}")
+        return None
 
 
 def update_games(excel_url):
@@ -228,8 +223,7 @@ def update_games(excel_url):
 
         date_str = main_game['date_obj'].strftime('%d.%m.%Y')
         day_he = HEBREW_WEEKDAYS.get(main_game['date_obj'].strftime('%A'), "")
-        date_part = f"{day_he}, {date_str}"
-        time_part = main_game['time']
+        date_display = f"{day_he}, {date_str}"
 
         home_hi = 'rehovot-highlight' if 'רחובות' in main_game['home'] else ''
         away_hi = 'rehovot-highlight' if 'רחובות' in main_game['away'] else ''
@@ -246,7 +240,7 @@ def update_games(excel_url):
         cal_btn = f'<button onclick="addToCalendar(\'{main_home_esc} נגד {main_away_esc}\', \'{main_date_cal}\', \'{main_game["time"]}\', \'{main_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button>'
         
         current_game_html = f'''<tr class="{row_class}">
-            <td>{main_game['mahzor']}</td><td>{date_part}</td><td>{time_part}</td><td class="{home_hi}">{main_game['home']}</td>
+            <td>{main_game['mahzor']}</td><td>{date_display}</td><td>{main_game['time']}</td><td class="{home_hi}">{main_game['home']}</td>
             <td class="game-result">{main_game["home_score"]}</td><td class="game-result">{main_game["away_score"]}</td>
             <td class="{away_hi}">{main_game['away']}</td><td class="action-col">{waze_btn}</td>
             <td class="action-col">{cal_btn}</td><td class="action-col">{toggle_btn}</td></tr>'''
@@ -254,8 +248,7 @@ def update_games(excel_url):
         for game in top_games:
             date_cal_top = game['date_obj'].strftime('%Y.%m.%d')
             day_he_top = HEBREW_WEEKDAYS.get(game['date_obj'].strftime('%A'), "")
-            date_part_top = f"{day_he_top}, {game['date_obj'].strftime('%d.%m.%Y')}"
-            time_part_top = game['time']
+            date_display_top = f"{day_he_top}, {game['date_obj'].strftime('%d.%m.%Y')}"
             
             game_arena_safe = urllib.parse.quote_plus(game['arena'])
             waze_link_top = f"https://waze.com/ul?q={game_arena_safe}&navigate=yes"
@@ -264,8 +257,9 @@ def update_games(excel_url):
             waze_btn_top = f'<a href="{waze_link_top}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a>'
             cal_btn_top = f'<button onclick="addToCalendar(\'{game_home_esc} נגד {game_away_esc}\', \'{date_cal_top}\', \'{game["time"]}\', \'{game_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button>'
             
+            # Add the mahzor-specific class `d{mahzor}` for toggleDetails
             current_game_html += f'''<tr class="{details_row_class} d{game['mahzor']}">
-                <td>{game['mahzor']}</td><td>{date_part_top}</td><td>{time_part_top}</td><td>{game['home']}</td>
+                <td>{game['mahzor']}</td><td>{date_display_top}</td><td>{game['time']}</td><td>{game['home']}</td>
                 <td class="game-result">{game["home_score"]}</td><td class="game-result">{game["away_score"]}</td>
                 <td>{game['away']}</td><td class="action-col">{waze_btn_top}</td>
                 <td class="action-col">{cal_btn_top}</td><td class="action-col"></td></tr>'''
