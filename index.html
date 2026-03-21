@@ -176,7 +176,9 @@
 
         /* General Styles & Fixes */
         .logo-container { margin-bottom: 15px; text-align: center; }
-        .countdown-box { padding: 15px 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; width: 100%; max-width: 1050px; box-sizing: border-box; }
+        .countdown-box { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; width: 100%; max-width: 1050px; box-sizing: border-box; }
+        .next-game-label { font-size: 1.8em; font-weight: bold; color: var(--text-light); }
+        .dark-mode .next-game-label { color: var(--dark-text-primary); }
         .timer-display { font-size: 1.8em; font-weight: bold; color: #007bff; }
         .insights-box { padding: 20px 30px; border-radius: 15px; margin-bottom: 30px; width: 100%; max-width: 1050px; box-sizing: border-box; }
         .insights-header { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
@@ -247,6 +249,8 @@
                 padding: 15px;
                 margin-bottom: 20px;
             }
+            .countdown-box { flex-direction: column; gap: 5px; }
+            .next-game-label, .timer-display { font-size: 1.4em; }
             th, td { font-size: 0.85rem; padding: 8px 5px; }
             .btn { padding: 5px 8px; font-size: 0.8rem; }
             .waze-btn i { font-size: 1rem; }
@@ -269,6 +273,7 @@
 </div>
 
 <div class="countdown-box">
+    <div class="next-game-label" data-i18n="next_game">המשחק הבא:</div>
     <div class="timer-display" id="timer" data-i18n="timer_loading">טוען שעון...</div>
 </div>
 
@@ -677,6 +682,7 @@
     const translations = {
         he: {
             title: "פורטל משחקים - מכבי רחובות 25/26",
+            next_game: "המשחק הבא:",
             schedule_title: "לוח משחקים - עונת 25/26",
             th_round: "מחזור",
             th_date: "תאריך",
@@ -705,6 +711,7 @@
         },
         en: {
             title: "Games Portal - Maccabi Rehovot",
+            next_game: "Next Game:",
             schedule_title: "Game Schedule - 25/26 Season",
             th_round: "Round",
             th_date: "Date",
