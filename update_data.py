@@ -228,7 +228,8 @@ def update_games(excel_url):
 
         date_str = main_game['date_obj'].strftime('%d.%m.%Y')
         day_he = HEBREW_WEEKDAYS.get(main_game['date_obj'].strftime('%A'), "")
-        date_display = f"{day_he}, {date_str} - {main_game['time']}"
+        date_part = f"{day_he}, {date_str}"
+        time_part = main_game['time']
 
         home_hi = 'rehovot-highlight' if 'רחובות' in main_game['home'] else ''
         away_hi = 'rehovot-highlight' if 'רחובות' in main_game['away'] else ''
@@ -245,7 +246,7 @@ def update_games(excel_url):
         cal_btn = f'<button onclick="addToCalendar(\'{main_home_esc} נגד {main_away_esc}\', \'{main_date_cal}\', \'{main_game["time"]}\', \'{main_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button>'
         
         current_game_html = f'''<tr class="{row_class}">
-            <td>{main_game['mahzor']}</td><td>{date_display}</td><td class="{home_hi}">{main_game['home']}</td>
+            <td>{main_game['mahzor']}</td><td>{date_part}</td><td>{time_part}</td><td class="{home_hi}">{main_game['home']}</td>
             <td class="game-result">{main_game["home_score"]}</td><td class="game-result">{main_game["away_score"]}</td>
             <td class="{away_hi}">{main_game['away']}</td><td class="action-col">{waze_btn}</td>
             <td class="action-col">{cal_btn}</td><td class="action-col">{toggle_btn}</td></tr>'''
@@ -253,7 +254,8 @@ def update_games(excel_url):
         for game in top_games:
             date_cal_top = game['date_obj'].strftime('%Y.%m.%d')
             day_he_top = HEBREW_WEEKDAYS.get(game['date_obj'].strftime('%A'), "")
-            date_display_top = f"{day_he_top}, {game['date_obj'].strftime('%d.%m.%Y')} - {game['time']}"
+            date_part_top = f"{day_he_top}, {game['date_obj'].strftime('%d.%m.%Y')}"
+            time_part_top = game['time']
             
             game_arena_safe = urllib.parse.quote_plus(game['arena'])
             waze_link_top = f"https://waze.com/ul?q={game_arena_safe}&navigate=yes"
@@ -262,9 +264,8 @@ def update_games(excel_url):
             waze_btn_top = f'<a href="{waze_link_top}" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a>'
             cal_btn_top = f'<button onclick="addToCalendar(\'{game_home_esc} נגד {game_away_esc}\', \'{date_cal_top}\', \'{game["time"]}\', \'{game_arena_esc}\')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button>'
             
-            # Add the mahzor-specific class `d{mahzor}` for toggleDetails
             current_game_html += f'''<tr class="{details_row_class} d{game['mahzor']}">
-                <td>{game['mahzor']}</td><td>{date_display_top}</td><td>{game['home']}</td>
+                <td>{game['mahzor']}</td><td>{date_part_top}</td><td>{time_part_top}</td><td>{game['home']}</td>
                 <td class="game-result">{game["home_score"]}</td><td class="game-result">{game["away_score"]}</td>
                 <td>{game['away']}</td><td class="action-col">{waze_btn_top}</td>
                 <td class="action-col">{cal_btn_top}</td><td class="action-col"></td></tr>'''
@@ -277,7 +278,7 @@ def update_games(excel_url):
     final_html = future_html
     if past_html:
         toggle_row = f'''<tr class="game-row" id="past-games-toggle-row">
-            <td colspan="9" style="text-align: center; cursor: pointer;" onclick="togglePastGames()">
+            <td colspan="10" style="text-align: center; cursor: pointer;" onclick="togglePastGames()">
                 <button id="past-games-toggle-btn" class="details-toggle">הצג משחקים קודמים</button>
             </td>
         </tr>'''

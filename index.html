@@ -210,7 +210,12 @@
 
         .widgets-wrapper { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; max-width: 1050px; margin-bottom: 30px; }
         .widget-box { padding: 20px; border-radius: 20px; flex: 1; min-width: 300px; box-sizing: border-box; }
-        .action-col { text-align: center; vertical-align: middle; width: 1%; }
+        .action-col {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 1%;
+        }
         .past-game, .past-game-details { display: none; }
 
         /* --- Mobile Responsiveness --- */
@@ -252,346 +257,346 @@
     <h1>לוח משחקים - עונת 25/26</h1>
     <div class="table-responsive">
         <table>
-            <thead><tr><th>מחזור</th><th>תאריך וזמן</th><th>מארחת</th><th>ניקוד בית</th><th>ניקוד חוץ</th><th>אורחת</th><th class="action-col">ניווט</th><th class="action-col">יומן</th><th class="action-col">משחקים נוספים</th></tr></thead>
+            <thead><tr><th>מחזור</th><th>תאריך</th><th>שעת משחק</th><th>מארחת</th><th>ניקוד בית</th><th>ניקוד חוץ</th><th>אורחת</th><th class="action-col">ניווט</th><th class="action-col">יומן</th><th class="action-col">משחקים נוספים</th></tr></thead>
             <tbody id="games-table-body">
 <tr class="game-row" id="past-games-toggle-row">
-            <td colspan="9" style="text-align: center; cursor: pointer;" onclick="togglePastGames()">
+            <td colspan="10" style="text-align: center; cursor: pointer;" onclick="togglePastGames()">
                 <button id="past-games-toggle-btn" class="details-toggle">הצג משחקים קודמים</button>
             </td>
         </tr><tr class="game-row past-game">
-            <td>11</td><td>רביעי, 15.10.2025 - 18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>11</td><td>רביעי, 15.10.2025</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">77</td><td class="game-result">86</td>
             <td class="">אליצור שומרון</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד אליצור שומרון', '2025.10.15', '18:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d11')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d11">
-                <td>11</td><td>רביעי, 10.12.2025 - 19:30</td><td>מ.ס צפת</td>
+                <td>11</td><td>רביעי, 10.12.2025</td><td>19:30</td><td>מ.ס צפת</td>
                 <td class="game-result">89</td><td class="game-result">105</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%94%D7%A4%D7%99%D7%A1%2C+%D7%A8%D7%97%27+%D7%96%27%D7%91%D7%95%D7%98%D7%99%D7%A0%D7%A1%D7%A7%D7%99+1%2C+%D7%A6%D7%A4%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מ.ס צפת נגד הפועל חיפה נווה שאנן שובל', '2025.12.10', '19:30', 'אולם הפיס, רח\' ז\'בוטינסקי 1, צפת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d11">
-                <td>11</td><td>שישי, 12.12.2025 - 13:00</td><td>עירוני נהריה</td>
+                <td>11</td><td>שישי, 12.12.2025</td><td>13:00</td><td>עירוני נהריה</td>
                 <td class="game-result">95</td><td class="game-result">89</td>
                 <td>מכבי גיא נתן חיפה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד מכבי גיא נתן חיפה', '2025.12.12', '13:00', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>3</td><td>שלישי, 21.10.2025 - 19:00</td><td class="">אליצור יבנה</td>
+            <td>3</td><td>שלישי, 21.10.2025</td><td>19:00</td><td class="">אליצור יבנה</td>
             <td class="game-result">86</td><td class="game-result">89</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%22%D7%A9+%D7%A8%D7%9C%D7%A3+%D7%A7%D7%9C%D7%99%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%95%D7%92%D7%99%D7%AA+22%2C+%D7%99%D7%91%D7%A0%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('אליצור יבנה נגד מכבי רחובות', '2025.10.21', '19:00', 'היכל הספורט ע&quot;ש רלף קליין, רח\' הדוגית 22, יבנה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d3')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d3">
-                <td>3</td><td>שישי, 24.10.2025 - 13:45</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>3</td><td>שישי, 24.10.2025</td><td>13:45</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">77</td><td class="game-result">82</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד עירוני נהריה', '2025.10.24', '13:45', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>4</td><td>שלישי, 28.10.2025 - 18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>4</td><td>שלישי, 28.10.2025</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">92</td><td class="game-result">77</td>
             <td class="">מכבי רוטשטיין אשדוד</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד מכבי רוטשטיין אשדוד', '2025.10.28', '18:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d4')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d4">
-                <td>4</td><td>שלישי, 28.10.2025 - 19:00</td><td>עירוני נהריה</td>
+                <td>4</td><td>שלישי, 28.10.2025</td><td>19:00</td><td>עירוני נהריה</td>
                 <td class="game-result">98</td><td class="game-result">78</td>
                 <td>מכבי מעלה אדומים</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד מכבי מעלה אדומים', '2025.10.28', '19:00', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d4">
-                <td>4</td><td>שלישי, 28.10.2025 - 19:30</td><td>מ.כ עוטף דרום</td>
+                <td>4</td><td>שלישי, 28.10.2025</td><td>19:30</td><td>מ.כ עוטף דרום</td>
                 <td class="game-result">76</td><td class="game-result">84</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%9E%D7%95%D7%A2%D7%A6%D7%94+%D7%90%D7%96%D7%95%D7%A8%D7%99%D7%AA+%D7%90%D7%A9%D7%9B%D7%95%D7%9C%2C+%D7%A7%D7%99%D7%91%D7%95%D7%A5+%D7%9E%D7%92%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מ.כ עוטף דרום נגד הפועל חיפה נווה שאנן שובל', '2025.10.28', '19:30', 'מועצה אזורית אשכול, קיבוץ מגן')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>5</td><td>שלישי, 04.11.2025 - 18:30</td><td class="">הפועל מגדל העמק-יזרעאל</td>
+            <td>5</td><td>שלישי, 04.11.2025</td><td>18:30</td><td class="">הפועל מגדל העמק-יזרעאל</td>
             <td class="game-result">90</td><td class="game-result">88</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%91%D7%99%D7%94%22%D7%A1+%D7%99%D7%A2%D7%A8%D7%AA+%D7%94%D7%A2%D7%9E%D7%A7%2C+%D7%9E%D7%92%D7%93%D7%9C+%D7%94%D7%A2%D7%9E%D7%A7&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('הפועל מגדל העמק-יזרעאל נגד מכבי רחובות', '2025.11.04', '18:30', 'ביה&quot;ס יערת העמק, מגדל העמק')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d5')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d5">
-                <td>5</td><td>רביעי, 05.11.2025 - 19:00</td><td>הפועל אסטרל אילת</td>
+                <td>5</td><td>רביעי, 05.11.2025</td><td>19:00</td><td>הפועל אסטרל אילת</td>
                 <td class="game-result">78</td><td class="game-result">84</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%92%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98%D7%90%D7%99%D7%9D+1%2C+%D7%90%D7%99%D7%9C%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל אסטרל אילת נגד עירוני נהריה', '2025.11.05', '19:00', 'אולם בגין, רח\' הספורטאים 1, אילת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d5">
-                <td>5</td><td>שישי, 07.11.2025 - 12:45</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>5</td><td>שישי, 07.11.2025</td><td>12:45</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">77</td><td class="game-result">93</td>
                 <td>א.ס רמה&quot;ש ירק השדה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד א.ס רמה&quot;ש ירק השדה', '2025.11.07', '12:45', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>6</td><td>שלישי, 11.11.2025 - 18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>6</td><td>שלישי, 11.11.2025</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">101</td><td class="game-result">70</td>
             <td class="">מ.ס צפת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד מ.ס צפת', '2025.11.11', '18:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d6')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d6">
-                <td>6</td><td>שלישי, 11.11.2025 - 18:45</td><td>עירוני נהריה</td>
+                <td>6</td><td>שלישי, 11.11.2025</td><td>18:45</td><td>עירוני נהריה</td>
                 <td class="game-result">84</td><td class="game-result">98</td>
                 <td>אליצור יבנה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד אליצור יבנה', '2025.11.11', '18:45', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d6">
-                <td>6</td><td>שלישי, 11.11.2025 - 19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>6</td><td>שלישי, 11.11.2025</td><td>19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">83</td><td class="game-result">93</td>
                 <td>מכבי מעלה אדומים</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד מכבי מעלה אדומים', '2025.11.11', '19:00', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>7</td><td>שלישי, 18.11.2025 - 18:30</td><td class="">א.ס. עירוני אשקלון</td>
+            <td>7</td><td>שלישי, 18.11.2025</td><td>18:30</td><td class="">א.ס. עירוני אשקלון</td>
             <td class="game-result">75</td><td class="game-result">82</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A9%D7%93%27+%D7%91%D7%9F+%D7%92%D7%95%D7%A8%D7%99%D7%95%D7%9F+37%2C+%D7%90%D7%A9%D7%A7%D7%9C%D7%95%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('א.ס. עירוני אשקלון נגד מכבי רחובות', '2025.11.18', '18:30', 'שד\' בן גוריון 37, אשקלון')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d7')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d7">
-                <td>7</td><td>שלישי, 18.11.2025 - 18:30</td><td>הפועל אסטרל אילת</td>
+                <td>7</td><td>שלישי, 18.11.2025</td><td>18:30</td><td>הפועל אסטרל אילת</td>
                 <td class="game-result">87</td><td class="game-result">91</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%92%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98%D7%90%D7%99%D7%9D+1%2C+%D7%90%D7%99%D7%9C%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל אסטרל אילת נגד הפועל חיפה נווה שאנן שובל', '2025.11.18', '18:30', 'אולם בגין, רח\' הספורטאים 1, אילת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d7">
-                <td>7</td><td>שלישי, 18.11.2025 - 19:00</td><td>מכבי רוטשטיין אשדוד</td>
+                <td>7</td><td>שלישי, 18.11.2025</td><td>19:00</td><td>מכבי רוטשטיין אשדוד</td>
                 <td class="game-result">91</td><td class="game-result">81</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%9E%D7%A7%D7%99%D7%A3+%D7%96%27%2C+%D7%A8%D7%95%D7%91%D7%A2+%D7%A1%D7%99%D7%98%D7%99%2C+%D7%A8%D7%97%27+%D7%94%D7%A2%D7%A6%D7%9E%D7%90%D7%95%D7%AA+62%2C+%D7%90%D7%A9%D7%93%D7%95%D7%93&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מכבי רוטשטיין אשדוד נגד עירוני נהריה', '2025.11.18', '19:00', 'מקיף ז\', רובע סיטי, רח\' העצמאות 62, אשדוד')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>1</td><td>שישי, 21.11.2025 - 12:45</td><td class="">מכבי מעלה אדומים</td>
+            <td>1</td><td>שישי, 21.11.2025</td><td>12:45</td><td class="">מכבי מעלה אדומים</td>
             <td class="game-result">61</td><td class="game-result">80</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A8%D7%97%27+%D7%93%D7%A8%D7%9A+%D7%94%D7%92%D7%99%D7%90+5%2C+%D7%9E%D7%A2%D7%9C%D7%94+%D7%90%D7%93%D7%95%D7%9E%D7%99%D7%9D&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי מעלה אדומים נגד מכבי רחובות', '2025.11.21', '12:45', 'רח\' דרך הגיא 5, מעלה אדומים')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d1')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d1">
-                <td>1</td><td>רביעי, 08.10.2025 - 19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>1</td><td>רביעי, 08.10.2025</td><td>19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">74</td><td class="game-result">79</td>
                 <td>אליצור שומרון</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד אליצור שומרון', '2025.10.08', '19:00', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d1">
-                <td>1</td><td>שישי, 31.10.2025 - 12:30</td><td>עירוני נהריה</td>
+                <td>1</td><td>שישי, 31.10.2025</td><td>12:30</td><td>עירוני נהריה</td>
                 <td class="game-result">86</td><td class="game-result">78</td>
                 <td>א.ס רמה&quot;ש ירק השדה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד א.ס רמה&quot;ש ירק השדה', '2025.10.31', '12:30', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>8</td><td>רביעי, 26.11.2025 - 19:00</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>8</td><td>רביעי, 26.11.2025</td><td>19:00</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">74</td><td class="game-result">95</td>
             <td class="">מכבי גיא נתן חיפה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד מכבי גיא נתן חיפה', '2025.11.26', '19:00', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d8')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d8">
-                <td>8</td><td>שני, 24.11.2025 - 20:45</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>8</td><td>שני, 24.11.2025</td><td>20:45</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">103</td><td class="game-result">104</td>
                 <td>אליצור יבנה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד אליצור יבנה', '2025.11.24', '20:45', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d8">
-                <td>8</td><td>שלישי, 25.11.2025 - 19:15</td><td>עירוני נהריה</td>
+                <td>8</td><td>שלישי, 25.11.2025</td><td>19:15</td><td>עירוני נהריה</td>
                 <td class="game-result">88</td><td class="game-result">101</td>
                 <td>הפועל מגדל העמק-יזרעאל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד הפועל מגדל העמק-יזרעאל', '2025.11.25', '19:15', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>9</td><td>שלישי, 02.12.2025 - 19:30</td><td class="">מכבי מנדל פ&quot;ת</td>
+            <td>9</td><td>שלישי, 02.12.2025</td><td>19:30</td><td class="">מכבי מנדל פ&quot;ת</td>
             <td class="game-result">97</td><td class="game-result">60</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%A8%D7%95%D7%96%D7%9E%D7%A8%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%91%D7%9F+%D7%92%D7%95%D7%A8%D7%99%D7%95%D7%9F+37%2C+%D7%A4%D7%AA%D7%97+%D7%AA%D7%A7%D7%95%D7%95%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי מנדל פ&quot;ת נגד מכבי רחובות', '2025.12.02', '19:30', 'אולם רוזמרין, רח\' בן גוריון 37, פתח תקווה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d9')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d9">
-                <td>9</td><td>שלישי, 02.12.2025 - 19:15</td><td>מכבי רוטשטיין אשדוד</td>
+                <td>9</td><td>שלישי, 02.12.2025</td><td>19:15</td><td>מכבי רוטשטיין אשדוד</td>
                 <td class="game-result">96</td><td class="game-result">76</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%9E%D7%A7%D7%99%D7%A3+%D7%96%27%2C+%D7%A8%D7%95%D7%91%D7%A2+%D7%A1%D7%99%D7%98%D7%99%2C+%D7%A8%D7%97%27+%D7%94%D7%A2%D7%A6%D7%9E%D7%90%D7%95%D7%AA+62%2C+%D7%90%D7%A9%D7%93%D7%95%D7%93&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מכבי רוטשטיין אשדוד נגד הפועל חיפה נווה שאנן שובל', '2025.12.02', '19:15', 'מקיף ז\', רובע סיטי, רח\' העצמאות 62, אשדוד')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d9">
-                <td>9</td><td>שלישי, 02.12.2025 - 19:30</td><td>מ.ס צפת</td>
+                <td>9</td><td>שלישי, 02.12.2025</td><td>19:30</td><td>מ.ס צפת</td>
                 <td class="game-result">89</td><td class="game-result">74</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%94%D7%A4%D7%99%D7%A1%2C+%D7%A8%D7%97%27+%D7%96%27%D7%91%D7%95%D7%98%D7%99%D7%A0%D7%A1%D7%A7%D7%99+1%2C+%D7%A6%D7%A4%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מ.ס צפת נגד עירוני נהריה', '2025.12.02', '19:30', 'אולם הפיס, רח\' ז\'בוטינסקי 1, צפת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>10</td><td>שבת, 06.12.2025 - 20:00</td><td class="">א.ס רמה&quot;ש ירק השדה</td>
+            <td>10</td><td>שבת, 06.12.2025</td><td>20:00</td><td class="">א.ס רמה&quot;ש ירק השדה</td>
             <td class="game-result">92</td><td class="game-result">102</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A7%D7%A8%D7%99%D7%AA+%D7%99%D7%A2%D7%A8%D7%99%D7%9D%2C+%D7%A8%D7%97%27+%D7%99%D7%A6%D7%97%D7%A7+%D7%90%D7%9C%D7%97%D7%A0%D7%9F+13%2C+%D7%A8%D7%9E%D7%AA+%D7%94%D7%A9%D7%A8%D7%95%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('א.ס רמה&quot;ש ירק השדה נגד מכבי רחובות', '2025.12.06', '20:00', 'קרית יערים, רח\' יצחק אלחנן 13, רמת השרון')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d10')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d10">
-                <td>10</td><td>שישי, 28.11.2025 - 12:30</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>10</td><td>שישי, 28.11.2025</td><td>12:30</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">80</td><td class="game-result">88</td>
                 <td>הפועל מגדל העמק-יזרעאל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד הפועל מגדל העמק-יזרעאל', '2025.11.28', '12:30', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d10">
-                <td>10</td><td>ראשון, 07.12.2025 - 19:00</td><td>עירוני נהריה</td>
+                <td>10</td><td>ראשון, 07.12.2025</td><td>19:00</td><td>עירוני נהריה</td>
                 <td class="game-result">65</td><td class="game-result">85</td>
                 <td>א.ס. עירוני אשקלון</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד א.ס. עירוני אשקלון', '2025.12.07', '19:00', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>12</td><td>שלישי, 16.12.2025 - 19:15</td><td class="">א.ס. אשקלון-קרית גת</td>
+            <td>12</td><td>שלישי, 16.12.2025</td><td>19:15</td><td class="">א.ס. אשקלון-קרית גת</td>
             <td class="game-result">101</td><td class="game-result">85</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A8%D7%97%27+%D7%90%D7%91%D7%A0%D7%99+%D7%94%D7%97%D7%95%D7%A9%D7%9F%2C+%D7%A7%D7%A8%D7%99%D7%AA+%D7%92%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('א.ס. אשקלון-קרית גת נגד מכבי רחובות', '2025.12.16', '19:15', 'רח\' אבני החושן, קרית גת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d12')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d12">
-                <td>12</td><td>שלישי, 16.12.2025 - 19:15</td><td>א.ס. עירוני אשקלון</td>
+                <td>12</td><td>שלישי, 16.12.2025</td><td>19:15</td><td>א.ס. עירוני אשקלון</td>
                 <td class="game-result">94</td><td class="game-result">82</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A9%D7%93%27+%D7%91%D7%9F+%D7%92%D7%95%D7%A8%D7%99%D7%95%D7%9F+37%2C+%D7%90%D7%A9%D7%A7%D7%9C%D7%95%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('א.ס. עירוני אשקלון נגד הפועל חיפה נווה שאנן שובל', '2025.12.16', '19:15', 'שד\' בן גוריון 37, אשקלון')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d12">
-                <td>12</td><td>שלישי, 16.12.2025 - 19:30</td><td>מכבי מנדל פ&quot;ת</td>
+                <td>12</td><td>שלישי, 16.12.2025</td><td>19:30</td><td>מכבי מנדל פ&quot;ת</td>
                 <td class="game-result">77</td><td class="game-result">65</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%A8%D7%95%D7%96%D7%9E%D7%A8%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%91%D7%9F+%D7%92%D7%95%D7%A8%D7%99%D7%95%D7%9F+37%2C+%D7%A4%D7%AA%D7%97+%D7%AA%D7%A7%D7%95%D7%95%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מכבי מנדל פ&quot;ת נגד עירוני נהריה', '2025.12.16', '19:30', 'אולם רוזמרין, רח\' בן גוריון 37, פתח תקווה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>2</td><td>שישי, 19.12.2025 - 13:00</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>2</td><td>שישי, 19.12.2025</td><td>13:00</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">67</td><td class="game-result">93</td>
             <td class="">הפועל אסטרל אילת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד הפועל אסטרל אילת', '2025.12.19', '13:00', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d2')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d2">
-                <td>2</td><td>רביעי, 15.10.2025 - 18:00</td><td>עירוני נהריה</td>
+                <td>2</td><td>רביעי, 15.10.2025</td><td>18:00</td><td>עירוני נהריה</td>
                 <td class="game-result">95</td><td class="game-result">70</td>
                 <td>מ.כ עוטף דרום</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד מ.כ עוטף דרום', '2025.10.15', '18:00', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d2">
-                <td>2</td><td>רביעי, 15.10.2025 - 19:30</td><td>א.ס. אשקלון-קרית גת</td>
+                <td>2</td><td>רביעי, 15.10.2025</td><td>19:30</td><td>א.ס. אשקלון-קרית גת</td>
                 <td class="game-result">88</td><td class="game-result">61</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A8%D7%97%27+%D7%90%D7%91%D7%A0%D7%99+%D7%94%D7%97%D7%95%D7%A9%D7%9F%2C+%D7%A7%D7%A8%D7%99%D7%AA+%D7%92%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('א.ס. אשקלון-קרית גת נגד הפועל חיפה נווה שאנן שובל', '2025.10.15', '19:30', 'רח\' אבני החושן, קרית גת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>13</td><td>שלישי, 23.12.2025 - 18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>13</td><td>שלישי, 23.12.2025</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">72</td><td class="game-result">88</td>
             <td class="">עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד עירוני נהריה', '2025.12.23', '18:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d13')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d13">
-                <td>13</td><td>רביעי, 24.12.2025 - 19:15</td><td>מכבי גיא נתן חיפה</td>
+                <td>13</td><td>רביעי, 24.12.2025</td><td>19:15</td><td>מכבי גיא נתן חיפה</td>
                 <td class="game-result">75</td><td class="game-result">91</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מכבי גיא נתן חיפה נגד הפועל חיפה נווה שאנן שובל', '2025.12.24', '19:15', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>14</td><td>שלישי, 30.12.2025 - 18:30</td><td class="">מ.כ עוטף דרום</td>
+            <td>14</td><td>שלישי, 30.12.2025</td><td>18:30</td><td class="">מ.כ עוטף דרום</td>
             <td class="game-result">88</td><td class="game-result">68</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%9E%D7%95%D7%A2%D7%A6%D7%94+%D7%90%D7%96%D7%95%D7%A8%D7%99%D7%AA+%D7%90%D7%A9%D7%9B%D7%95%D7%9C%2C+%D7%A7%D7%99%D7%91%D7%95%D7%A5+%D7%9E%D7%92%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מ.כ עוטף דרום נגד מכבי רחובות', '2025.12.30', '18:30', 'מועצה אזורית אשכול, קיבוץ מגן')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d14')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d14">
-                <td>14</td><td>שלישי, 30.12.2025 - 19:00</td><td>עירוני נהריה</td>
+                <td>14</td><td>שלישי, 30.12.2025</td><td>19:00</td><td>עירוני נהריה</td>
                 <td class="game-result">89</td><td class="game-result">49</td>
                 <td>אליצור שומרון</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד אליצור שומרון', '2025.12.30', '19:00', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d14">
-                <td>14</td><td>שישי, 02.01.2026 - 13:00</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>14</td><td>שישי, 02.01.2026</td><td>13:00</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">79</td><td class="game-result">71</td>
                 <td>מכבי מנדל פ&quot;ת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד מכבי מנדל פ&quot;ת', '2026.01.02', '13:00', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>15</td><td>שישי, 09.01.2026 - 13:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>15</td><td>שישי, 09.01.2026</td><td>13:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">84</td><td class="game-result">90</td>
             <td class="">הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד הפועל חיפה נווה שאנן שובל', '2026.01.09', '13:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d15')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d15">
-                <td>15</td><td>שלישי, 06.01.2026 - 19:00</td><td>א.ס. אשקלון-קרית גת</td>
+                <td>15</td><td>שלישי, 06.01.2026</td><td>19:00</td><td>א.ס. אשקלון-קרית גת</td>
                 <td class="game-result">102</td><td class="game-result">89</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A8%D7%97%27+%D7%90%D7%91%D7%A0%D7%99+%D7%94%D7%97%D7%95%D7%A9%D7%9F%2C+%D7%A7%D7%A8%D7%99%D7%AA+%D7%92%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('א.ס. אשקלון-קרית גת נגד עירוני נהריה', '2026.01.06', '19:00', 'רח\' אבני החושן, קרית גת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>16</td><td>שלישי, 13.01.2026 - 18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>16</td><td>שלישי, 13.01.2026</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">67</td><td class="game-result">102</td>
             <td class="">מכבי מעלה אדומים</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד מכבי מעלה אדומים', '2026.01.13', '18:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d16')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d16">
-                <td>16</td><td>שלישי, 13.01.2026 - 18:45</td><td>אליצור שומרון</td>
+                <td>16</td><td>שלישי, 13.01.2026</td><td>18:45</td><td>אליצור שומרון</td>
                 <td class="game-result">73</td><td class="game-result">90</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%99%D7%A9%D7%99%D7%91%D7%AA+%D7%90%D7%9E%D7%99%D7%AA%2C+%D7%91%D7%A8%D7%95%D7%9B%D7%99%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('אליצור שומרון נגד הפועל חיפה נווה שאנן שובל', '2026.01.13', '18:45', 'ישיבת אמית, ברוכין')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d16">
-                <td>16</td><td>שלישי, 13.01.2026 - 19:15</td><td>א.ס רמה&quot;ש ירק השדה</td>
+                <td>16</td><td>שלישי, 13.01.2026</td><td>19:15</td><td>א.ס רמה&quot;ש ירק השדה</td>
                 <td class="game-result">79</td><td class="game-result">92</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A7%D7%A8%D7%99%D7%AA+%D7%99%D7%A2%D7%A8%D7%99%D7%9D%2C+%D7%A8%D7%97%27+%D7%99%D7%A6%D7%97%D7%A7+%D7%90%D7%9C%D7%97%D7%A0%D7%9F+13%2C+%D7%A8%D7%9E%D7%AA+%D7%94%D7%A9%D7%A8%D7%95%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('א.ס רמה&quot;ש ירק השדה נגד עירוני נהריה', '2026.01.13', '19:15', 'קרית יערים, רח\' יצחק אלחנן 13, רמת השרון')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>17</td><td>רביעי, 21.01.2026 - 18:45</td><td class="">הפועל אסטרל אילת</td>
+            <td>17</td><td>רביעי, 21.01.2026</td><td>18:45</td><td class="">הפועל אסטרל אילת</td>
             <td class="game-result">79</td><td class="game-result">86</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%92%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98%D7%90%D7%99%D7%9D+1%2C+%D7%90%D7%99%D7%9C%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('הפועל אסטרל אילת נגד מכבי רחובות', '2026.01.21', '18:45', 'אולם בגין, רח\' הספורטאים 1, אילת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d17')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d17">
-                <td>17</td><td>שלישי, 20.01.2026 - 18:45</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>17</td><td>שלישי, 20.01.2026</td><td>18:45</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">83</td><td class="game-result">100</td>
                 <td>א.ס. אשקלון-קרית גת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד א.ס. אשקלון-קרית גת', '2026.01.20', '18:45', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d17">
-                <td>17</td><td>חמישי, 22.01.2026 - 17:45</td><td>מ.כ עוטף דרום</td>
+                <td>17</td><td>חמישי, 22.01.2026</td><td>17:45</td><td>מ.כ עוטף דרום</td>
                 <td class="game-result">83</td><td class="game-result">76</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%9E%D7%95%D7%A2%D7%A6%D7%94+%D7%90%D7%96%D7%95%D7%A8%D7%99%D7%AA+%D7%90%D7%A9%D7%9B%D7%95%D7%9C%2C+%D7%A7%D7%99%D7%91%D7%95%D7%A5+%D7%9E%D7%92%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מ.כ עוטף דרום נגד עירוני נהריה', '2026.01.22', '17:45', 'מועצה אזורית אשכול, קיבוץ מגן')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>18</td><td>שלישי, 27.01.2026 - 19:00</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>18</td><td>שלישי, 27.01.2026</td><td>19:00</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">71</td><td class="game-result">103</td>
             <td class="">אליצור יבנה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד אליצור יבנה', '2026.01.27', '19:00', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d18')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d18">
-                <td>18</td><td>שלישי, 27.01.2026 - 18:30</td><td>עירוני נהריה</td>
+                <td>18</td><td>שלישי, 27.01.2026</td><td>18:30</td><td>עירוני נהריה</td>
                 <td class="game-result">77</td><td class="game-result">65</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד הפועל חיפה נווה שאנן שובל', '2026.01.27', '18:30', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>19</td><td>שלישי, 03.02.2026 - 19:00</td><td class="">מכבי רוטשטיין אשדוד</td>
+            <td>19</td><td>שלישי, 03.02.2026</td><td>19:00</td><td class="">מכבי רוטשטיין אשדוד</td>
             <td class="game-result">90</td><td class="game-result">83</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%9E%D7%A7%D7%99%D7%A3+%D7%96%27%2C+%D7%A8%D7%95%D7%91%D7%A2+%D7%A1%D7%99%D7%98%D7%99%2C+%D7%A8%D7%97%27+%D7%94%D7%A2%D7%A6%D7%9E%D7%90%D7%95%D7%AA+62%2C+%D7%90%D7%A9%D7%93%D7%95%D7%93&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רוטשטיין אשדוד נגד מכבי רחובות', '2026.02.03', '19:00', 'מקיף ז\', רובע סיטי, רח\' העצמאות 62, אשדוד')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d19')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d19">
-                <td>19</td><td>שלישי, 03.02.2026 - 18:45</td><td>מכבי מעלה אדומים</td>
+                <td>19</td><td>שלישי, 03.02.2026</td><td>18:45</td><td>מכבי מעלה אדומים</td>
                 <td class="game-result">108</td><td class="game-result">84</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A8%D7%97%27+%D7%93%D7%A8%D7%9A+%D7%94%D7%92%D7%99%D7%90+5%2C+%D7%9E%D7%A2%D7%9C%D7%94+%D7%90%D7%93%D7%95%D7%9E%D7%99%D7%9D&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מכבי מעלה אדומים נגד עירוני נהריה', '2026.02.03', '18:45', 'רח\' דרך הגיא 5, מעלה אדומים')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d19">
-                <td>19</td><td>רביעי, 04.02.2026 - 20:10</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>19</td><td>רביעי, 04.02.2026</td><td>20:10</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">60</td><td class="game-result">66</td>
                 <td>מ.כ עוטף דרום</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד מ.כ עוטף דרום', '2026.02.04', '20:10', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>20</td><td>שלישי, 10.02.2026 - 18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>20</td><td>שלישי, 10.02.2026</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">81</td><td class="game-result">95</td>
             <td class="">הפועל מגדל העמק-יזרעאל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד הפועל מגדל העמק-יזרעאל', '2026.02.10', '18:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d20')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d20">
-                <td>20</td><td>שלישי, 10.02.2026 - 18:30</td><td>עירוני נהריה</td>
+                <td>20</td><td>שלישי, 10.02.2026</td><td>18:30</td><td>עירוני נהריה</td>
                 <td class="game-result">79</td><td class="game-result">87</td>
                 <td>הפועל אסטרל אילת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד הפועל אסטרל אילת', '2026.02.10', '18:30', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d20">
-                <td>20</td><td>שלישי, 10.02.2026 - 19:00</td><td>א.ס רמה&quot;ש ירק השדה</td>
+                <td>20</td><td>שלישי, 10.02.2026</td><td>19:00</td><td>א.ס רמה&quot;ש ירק השדה</td>
                 <td class="game-result">87</td><td class="game-result">95</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A7%D7%A8%D7%99%D7%AA+%D7%99%D7%A2%D7%A8%D7%99%D7%9D%2C+%D7%A8%D7%97%27+%D7%99%D7%A6%D7%97%D7%A7+%D7%90%D7%9C%D7%97%D7%A0%D7%9F+13%2C+%D7%A8%D7%9E%D7%AA+%D7%94%D7%A9%D7%A8%D7%95%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('א.ס רמה&quot;ש ירק השדה נגד הפועל חיפה נווה שאנן שובל', '2026.02.10', '19:00', 'קרית יערים, רח\' יצחק אלחנן 13, רמת השרון')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>21</td><td>שלישי, 17.02.2026 - 19:30</td><td class="">מ.ס צפת</td>
+            <td>21</td><td>שלישי, 17.02.2026</td><td>19:30</td><td class="">מ.ס צפת</td>
             <td class="game-result">99</td><td class="game-result">74</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%94%D7%A4%D7%99%D7%A1%2C+%D7%A8%D7%97%27+%D7%96%27%D7%91%D7%95%D7%98%D7%99%D7%A0%D7%A1%D7%A7%D7%99+1%2C+%D7%A6%D7%A4%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מ.ס צפת נגד מכבי רחובות', '2026.02.17', '19:30', 'אולם הפיס, רח\' ז\'בוטינסקי 1, צפת')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d21')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d21">
-                <td>21</td><td>שלישי, 17.02.2026 - 19:00</td><td>אליצור יבנה</td>
+                <td>21</td><td>שלישי, 17.02.2026</td><td>19:00</td><td>אליצור יבנה</td>
                 <td class="game-result">77</td><td class="game-result">85</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%22%D7%A9+%D7%A8%D7%9C%D7%A3+%D7%A7%D7%9C%D7%99%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%95%D7%92%D7%99%D7%AA+22%2C+%D7%99%D7%91%D7%A0%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('אליצור יבנה נגד עירוני נהריה', '2026.02.17', '19:00', 'היכל הספורט ע&quot;ש רלף קליין, רח\' הדוגית 22, יבנה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d21">
-                <td>21</td><td>שלישי, 17.02.2026 - 19:00</td><td>מכבי מעלה אדומים</td>
+                <td>21</td><td>שלישי, 17.02.2026</td><td>19:00</td><td>מכבי מעלה אדומים</td>
                 <td class="game-result">76</td><td class="game-result">88</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A8%D7%97%27+%D7%93%D7%A8%D7%9A+%D7%94%D7%92%D7%99%D7%90+5%2C+%D7%9E%D7%A2%D7%9C%D7%94+%D7%90%D7%93%D7%95%D7%9E%D7%99%D7%9D&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מכבי מעלה אדומים נגד הפועל חיפה נווה שאנן שובל', '2026.02.17', '19:00', 'רח\' דרך הגיא 5, מעלה אדומים')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row past-game">
-            <td>22</td><td>שלישי, 24.02.2026 - 19:00</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>22</td><td>שלישי, 24.02.2026</td><td>19:00</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">68</td><td class="game-result">85</td>
             <td class="">א.ס. עירוני אשקלון</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד א.ס. עירוני אשקלון', '2026.02.24', '19:00', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d22')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel past-game-details d22">
-                <td>22</td><td>שלישי, 24.02.2026 - 19:00</td><td>עירוני נהריה</td>
+                <td>22</td><td>שלישי, 24.02.2026</td><td>19:00</td><td>עירוני נהריה</td>
                 <td class="game-result">88</td><td class="game-result">84</td>
                 <td>מכבי רוטשטיין אשדוד</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד מכבי רוטשטיין אשדוד', '2026.02.24', '19:00', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel past-game-details d22">
-                <td>22</td><td>שלישי, 24.02.2026 - 19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>22</td><td>שלישי, 24.02.2026</td><td>19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">96</td><td class="game-result">92</td>
                 <td>הפועל אסטרל אילת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד הפועל אסטרל אילת', '2026.02.24', '19:00', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row">
-            <td>23</td><td>שישי, 27.03.2026 - 13:00</td><td class="">מכבי גיא נתן חיפה</td>
+            <td>23</td><td>שישי, 27.03.2026</td><td>13:00</td><td class="">מכבי גיא נתן חיפה</td>
             <td class="game-result">-</td><td class="game-result">-</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי גיא נתן חיפה נגד מכבי רחובות', '2026.03.27', '13:00', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d23')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel d23">
-                <td>23</td><td>שישי, 27.03.2026 - 13:30</td><td>אליצור יבנה</td>
+                <td>23</td><td>שישי, 27.03.2026</td><td>13:30</td><td>אליצור יבנה</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%22%D7%A9+%D7%A8%D7%9C%D7%A3+%D7%A7%D7%9C%D7%99%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%95%D7%92%D7%99%D7%AA+22%2C+%D7%99%D7%91%D7%A0%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('אליצור יבנה נגד הפועל חיפה נווה שאנן שובל', '2026.03.27', '13:30', 'היכל הספורט ע&quot;ש רלף קליין, רח\' הדוגית 22, יבנה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel d23">
-                <td>23</td><td>שישי, 27.03.2026 - 13:45</td><td>הפועל מגדל העמק-יזרעאל</td>
+                <td>23</td><td>שישי, 27.03.2026</td><td>13:45</td><td>הפועל מגדל העמק-יזרעאל</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%91%D7%99%D7%94%22%D7%A1+%D7%99%D7%A2%D7%A8%D7%AA+%D7%94%D7%A2%D7%9E%D7%A7%2C+%D7%9E%D7%92%D7%93%D7%9C+%D7%94%D7%A2%D7%9E%D7%A7&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל מגדל העמק-יזרעאל נגד עירוני נהריה', '2026.03.27', '13:45', 'ביה&quot;ס יערת העמק, מגדל העמק')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row">
-            <td>27</td><td>שלישי, 31.03.2026 - 17:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>27</td><td>שלישי, 31.03.2026</td><td>17:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">-</td><td class="game-result">-</td>
             <td class="">א.ס. אשקלון-קרית גת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד א.ס. אשקלון-קרית גת', '2026.03.31', '17:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d27')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel d27">
-                <td>27</td><td>שלישי, 31.03.2026 - 17:45</td><td>עירוני נהריה</td>
+                <td>27</td><td>שלישי, 31.03.2026</td><td>17:45</td><td>עירוני נהריה</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>מכבי מנדל פ&quot;ת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד מכבי מנדל פ&quot;ת', '2026.03.31', '17:45', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel d27">
-                <td>27</td><td>שלישי, 31.03.2026 - 19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>27</td><td>שלישי, 31.03.2026</td><td>19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>א.ס. עירוני אשקלון</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד א.ס. עירוני אשקלון', '2026.03.31', '19:00', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row">
-            <td>28</td><td>שני, 06.04.2026 - 19:00</td><td class="">עירוני נהריה</td>
+            <td>28</td><td>שני, 06.04.2026</td><td>19:00</td><td class="">עירוני נהריה</td>
             <td class="game-result">-</td><td class="game-result">-</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד מכבי רחובות', '2026.04.06', '19:00', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d28')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel d28">
-                <td>28</td><td>שני, 06.04.2026 - 19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>28</td><td>שני, 06.04.2026</td><td>19:00</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>מכבי גיא נתן חיפה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד מכבי גיא נתן חיפה', '2026.04.06', '19:00', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row">
-            <td>24</td><td>שישי, 10.04.2026 - 14:00</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>24</td><td>שישי, 10.04.2026</td><td>14:00</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">-</td><td class="game-result">-</td>
             <td class="">מכבי מנדל פ&quot;ת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד מכבי מנדל פ&quot;ת', '2026.04.10', '14:00', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d24')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel d24">
-                <td>24</td><td>שישי, 10.04.2026 - 13:30</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>24</td><td>שישי, 10.04.2026</td><td>13:30</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>מכבי רוטשטיין אשדוד</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד מכבי רוטשטיין אשדוד', '2026.04.10', '13:30', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel d24">
-                <td>24</td><td>שישי, 10.04.2026 - 13:45</td><td>עירוני נהריה</td>
+                <td>24</td><td>שישי, 10.04.2026</td><td>13:45</td><td>עירוני נהריה</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>מ.ס צפת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד מ.ס צפת', '2026.04.10', '13:45', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row">
-            <td>29</td><td>שלישי, 14.04.2026 - 18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>29</td><td>שלישי, 14.04.2026</td><td>18:30</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">-</td><td class="game-result">-</td>
             <td class="">מ.כ עוטף דרום</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד מ.כ עוטף דרום', '2026.04.14', '18:30', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d29')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel d29">
-                <td>29</td><td>שלישי, 14.04.2026 - 18:30</td><td>אליצור שומרון</td>
+                <td>29</td><td>שלישי, 14.04.2026</td><td>18:30</td><td>אליצור שומרון</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%91%D7%99%D7%94%22%D7%A1+%D7%AA%D7%99%D7%9B%D7%95%D7%9F+%D7%97%D7%93%D7%A9%2C+%D7%A8%D7%97%27+%D7%90%D7%9C%D7%92%27%D7%96%D7%90%D7%9C%D7%99+111%2C+%D7%9B%D7%A4%D7%A8+%D7%A7%D7%90%D7%A1%D7%9D&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('אליצור שומרון נגד עירוני נהריה', '2026.04.14', '18:30', 'ביה&quot;ס תיכון חדש, רח\' אלג\'זאלי 111, כפר קאסם')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel d29">
-                <td>29</td><td>שלישי, 14.04.2026 - 19:30</td><td>מכבי מנדל פ&quot;ת</td>
+                <td>29</td><td>שלישי, 14.04.2026</td><td>19:30</td><td>מכבי מנדל פ&quot;ת</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%A8%D7%95%D7%96%D7%9E%D7%A8%D7%99%D7%9F%2C+%D7%A8%D7%97%27+%D7%91%D7%9F+%D7%92%D7%95%D7%A8%D7%99%D7%95%D7%9F+37%2C+%D7%A4%D7%AA%D7%97+%D7%AA%D7%A7%D7%95%D7%95%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מכבי מנדל פ&quot;ת נגד הפועל חיפה נווה שאנן שובל', '2026.04.14', '19:30', 'אולם רוזמרין, רח\' בן גוריון 37, פתח תקווה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row">
-            <td>25</td><td>שישי, 17.04.2026 - 14:00</td><td class="rehovot-highlight">מכבי רחובות</td>
+            <td>25</td><td>שישי, 17.04.2026</td><td>14:00</td><td class="rehovot-highlight">מכבי רחובות</td>
             <td class="game-result">-</td><td class="game-result">-</td>
             <td class="">א.ס רמה&quot;ש ירק השדה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%90%D7%95%D7%9C%D7%9D+%D7%91%D7%A8%D7%96%D7%99%D7%9C%D7%99%2C+%D7%A8%D7%97%27+%D7%99%D7%A2%D7%A7%D7%91+%D7%A8%D7%99%D7%99%D7%A4%D7%9F+6%2C+%D7%A8%D7%97%D7%95%D7%91%D7%95%D7%AA&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('מכבי רחובות נגד א.ס רמה&quot;ש ירק השדה', '2026.04.17', '14:00', 'אולם ברזילי, רח\' יעקב רייפן 6, רחובות')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d25')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel d25">
-                <td>25</td><td>שישי, 17.04.2026 - 13:30</td><td>א.ס. עירוני אשקלון</td>
+                <td>25</td><td>שישי, 17.04.2026</td><td>13:30</td><td>א.ס. עירוני אשקלון</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%A9%D7%93%27+%D7%91%D7%9F+%D7%92%D7%95%D7%A8%D7%99%D7%95%D7%9F+37%2C+%D7%90%D7%A9%D7%A7%D7%9C%D7%95%D7%9F&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('א.ס. עירוני אשקלון נגד עירוני נהריה', '2026.04.17', '13:30', 'שד\' בן גוריון 37, אשקלון')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel d25">
-                <td>25</td><td>שישי, 17.04.2026 - 14:00</td><td>הפועל מגדל העמק-יזרעאל</td>
+                <td>25</td><td>שישי, 17.04.2026</td><td>14:00</td><td>הפועל מגדל העמק-יזרעאל</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>הפועל חיפה נווה שאנן שובל</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%91%D7%99%D7%94%22%D7%A1+%D7%99%D7%A2%D7%A8%D7%AA+%D7%94%D7%A2%D7%9E%D7%A7%2C+%D7%9E%D7%92%D7%93%D7%9C+%D7%94%D7%A2%D7%9E%D7%A7&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל מגדל העמק-יזרעאל נגד הפועל חיפה נווה שאנן שובל', '2026.04.17', '14:00', 'ביה&quot;ס יערת העמק, מגדל העמק')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row">
-            <td>26</td><td>שישי, 24.04.2026 - 13:30</td><td class="">אליצור שומרון</td>
+            <td>26</td><td>שישי, 24.04.2026</td><td>13:30</td><td class="">אליצור שומרון</td>
             <td class="game-result">-</td><td class="game-result">-</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%91%D7%99%D7%94%22%D7%A1+%D7%AA%D7%99%D7%9B%D7%95%D7%9F+%D7%97%D7%93%D7%A9%2C+%D7%A8%D7%97%27+%D7%90%D7%9C%D7%92%27%D7%96%D7%90%D7%9C%D7%99+111%2C+%D7%9B%D7%A4%D7%A8+%D7%A7%D7%90%D7%A1%D7%9D&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('אליצור שומרון נגד מכבי רחובות', '2026.04.24', '13:30', 'ביה&quot;ס תיכון חדש, רח\' אלג\'זאלי 111, כפר קאסם')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d26')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel d26">
-                <td>26</td><td>שישי, 24.04.2026 - 13:45</td><td>הפועל חיפה נווה שאנן שובל</td>
+                <td>26</td><td>שישי, 24.04.2026</td><td>13:45</td><td>הפועל חיפה נווה שאנן שובל</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>מ.ס צפת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד מ.ס צפת', '2026.04.24', '13:45', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="details-panel d26">
-                <td>26</td><td>שישי, 24.04.2026 - 14:00</td><td>מכבי גיא נתן חיפה</td>
+                <td>26</td><td>שישי, 24.04.2026</td><td>14:00</td><td>מכבי גיא נתן חיפה</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>עירוני נהריה</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('מכבי גיא נתן חיפה נגד עירוני נהריה', '2026.04.24', '14:00', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr><tr class="game-row">
-            <td>30</td><td>שלישי, 28.04.2026 - 18:30</td><td class="">הפועל חיפה נווה שאנן שובל</td>
+            <td>30</td><td>שלישי, 28.04.2026</td><td>18:30</td><td class="">הפועל חיפה נווה שאנן שובל</td>
             <td class="game-result">-</td><td class="game-result">-</td>
             <td class="rehovot-highlight">מכבי רחובות</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A8%D7%95%D7%9E%D7%9E%D7%94%2C+%D7%97%D7%99%D7%A4%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
             <td class="action-col"><button onclick="addToCalendar('הפועל חיפה נווה שאנן שובל נגד מכבי רחובות', '2026.04.28', '18:30', 'היכל הספורט רוממה, חיפה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"><button class="details-toggle" onclick="toggleDetails('d30')">עוד <i class="fa-solid fa-chevron-down"></i></button></td></tr><tr class="details-panel d30">
-                <td>30</td><td>שלישי, 28.04.2026 - 18:30</td><td>עירוני נהריה</td>
+                <td>30</td><td>שלישי, 28.04.2026</td><td>18:30</td><td>עירוני נהריה</td>
                 <td class="game-result">-</td><td class="game-result">-</td>
                 <td>א.ס. אשקלון-קרית גת</td><td class="action-col"><a href="https://waze.com/ul?q=%D7%94%D7%99%D7%9B%D7%9C+%D7%94%D7%A1%D7%A4%D7%95%D7%A8%D7%98+%D7%A2%D7%99%D7%9F+%D7%A9%D7%A8%D7%94%2C+%D7%A8%D7%97%27+%D7%94%D7%93%D7%91%D7%95%D7%A8%D7%A0%D7%99%D7%AA+11%2C+%D7%A0%D7%94%D7%A8%D7%99%D7%94&navigate=yes" target="_blank" class="btn waze-btn"><i class="fa-brands fa-waze"></i></a></td>
                 <td class="action-col"><button onclick="addToCalendar('עירוני נהריה נגד א.ס. אשקלון-קרית גת', '2026.04.28', '18:30', 'היכל הספורט עין שרה, רח\' הדבורנית 11, נהריה')" class="btn cal-btn"><i class="fa-regular fa-calendar-plus"></i></button></td><td class="action-col"></td></tr>
@@ -603,7 +608,11 @@
 <div class="insights-box">
     <div class="insights-header">ניתוח סטטיסטי וסיכויי פלייאוף</div>
     <div class="insights-content">
-<p>בחינת הנתונים מראה כי <strong>מכבי רחובות</strong>, המדורגת במקום השני, נמצאת בעמדה מאתגרת ביותר בכל הנוגע למאבק על המקום הראשון. עם מאזן של 18 ניצחונות ו-4 הפסדים, ו-40 נקודות ליגה, היא מפגרת בבירור אחרי הפועל אסטרל אילת, שמחזיקה במאזן מרשים של 21 ניצחונות, הפסד בודד ו-43 נקודות. בהתחשב בכך שכל הקבוצות השלימו 22 משחקים, פער של 3 ניצחונות ו-3 נקודות הופך את סיכוייה של רחובות להדביק את אילת ולסיים במקום הראשון לבלתי אפשרי, או לכל הפחות, לבעל סבירות אפסית מבחינה מתמטית.</p><p>עם זאת, <strong>מכבי רחובות</strong> הבטיחה לעצמה באופן ודאי יתרון ביתיות לקראת שלבי הפלייאוף. מיקומה השני בטבלה, עם 40 נקודות, ממקם אותה בבטחה בתוך רביעיית הצמרת (מקומות 1-4). היא מקדימה את עירוני נהריה (39 נקודות) והפועל חיפה נווה שאנן שובל (38 נקודות), ומחזיקה בפער ניכר של 4 נקודות מא.ס. עירוני אשקלון המדורגת חמישית (36 נקודות). יתרון זה יאפשר לה לארח משחקים מכריעים על הפרקט הביתי, נתון סטטיסטי שיכול להשפיע מהותית על תוצאות סדרות הפלייאוף.</p><p>למרות מעמדה הבכיר, לקראת הפלייאוף קיימות מספר סכנות פוטנציאליות מצד קבוצות המדורגות מתחתיה. <strong>מכבי רחובות</strong> מחזיקה בהגנה הטובה ביותר בליגה עם 1700 נקודות בלבד שספגה, אך קבוצות מסוימות הציגו יכולת התקפית מרשימה שעשויה לאתגר נתון זה. כך למשל, <strong>מכבי רוטשטיין אשדוד</strong> (מקום 6), למרות דירוגה הנמוך יותר, קלעה 2020 נקודות, נתון שעולה על 1993 הנקודות שקלעה רחובות. כמו כן, קבוצות כמו <strong>עירוני נהריה</strong> (מקום 3) ו<strong>הפועל חיפה נווה שאנן שובל</strong> (מקום 4), עם מאזנים קרובים יחסית ופער נקודות חיובי משמעותי, מהוות יריבות חזקות ומאוזנות אשר יציבו מבחן רציני בפני רחובות בשלבי ההכרעה.</p>
+<p>סטטיסטית, קבוצת <strong>מכבי רחובות</strong>, הממוקמת במקום השני עם מאזן 18 ניצחונות ו-4 הפסדים (40 נקודות), ניצבת בפני אתגר כמעט בלתי עביר במאבק על המקום הראשון. הפועל אסטרל אילת מובילה את הליגה בפער משמעותי עם 21 ניצחונות והפסד בודד (43 נקודות). פער של שלושה ניצחונות ושלוש נקודות, בצירוף הפרש סלים נחות (293+ לרחובות לעומת 328+ לאילת), ממקם את אילת בעמדה דומיננטית במיוחד, ולמעשה הופך את סיכוייה של רחובות לסיים במקום הראשון לסטטיסטית נמוכים מאוד, אם לא אפסיים, בהתבסס על הנתונים הקיימים.</p>
+
+<p>מאידך, <strong>מכבי רחובות</strong> מבוססת היטב בעמדה שמבטיחה לה יתרון ביתיות לקראת הפלייאוף. מיקומה השני בטבלה, עם 18 ניצחונות, מציב אותה בבטחה בארבעת המקומות הראשונים המקנים יתרון זה. הקבוצה שבמקום החמישי, א.ס. עירוני אשקלון, מרוחקת ארבעה ניצחונות (14-8) וארבע נקודות (36 נקודות) מרחובות. פער זה, המודגש גם על ידי הפרש הסלים העדיף של רחובות (+293), מבטיח לה נוחות סטטיסטית משמעותית בשמירה על יתרון הביתיות לקראת השלבים המכריעים של העונה.</p>
+
+<p>לקראת הפלייאוף, <strong>מכבי רחובות</strong> מציגה נתונים מרשימים המעידים על חוסן ועומק. הקבוצה מדורגת שנייה בליגה בהפרש הסלים (293+) והשנייה בנקודות זכות (1993) והשנייה בנקודות חובה (1700), מה שמצביע על איזון מצוין בין התקפה להגנה. קבוצות הממוקמות מתחתיה, כמו עירוני נהריה (מקום 3, הפרש סלים +212) או הפועל חיפה (מקום 4, הפרש סלים +72), נמצאות פער ניכר בנתונים אלה. גם קבוצות כמו מכבי רוטשטיין אשדוד (מקום 6, הפרש סלים +165) אינן מציגות מאזן נקודות דומה. הנתונים הסטטיסטיים מצביעים על כך שרחובות היא קבוצה חזקה ועקבית, וסכנות משמעותיות מקבוצות המדורגות מתחתיה נראות, מבחינה מספרית, פחותות יחסית.</p>
 </div>
 </div>
 
@@ -654,7 +663,7 @@
             });
             // Reset all 'more' buttons inside the hidden past games
             document.querySelectorAll('.past-game .details-toggle').forEach(toggleBtn => {
-                toggleBtn.innerHTML = 'עוד <i class="fa-solid fa-chevron-down"></i>';
+                toggleBtn.innerHTML = 'עוד משחקים <i class="fa-solid fa-chevron-down"></i>';
             });
             btn.innerHTML = 'הצג משחקים קודמים';
         }
