@@ -49,31 +49,48 @@ def get_gemini_model():
     return None
 
 def update_insights(model):
-    """מפיק תובנות סטטיסטיות על הקבוצה ומחזיר אותן כ-HTML."""
-    if not model:
-        return None
-    
+    """
+    מפיק תובנות סטטיסטיות או מציג טבלת דירוג כגיבוי.
+    מחזיר HTML עם התוכן המעודכן, או None במקרה של כשל מוחלט.
+    """
     standings_text = ""
-    # משיכת טבלת הדירוג הרשמית מאתר איגוד הכדורסל 
-    # עקיפת זיכרון מטמון (Cache) כדי לקבל נתונים טריים כמו באקסל
+    standings_df = None
+    
     try:
         timestamp = int(datetime.datetime.now().timestamp())
         url = f"https://ibasketball.co.il/league/2025-2/?nocache={timestamp}"
         headers = {'User-Agent': 'Mozilla/5.0'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code == 200:
-            tables = pd.read_html(io.BytesIO(r.content))
-            for df in tables:
-                text_rep = df.to_string()
-                if 'קבוצה' in text_rep and ('ניצ' in text_rep or 'נק' in text_rep):
-                    standings_text = df.to_string(index=False)
-                    break
-    except Exception as e:
-        logging.warning(f"Failed to fetch standings from association site: {e}")
+        r = requests.get(url, headers=headers, timeout=15)
+        r.raise_for_status()
+        
+        tables = pd.read_html(io.BytesIO(r.content))
+        for df in tables:
+            # Clean column names
+            cleaned_columns = [re.sub(r"['\"`׳’´]", "", str(col)).strip() for col in df.columns]
+            df.columns = cleaned_columns
 
-    if not standings_text:
-        logging.error("No standings data found.")
-        return None # מחזיר None כדי לא לדרוס את הקיים במקרה של שגיאה
+            # Check for essential columns after cleaning
+            if 'קבוצה' in df.columns and ('נצ' in df.columns or 'נק' in df.columns):
+                standings_df = df
+                standings_text = df.to_string(index=False)
+                logging.info("Successfully fetched and parsed league standings.")
+                break
+    except Exception as e:
+        logging.error(f"Failed to fetch or parse standings from association site: {e}")
+        return None # כשל קריטי, אין נתונים להציג
+
+    # אם לא נמצאה טבלת דירוג, החזר None
+    if standings_df is None or not standings_text:
+        logging.error("No valid standings data found on the page.")
+        return None
+
+    # הכנת HTML חלופי של הטבלה למקרה שה-API ייכשל
+    fallback_html = "<p><strong>טבלת הליגה העדכנית:</strong></p>" + standings_df.to_html(index=False, classes='table table-striped', border=0)
+    
+    # נסיון לקבל תובנות מה-API של Gemini
+    if not model:
+        logging.warning("Gemini model not available. Returning fallback standings table.")
+        return fallback_html
 
     try:
         prompt = f"""
@@ -86,14 +103,23 @@ def update_insights(model):
         חובה להשתמש בתגיות HTML של <p> ו-<strong> בלבד.
         אל תוסיף כותרות, טקסט הקדמה או פורמט Markdown. החזר אך ורק את הפסקאות.
         """
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, request_options={'timeout': 45})
         new_insights = response.text.strip()
+        
+        # ניקוי תגיות Markdown אפשריות
         new_insights = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights, flags=re.IGNORECASE)
         new_insights = re.sub(r'\s*```$', '', new_insights).strip()
+
+        # בדיקה אם התשובה מה-API מכילה תוכן ממשי
+        if len(new_insights) < 50:
+             logging.warning("Gemini response was too short, likely an error. Returning fallback.")
+             return fallback_html
+
+        logging.info("Successfully generated AI insights.")
         return new_insights
     except Exception as e:
-        logging.error(f"Error generating insights: {e}")
-        return None
+        logging.error(f"Error generating insights with Gemini: {e}. Returning fallback standings table.")
+        return fallback_html
 
 
 def update_games(excel_url):
