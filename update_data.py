@@ -65,7 +65,7 @@ def update_insights(model):
             tables = pd.read_html(io.BytesIO(r.content))
             for df in tables:
                 text_rep = df.to_string()
-                if 'קבוצה' in text_rep and ('נצחונות' in text_rep or 'נקודות' in text_rep):
+                if 'קבוצה' in text_rep and ('ניצ' in text_rep or 'נק' in text_rep):
                     standings_text = df.to_string(index=False)
                     break
     except Exception as e:
