@@ -3,7 +3,7 @@ import os
 import re
 import requests
 from bs4 import BeautifulSoup
-from google import genai
+import google.generativeai as genai
 from collections import defaultdict
 import logging
 import pandas as pd
@@ -34,20 +34,23 @@ HEBREW_WEEKDAYS = {
 }
 
 def get_gemini_model():
-    """מחבר למודל השפה של ג'מיני ומחזיר קליינט."""
+    """מגדיר את החיבור ל-Gemini ומחזיר מודל."""
     try:
         api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key:
             logging.error("GEMINI_API_KEY not found in environment variables.")
             return None
-        return genai.Client(api_key=api_key)
+        genai.configure(api_key=api_key)
+        # שימוש במודל העדכני והמהיר של ג'מיני
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        return model
     except Exception as e:
         logging.error(f"Error connecting to Gemini: {e}")
     return None
 
-def update_insights(client):
+def update_insights(model):
     """מפיק תובנות סטטיסטיות על הקבוצה ומחזיר אותן כ-HTML."""
-    if not client:
+    if not model:
         return None
     
     standings_text = ""
@@ -95,13 +98,13 @@ def update_insights(client):
         Do not add headers, introductory text, or Markdown formatting. Return strictly the paragraphs.
         """
 
-        response_he = client.models.generate_content(model='gemini-2.5-flash', contents=prompt_he)
+        response_he = model.generate_content(prompt_he)
         new_insights_he = response_he.text.strip()
         new_insights_he = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights_he, flags=re.IGNORECASE)
         new_insights_he = re.sub(r'\s*```$', '', new_insights_he).strip()
         new_insights_he = re.sub(r'<p>', '<p class="lang-he">', new_insights_he, flags=re.IGNORECASE)
 
-        response_en = client.models.generate_content(model='gemini-2.5-flash', contents=prompt_en)
+        response_en = model.generate_content(prompt_en)
         new_insights_en = response_en.text.strip()
         new_insights_en = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights_en, flags=re.IGNORECASE)
         new_insights_en = re.sub(r'\s*```$', '', new_insights_en).strip()
@@ -303,8 +306,8 @@ def main():
     logging.info("Starting data update process.")
     
     # עדכון התובנות מהטבלה הרשמית והמשחקים מקובץ האקסל
-    gemini_client = get_gemini_model()
-    new_insights_html = update_insights(gemini_client)
+    gemini_model = get_gemini_model()
+    new_insights_html = update_insights(gemini_model)
     
     excel_url = "https://ibasketball.co.il/league/2025-2/?feed=xlsx&league_id=119474"
     new_games_html, next_game_date_str = update_games(excel_url)
