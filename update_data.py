@@ -214,7 +214,7 @@ def update_games(excel_url):
         if not is_rehovot_game and is_top_game:
             other_games_by_round[g['mahzor']].append(g)
 
-    today = datetime.datetime.now()
+        today = datetime.datetime.now()
 
     # מציאת האינדקס של המשחק האחרון ששוחק
     past_game_indices = [i for i, g in enumerate(rehovot_games) if g['date_obj'] < today]
