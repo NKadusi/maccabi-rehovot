@@ -78,7 +78,7 @@ def update_insights(client):
         {standings_text}
 
         כתוב 3 פסקאות קצרות ומקצועיות של מסקנות סטטיסטיות על מצבה של קבוצת 'מכבי רחובות' (או מכבי ברק רחובות).
-        התייחס למאבק על המקום ה-1, ליתרון הביתיות (מקומות 1-4) ולסכנות מול הקבוצות שמתחתיה לקראת הפלייאוף.
+        התייחס למאבק על המקום ה-2, ליתרון הביתיות (מקומות 2-5) ולסכנות מול הקבוצות שמתחתיה לקראת הפלייאוף.
         אל תנחש, תתבסס רק על המתמטיקה והמאזנים שמופיעים בטקסט.
         חובה להשתמש בתגיות HTML של <p> ו-<strong> בלבד.
         אל תוסיף כותרות, טקסט הקדמה או פורמט Markdown. החזר אך ורק את הפסקאות.
@@ -89,7 +89,7 @@ def update_insights(client):
         {standings_text}
 
         Write 3 short, professional paragraphs of statistical conclusions regarding the status of the team 'Maccabi Rehovot' (or Maccabi Barak Rehovot).
-        Address the battle for 1st place, home-court advantage (places 1-4), and the threats from teams ranked below them approaching the playoffs.
+        Address the battle for 2nd place, home-court advantage (places 2-5), and the threats from teams ranked below them approaching the playoffs.
         Do not guess; base your conclusions solely on the math and records shown in the text.
         You must use ONLY <p> and <strong> HTML tags.
         Do not add headers, introductory text, or Markdown formatting. Return strictly the paragraphs.
