@@ -181,6 +181,13 @@ def update_games(excel_url):
                 else:
                     time_str = str(time_val).strip()[:5]
 
+            try:
+                if time_str and time_str != "00:00" and time_str != "-":
+                    h, m = map(int, time_str.split(':'))
+                    date_obj = date_obj.replace(hour=h, minute=m)
+            except Exception:
+                pass
+
             home_score = str(row[home_score_col]).strip() if home_score_col and pd.notna(row[home_score_col]) else "-"
             if home_score.endswith('.0'): home_score = home_score[:-2]
             
@@ -275,7 +282,7 @@ def update_games(excel_url):
         </tr>'''
         final_html = toggle_row + past_html + future_html
         
-    return final_html
+    return final_html, next_game_date_str
 
 def main():
     """הפונקציה הראשית שמריצה את תהליך העדכון."""
@@ -286,7 +293,7 @@ def main():
     new_insights_html = update_insights(gemini_client)
     
     excel_url = "https://ibasketball.co.il/league/2025-2/?feed=xlsx&league_id=119474"
-    new_games_html = update_games(excel_url)
+    new_games_html, next_game_date_str = update_games(excel_url)
 
     # 3. עדכון קובץ ה-HTML
     try:
@@ -326,6 +333,11 @@ def main():
             logging.info("Games schedule prepared for update.")
         else:
             logging.warning("Games schedule is empty. HTML will not be updated for games.")
+
+        if next_game_date_str:
+            timer_pattern = r'(const countDownDate = new Date\(").*?("\)\.getTime\(\);)'
+            html_content = re.sub(timer_pattern, rf'\g<1>{next_game_date_str}\g<2>', html_content)
+            logging.info(f"Timer updated to: {next_game_date_str}")
 
         with open('index.html', 'w', encoding='utf-8') as f:
             f.write(html_content)

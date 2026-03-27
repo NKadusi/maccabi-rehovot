@@ -707,7 +707,8 @@
             close_games: "סגור",
             timer_loading: "טוען שעון...",
             timer_days: " ימים | ",
-            series: "סדרה"
+            series: "סדרה",
+            timer_ended: "המשחק משוחק כעת / הסתיים"
         },
         en: {
             title: "Games Portal - Maccabi Rehovot",
@@ -736,7 +737,8 @@
             close_games: "Close",
             timer_loading: "Loading timer...",
             timer_days: " Days | ",
-            series: "Series"
+            series: "Series",
+            timer_ended: "Game in progress / Finished"
         }
     };
 
@@ -954,6 +956,10 @@
     setInterval(function() {
         const now = new Date().getTime();
         const d = countDownDate - now;
+        if (d < 0) {
+            document.getElementById("timer").innerHTML = translations[currentLang].timer_ended;
+            return;
+        }
         const days = Math.floor(d / 86400000);
         const hours = Math.floor((d % 86400000) / 3600000);
         const mins = Math.floor((d % 3600000) / 60000);
