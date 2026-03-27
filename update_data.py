@@ -214,14 +214,28 @@ def update_games(excel_url):
         if not is_rehovot_game and is_top_game:
             other_games_by_round[g['mahzor']].append(g)
 
-    past_html, future_html = "", ""
     today = datetime.datetime.now()
 
-    for main_game in rehovot_games:
+    # מציאת האינדקס של המשחק האחרון ששוחק
+    past_game_indices = [i for i, g in enumerate(rehovot_games) if g['date_obj'] < today]
+    last_played_game_idx = past_game_indices[-1] if past_game_indices else -1
+
+    hidden_past_html = ""
+    visible_html = ""
+
+    # מציאת המשחק הבא עבור שעון העצר
+    next_game_date_str = None
+    first_future_game = next((g for g in rehovot_games if g['date_obj'] >= today), None)
+    if first_future_game:
+        next_game_date_str = first_future_game['date_obj'].strftime('%b %d, %Y %H:%M:%S')
+
+    for i, main_game in enumerate(rehovot_games):
         is_past = main_game['date_obj'] < today
+        is_hidden_past_game = is_past and (i != last_played_game_idx)
+
         row_class = "game-row"
         details_row_class = "details-panel"
-        if is_past:
+        if is_hidden_past_game:
             row_class += " past-game"
             details_row_class += " past-game-details"
 
@@ -268,19 +282,19 @@ def update_games(excel_url):
                 <td>{game['away']}</td><td class="action-col">{waze_btn_top}</td>
                 <td class="action-col">{cal_btn_top}</td><td class="action-col"></td></tr>'''
         
-        if is_past:
-            past_html += current_game_html
+        if is_hidden_past_game:
+            hidden_past_html += current_game_html
         else:
-            future_html += current_game_html
+            visible_html += current_game_html
             
-    final_html = future_html
-    if past_html:
+    final_html = visible_html
+    if hidden_past_html:
         toggle_row = f'''<tr class="game-row" id="past-games-toggle-row">
             <td colspan="10" style="text-align: center; cursor: pointer;" onclick="togglePastGames()">
                 <button id="past-games-toggle-btn" class="details-toggle">הצג משחקים קודמים</button>
             </td>
         </tr>'''
-        final_html = toggle_row + past_html + future_html
+        final_html = toggle_row + hidden_past_html + visible_html
         
     return final_html, next_game_date_str
 
