@@ -1,12 +1,7 @@
-# Environment variables - NEVER commit this file!
+# Environment variables
 .env
 
-# Python artifacts
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# IDE and editor specific files
-.vscode/
-.idea/
+# Virtual environment
+.venv/
+venv/
+*.venv
