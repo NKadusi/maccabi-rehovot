@@ -3,7 +3,8 @@ name: Daily Data Update
 on:
   workflow_dispatch: # מאפשר הרצה ידנית דרך ממשק ה-Actions ב-GitHub
   schedule:
-    - cron: '0 6 * * *' # הרצה אוטומטית כל יום ב-6 בבוקר (זמן UTC)
+    - cron: '0 6 * * *' # הרצה יומית בבוקר
+    - cron: '0 18 * * *' # הרצה נוספת בערב כדי לוודא עדכניות אחרי משחקים
 
 jobs:
   update-and-commit:

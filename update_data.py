@@ -114,6 +114,7 @@ def update_insights(model, games_list):
     ])
 
     try:
+        # הגדרות בטיחות למניעת חסימות שווא של תוכן ספורט
         safety_settings = [
             {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
             {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -123,21 +124,23 @@ def update_insights(model, games_list):
 
         prompt_he = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הרשמית עבור שאר הקבוצות (יתכן שהיא לא מעודכנת):
+        אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הכללית עבור שאר הקבוצות (שיכולה להיות לא מעודכנת):
         {filtered_standings_text}
 
-        נתוני אמת מחושבים עבור מכבי רחובות (השתמש רק בהם! אלו הנתונים המדויקים והמעודכנים ביותר):
+        נתוני אמת מעודכנים עבור מכבי רחובות (חובה להשתמש רק בהם עבור רחובות!):
         {live_stats_msg}
 
         תוצאות המשחקים האחרונים של רחובות:
         {results_summary}
 
-        משימה: כתוב 3 פסקאות ניתוח על מצבה של מכבי רחובות. 
-        השתמש במאזן המדויק שצוין לעיל ({rehovot_points} נקודות מ-{rehovot_gp} משחקים) עבור מכבי רחובות.
-        נתח את המאבק על המקום ה-2 מול נהריה והפועל חיפה, תוך התבססות על הנתונים המעודכנים של רחובות ונתוני הטבלה של שאר הקבוצות.
+        משימה: כתוב 3 פסקאות ניתוח מקצועיות על מצבה של מכבי רחובות. 
+        השתמש במאזן המדויק: {rehovot_wins} ניצחונות ו-{rehovot_losses} הפסדים ({rehovot_points} נקודות).
+        נתח את המאבק בצמרת מול נהריה והפועל חיפה על בסיס נתוני האמת שסופקו כאן.
         
-        דגשים: אל תוסיף הקדמות. החזר רק פסקאות עטופות ב-<p>. 
+        דגשים חשובים:
+        1. אל תוסיף הקדמות כמו "הנה הניתוח". החזר רק פסקאות עטופות ב-<p>. 
         השתמש ב-<strong> להדגשת שמות קבוצות ומספרים. המר כל סימון Markdown של כוכביות לתגיות HTML.
+        2. אם נתוני הטבלה הכללית סותרים את נתוני האמת של רחובות, התעלם מהטבלה והשתמש רק בנתוני האמת.
         """
 
         prompt_en = f"""
@@ -172,9 +175,10 @@ def update_insights(model, games_list):
             paragraphs = [m.strip() for m in p_matches if m.strip()] if p_matches else [p.strip() for p in re.split(r'\n+', text) if p.strip()]
             
             wrapped = ""
+            # הגדרת ביטויי פתיחה לניקוי
+            intros = ('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח', 'להלן הניתוח', 'בבקשה', 'ניתוח מצבה')
             for p in paragraphs:
                 clean_p = re.sub(r'</?p\b[^>]*>', '', p, flags=re.IGNORECASE).strip()
-                # במקום למחוק את כל הפסקה, ננקה רק את משפט הפתיחה אם הוא קיים
                 for intro in intros:
                     if clean_p.lower().startswith(intro):
                         clean_p = re.sub(f'^{intro}:?\\s*', '', clean_p, flags=re.IGNORECASE).strip()
