@@ -160,19 +160,18 @@ def update_insights(model, games_list):
         """
 
         def process_ai_response(response_text, lang_class):
-            if not response_text: return ""
+            if not response_text or len(response_text) < 10: return ""
             # ניקוי פורמט Markdown
             text = re.sub(r'```(?:html|markdown)?\s*', '', response_text, flags=re.IGNORECASE)
             text = text.replace('```', '').strip()
             
-            # המרת Markdown Bold ל-HTML Strong
+            # המרת Markdown Bold ל-HTML Strong וניקוי תגיות מיותרות
             text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
             
             p_matches = re.findall(r'<p\b[^>]*>(.*?)</p>', text, flags=re.IGNORECASE | re.DOTALL)
             paragraphs = [m.strip() for m in p_matches if m.strip()] if p_matches else [p.strip() for p in re.split(r'\n+', text) if p.strip()]
             
             wrapped = ""
-            intros = ('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח', 'להלן הניתוח', 'בבקשה')
             for p in paragraphs:
                 clean_p = re.sub(r'</?p\b[^>]*>', '', p, flags=re.IGNORECASE).strip()
                 # במקום למחוק את כל הפסקה, ננקה רק את משפט הפתיחה אם הוא קיים
@@ -186,10 +185,10 @@ def update_insights(model, games_list):
 
         # בדיקה שהתגובה אכן מכילה טקסט לפני הגישה ל-.text
         res_he = model.generate_content(prompt_he, safety_settings=safety_settings)
-        new_insights_he = process_ai_response(res_he.text, "lang-he") if res_he.candidates else ""
+        new_insights_he = process_ai_response(res_he.text, "lang-he") if res_he and res_he.candidates else ""
 
         res_en = model.generate_content(prompt_en, safety_settings=safety_settings)
-        new_insights_en = process_ai_response(res_en.text, "lang-en") if res_en.candidates else ""
+        new_insights_en = process_ai_response(res_en.text, "lang-en") if res_en and res_en.candidates else ""
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
@@ -440,7 +439,7 @@ def main():
                     sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
             
             # שימוש בביטוי רגולרי גמיש יותר לזיהוי ה-div
-            insights_pattern = r'(<div\s+[^>]*class=["\'][^"\']*insights-content[^"\']*["\'][^>]*>).*?(</div>)'
+            insights_pattern = r'(<div\s+[^>]*class=["\'][^"\']*insights-content[^"\']*["\'][^>]*>)\s*.*?\s*(</div>)'
             if re.search(insights_pattern, html_content, flags=re.DOTALL):
                 html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
                 logging.info("Insights section prepared for update.")
