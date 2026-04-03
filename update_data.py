@@ -114,6 +114,7 @@ def update_insights(model, games_list):
     ])
 
     try:
+        # הגדרות בטיחות מתירניות למניעת חסימות שגויות בניתוחי ספורט
         safety_settings = [
             {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
             {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -122,11 +123,12 @@ def update_insights(model, games_list):
         ]
 
         prompt_he = f"""
-        Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הכללית עבור שאר הקבוצות (שיכולה להיות לא מעודכנת):
+        עונה: 2025/2026. תאריך: {datetime.now().strftime('%d/%m/%Y')}
+        אתה פרשן כדורסל מומחה. עליך לנתח אך ורק את מצבה של מכבי רחובות.
+        להלן נתוני הטבלה עבור שאר הקבוצות:
         {filtered_standings_text}
 
-        נתוני אמת של מכבי רחובות (השתמש רק בהם!):
+        נתוני אמת בלעדיים למכבי רחובות (חובה להשתמש רק בהם!):
         {live_stats_msg}
 
         תוצאות המשחקים האחרונים של רחובות:
@@ -137,8 +139,8 @@ def update_insights(model, games_list):
         נתח את הסיכויים מול נהריה והפועל חיפה.
         
         דגשים:
-        1. אל תוסיף הקדמות. החזר רק פסקאות עטופות ב-<p>. 
-        השתמש ב-<strong> להדגשת שמות קבוצות ומספרים. המר כל סימון Markdown של כוכביות לתגיות HTML.
+        1. אל תוסיף הקדמות. החזר רק קוד HTML של פסקאות <p>. 
+        2. השתמש ב-<strong> להדגשת שמות ומספרים. המר כוכביות (**) לתגיות <strong>.
         """
 
         prompt_en = f"""
@@ -184,12 +186,18 @@ def update_insights(model, games_list):
                     wrapped += f'<p class="{lang_class}">{clean_p}</p>\n'
             return wrapped
 
-        # בדיקה שהתגובה אכן מכילה טקסט לפני הגישה ל-.text
-        res_he = model.generate_content(prompt_he, safety_settings=safety_settings)
-        new_insights_he = process_ai_response(res_he.text, "lang-he") if (res_he and res_he.candidates) else ""
+        def safe_get_text(prompt):
+            try:
+                response = model.generate_content(prompt, safety_settings=safety_settings)
+                if response and response.candidates and response.candidates[0].content.parts:
+                    return response.text
+                return ""
+            except Exception as e:
+                logging.error(f"AI Error: {e}")
+                return ""
 
-        res_en = model.generate_content(prompt_en, safety_settings=safety_settings)
-        new_insights_en = process_ai_response(res_en.text, "lang-en") if (res_en and res_en.candidates) else ""
+        new_insights_he = process_ai_response(safe_get_text(prompt_he), "lang-he")
+        new_insights_en = process_ai_response(safe_get_text(prompt_en), "lang-en")
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
