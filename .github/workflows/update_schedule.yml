@@ -1,5 +1,0 @@
-# קובץ זה בוטל כדי למנוע התנגשויות.
-# כל העדכונים מבוצעים דרך daily-update.yml
-name: Deprecated Workflow
-on: push: branches: [ ignore_this_branch ]
-jobs: { dummy: { runs-on: ubuntu-latest, steps: [ { run: echo "Disabled" } ] } }
