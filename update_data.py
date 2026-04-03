@@ -60,17 +60,19 @@ def update_insights(client, games_list):
     for g in games_list:
         if 'רחובות' in g['home'] or 'רחובות' in g['away']:
             if g['home_score'] != '-' and g['away_score'] != '-':
-                try:
-                    h_score = int(g['home_score'])
-                    a_score = int(g['away_score'])
-                    # ספירה רק אם המשחק באמת התקיים (לפחות קבוצה אחת קלעה)
-                    if h_score > 10 or a_score > 10:
+                h_score_str = str(g['home_score']).strip()
+                a_score_str = str(g['away_score']).strip()
+                if h_score_str.isdigit() and a_score_str.isdigit():
+                    try:
+                        h_score, a_score = int(h_score_str), int(a_score_str)
+                        if h_score <= 10 and a_score <= 10: continue # דילוג על משחקים שלא שוחקו
+                        
                         is_home = 'רחובות' in g['home']
                         if (is_home and h_score > a_score) or (not is_home and a_score > h_score):
                             rehovot_wins += 1
                         else:
                             rehovot_losses += 1
-                except: continue
+                    except: continue
     
     rehovot_gp = rehovot_wins + rehovot_losses
     rehovot_points = (rehovot_wins * 2) + rehovot_losses
@@ -87,7 +89,7 @@ def update_insights(client, games_list):
     # עקיפת זיכרון מטמון (Cache) כדי לקבל נתונים טריים כמו באקסל
     try:
         timestamp = int(datetime.now().timestamp())
-        url = f"https://ibasketball.co.il/league/2025-2/?league_id=119474&nocache={timestamp}"
+        url = f"https://ibasketball.co.il/league/2026-2/?league_id=119474&nocache={timestamp}"
         headers = {'User-Agent': 'Mozilla/5.0'}
         r = requests.get(url, headers=headers, timeout=15)
         if r.status_code == 200:
@@ -108,12 +110,13 @@ def update_insights(client, games_list):
         logging.info(f"Standings data fetched. Length: {len(standings_text)} chars.")
 
     # הגדרת המשתנה החסר עבור ה-AI - שימוש בטבלה המלאה כהקשר לניתוח הסיכויים
+    # הגדרת המשתנה החסר שגרם ל-AI להיכשל
     full_standings_context = standings_text if standings_text else "Official standings table currently unavailable."
     logging.info("Contextual standings prepared for AI analysis.")
 
     # אם standings_text זמין, ננסה להסיר את השורה של מכבי רחובות כדי למנוע נתונים סותרים
     filtered_standings_text = standings_text
-    if standings_text and ("מכבי רחובות" in standings_text or "Maccabi Rehovot" in standings_text):
+    if standings_text and "מכבי רחובות" in standings_text:
         lines = standings_text.split('\n')
         filtered_lines = [line for line in lines if "מכבי רחובות" not in line and "Maccabi Rehovot" not in line]
         filtered_standings_text = "\n".join(filtered_lines)
@@ -134,12 +137,11 @@ def update_insights(client, games_list):
         
         League Context (Standings Table): {full_standings_context}
         Maccabi Rehovot Verified Stats: {rehovot_wins} wins, {rehovot_losses} losses ({rehovot_gp} games total).
-        Recent Results: {results_summary}
+        Recent Results from Excel: {results_summary}
 
         Output Instructions:
         1. Write exactly 3 professional paragraphs in HEBREW.
-        2. Focus on the RANKING and CHANCES to advance or maintain position.
-        3. Analyze the race against Ironi Nahariya and Hapoel Haifa specifically.
+        2. Focus on the RANKING and the PROBABILITY of promotion to the first division.
         3. Return ONLY HTML <p> tags. Use <strong> for team names and numbers.
         4. No introductory phrases or conversational filler.
         """
@@ -422,7 +424,7 @@ def main():
     """הפונקציה הראשית שמריצה את תהליך העדכון."""
     logging.info("Starting data update process.")
     
-    excel_url = "https://ibasketball.co.il/league/2025-2/?feed=xlsx&league_id=119474"
+    excel_url = "https://ibasketball.co.il/league/2026-2/?feed=xlsx&league_id=119474"
     new_games_html, next_game_date_str, all_games = update_games(excel_url)
 
     # עדכון התובנות - כעת שולחים גם את רשימת המשחקים שחולצה מהאקסל
