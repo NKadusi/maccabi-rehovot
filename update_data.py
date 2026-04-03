@@ -65,7 +65,6 @@ def update_insights(client, games_list):
                     a_score = int(g['away_score'])
                     # ספירה רק אם המשחק באמת התקיים (לפחות קבוצה אחת קלעה)
                     if h_score > 10 or a_score > 10:
-                        rehovot_gp += 1
                         is_home = 'רחובות' in g['home']
                         if (is_home and h_score > a_score) or (not is_home and a_score > h_score):
                             rehovot_wins += 1
@@ -73,6 +72,7 @@ def update_insights(client, games_list):
                             rehovot_losses += 1
                 except: continue
     
+    rehovot_gp = rehovot_wins + rehovot_losses
     rehovot_points = (rehovot_wins * 2) + rehovot_losses
     live_stats_msg = f"מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות ליגה."
     
@@ -106,6 +106,10 @@ def update_insights(client, games_list):
         standings_text = "Official table unavailable. Use game results for calculations."
     else:
         logging.info(f"Standings data fetched. Length: {len(standings_text)} chars.")
+
+    # הגדרת המשתנה החסר עבור ה-AI - שימוש בטבלה המלאה כהקשר לניתוח הסיכויים
+    full_standings_context = standings_text if standings_text else "Official standings table currently unavailable."
+    logging.info("Contextual standings prepared for AI analysis.")
 
     # אם standings_text זמין, ננסה להסיר את השורה של מכבי רחובות כדי למנוע נתונים סותרים
     filtered_standings_text = standings_text
