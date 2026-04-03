@@ -3,7 +3,7 @@ import os
 import re
 import requests
 from bs4 import BeautifulSoup
-import google.generativeai as genai
+from google import genai
 from collections import defaultdict
 import logging
 import pandas as pd
@@ -34,25 +34,55 @@ HEBREW_WEEKDAYS = {
     "Thursday": "חמישי", "Friday": "שישי", "Saturday": "שבת", "Sunday": "ראשון"
 }
 
-def get_gemini_model():
-    """מגדיר את החיבור ל-Gemini ומחזיר מודל."""
+def get_gemini_client():
+    """מגדיר את החיבור ל-Gemini ומחזיר קליינט."""
     try:
         api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key:
             logging.error("GEMINI_API_KEY not found in environment variables.")
             return None
-        genai.configure(api_key=api_key)
-        # שימוש בגרסה יציבה יותר למניעת חסימות שווא
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
-        return model
+        client = genai.Client(api_key=api_key)
+        return client
     except Exception as e:
         logging.error(f"Error connecting to Gemini: {e}")
     return None
 
-def update_insights(model, games_list):
+def update_insights(client, games_list):
     """מפיק תובנות סטטיסטיות על הקבוצה ומחזיר אותן כ-HTML."""
-    if not model or not games_list:
+    if not games_list:
         return None
+
+    # חישוב מאזן מדויק עבור רחובות ישירות מהאקסל (Live Stats)
+    # אנחנו עושים זאת כאן כדי שיהיה לנו Fallback גם אם ה-AI נכשל
+    rehovot_wins = 0
+    rehovot_losses = 0
+    rehovot_gp = 0
+    for g in games_list:
+        if 'רחובות' in g['home'] or 'רחובות' in g['away']:
+            if g['home_score'] != '-' and g['away_score'] != '-':
+                rehovot_gp += 1
+                try:
+                    h_score = int(g['home_score'])
+                    a_score = int(g['away_score'])
+                    # ספירה רק אם המשחק באמת התקיים (תוצאה שונה מ-0:0)
+                    if h_score > 0 or a_score > 0:
+                        rehovot_gp += 1
+                        if 'רחובות' in g['home']:
+                            if h_score > a_score: rehovot_wins += 1
+                            else: rehovot_losses += 1
+                        else:
+                            if a_score > h_score: rehovot_wins += 1
+                            else: rehovot_losses += 1
+                except: continue
+    
+    rehovot_points = (rehovot_wins * 2) + rehovot_losses
+    live_stats_msg = f"מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות."
+    
+    if not client:
+        logging.warning("Gemini client not initialized. Using fallback stats.")
+        fallback_html = f'<p class="lang-he"><strong>עדכון סטטיסטי:</strong> {live_stats_msg}</p>'
+        fallback_html += f'<p class="lang-en"><strong>Live Stats:</strong> Maccabi Rehovot: {rehovot_gp} games, {rehovot_wins} wins, {rehovot_losses} losses.</p>'
+        return fallback_html
     
     standings_text = ""
     # משיכת טבלת הדירוג הרשמית מאתר איגוד הכדורסל 
@@ -86,30 +116,6 @@ def update_insights(model, games_list):
         filtered_lines = [line for line in lines if "מכבי רחובות" not in line and "Maccabi Rehovot" not in line]
         filtered_standings_text = "\n".join(filtered_lines)
         logging.info("Removed Maccabi Rehovot's row from official standings to prevent data conflict.")
-    # חישוב מאזן מדויק עבור רחובות ישירות מהאקסל (Live Stats)
-    rehovot_wins = 0
-    rehovot_losses = 0
-    rehovot_gp = 0
-    for g in games_list:
-        if 'רחובות' in g['home'] or 'רחובות' in g['away']:
-            if g['home_score'] != '-' and g['away_score'] != '-':
-                rehovot_gp += 1
-                try:
-                    h_score = int(g['home_score'])
-                    a_score = int(g['away_score'])
-                    if 'רחובות' in g['home']:
-                        if h_score > a_score: rehovot_wins += 1
-                        else: rehovot_losses += 1
-                    else:
-                        if a_score > h_score: rehovot_wins += 1
-                        else: rehovot_losses += 1
-                except: continue
-    
-    rehovot_points = (rehovot_wins * 2) + rehovot_losses
-    live_stats_msg = f"מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות."
-    
-    # יצירת טקסט גיבוי למקרה שה-AI נכשל
-    fallback_html = f'<p class="lang-he"><strong>עדכון סטטיסטי:</strong> {live_stats_msg}</p>'
 
     # יצירת סיכום של תוצאות מהאקסל כדי לעזור למודל לעדכן את הנתונים
     results_summary = "\n".join([
@@ -118,13 +124,6 @@ def update_insights(model, games_list):
     ])
 
     try:
-        safety_settings = [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_ONLY_HIGH"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"},
-        ]
-
         prompt_he = f"""
         You are a professional basketball analyst providing an objective sports update.
         Season: 2025/2026. Date: {datetime.now().strftime('%d/%m/%Y')}
@@ -183,15 +182,12 @@ def update_insights(model, games_list):
 
         def get_safe_response(prompt):
             try:
-                response = model.generate_content(prompt, safety_settings=safety_settings)
-                if response.candidates:
-                    try:
-                        return response.text
-                    except ValueError:
-                        # This triggers if Gemini blocks the response (HARM_CATEGORY)
-                        logging.warning(f"Gemini blocked the response. Reason: {response.candidates[0].finish_reason}")
-                else:
-                    logging.warning("Gemini returned no candidates.")
+                response = client.models.generate_content(
+                    model='gemini-1.5-flash',
+                    contents=prompt
+                )
+                if response.text:
+                    return response.text
                 return ""
             except Exception as e:
                 logging.error(f"Gemini API Error: {e}")
@@ -209,11 +205,11 @@ def update_insights(model, games_list):
 
         combined_insights = f"{new_insights_he}\n{new_insights_en}".strip()
         
-        return combined_insights if len(combined_insights) > 20 else fallback_html
+        return combined_insights if len(combined_insights) > 50 else f'<p class="lang-he"><strong>עדכון סטטיסטי:</strong> {live_stats_msg}</p>'
         
     except Exception as e:
         logging.error(f"Error generating insights: {e}")
-        return fallback_html
+        return f'<p class="lang-he"><strong>עדכון סטטיסטי:</strong> {live_stats_msg}</p>'
 
 def update_games(excel_url):
     """קורא את לוח המשחקים, ממיין לפי תאריך, ומקבץ משחקי עבר."""
@@ -426,8 +422,8 @@ def main():
     new_games_html, next_game_date_str, all_games = update_games(excel_url)
 
     # עדכון התובנות - כעת שולחים גם את רשימת המשחקים שחולצה מהאקסל
-    gemini_model = get_gemini_model()
-    new_insights_html = update_insights(gemini_model, all_games)
+    gemini_client = get_gemini_client()
+    new_insights_html = update_insights(gemini_client, all_games)
 
     # 3. עדכון קובץ ה-HTML
     try:
