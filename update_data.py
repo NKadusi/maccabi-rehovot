@@ -175,8 +175,9 @@ def update_games(excel_url):
     home_col = find_col(['מארחת', 'קבוצה א', 'home', 'קבוצהא'])
     away_col = find_col(['אורחת', 'קבוצה ב', 'away', 'קבוצהב'])
     arena_col = find_col(['אולם', 'מגרש', 'venue', 'arena'])
-    home_score_col = find_col(['home score', 'תוצאה קבוצה א', 'תוצאת מארחת', 'תוצאה א', 'תוצאה', 'נקודות בית'])
-    away_score_col = find_col(['away score', 'תוצאה קבוצה ב', 'תוצאת אורחת', 'תוצאה ב', 'תוצאה.1', 'נקודות חוץ'])
+    home_score_col = find_col(['home score', 'תוצאה קבוצה א', 'תוצאת מארחת', 'תוצאה א', 'נקודות בית'])
+    away_score_col = find_col(['away score', 'תוצאה קבוצה ב', 'תוצאת אורחת', 'תוצאה ב', 'נקודות חוץ'])
+    general_score_col = find_col(['תוצאה', 'score', 'תוצאה סופית'])
 
     all_games = []
     for index, row in df.iterrows():
@@ -205,17 +206,34 @@ def update_games(excel_url):
             except Exception:
                 pass
 
-            home_score = str(row[home_score_col]).strip() if home_score_col and pd.notna(row[home_score_col]) else "-"
-            if home_score.endswith('.0'): home_score = home_score[:-2]
+            home_score, away_score = "-", "-"
+            # ניסיון חילוץ מעמודות נפרדות
+            if home_score_col and pd.notna(row[home_score_col]):
+                home_score = str(row[home_score_col]).strip()
+            if away_score_col and pd.notna(row[away_score_col]):
+                away_score = str(row[away_score_col]).strip()
+
+            # אם לא נמצאו תוצאות בנפרד, נבדוק אם יש עמודה מאוחדת (למשל 85-70)
+            if (home_score == "-" or away_score == "-") and general_score_col and pd.notna(row[general_score_col]):
+                score_val = str(row[general_score_col]).strip()
+                parts = re.split(r'[-\s:]+', score_val)
+                if len(parts) >= 2:
+                    p1 = "".join(filter(str.isdigit, parts[0]))
+                    p2 = "".join(filter(str.isdigit, parts[1]))
+                    if p1 and p2:
+                        home_score, away_score = p1, p2
+
+            # ניקוי סיומות מיותרות ובדיקת תקינות
+            home_score = home_score[:-2] if home_score.endswith('.0') else home_score
+            away_score = away_score[:-2] if away_score.endswith('.0') else away_score
             
-            away_score = str(row[away_score_col]).strip() if away_score_col and pd.notna(row[away_score_col]) else "-"
-            if away_score.endswith('.0'): away_score = away_score[:-2]
+            home_score = home_score if home_score not in ['nan', '', 'None'] else '-'
+            away_score = away_score if away_score not in ['nan', '', 'None'] else '-'
 
             all_games.append({
                 'mahzor': mahzor, 'date_obj': date_obj, 'time': time_str,
                 'home': str(row[home_col]), 'away': str(row[away_col]), 'arena': str(row.get(arena_col, '')),
-                'home_score': home_score if home_score not in ['nan', ''] else '-',
-                'away_score': away_score if away_score not in ['nan', ''] else '-'
+                'home_score': home_score, 'away_score': away_score
             })
         except (KeyError, ValueError, TypeError) as e:
             logging.warning(f"Skipping row {index} due to parsing error: {e}")
