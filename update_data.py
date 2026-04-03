@@ -62,10 +62,10 @@ def update_insights(model, games_list):
         headers = {'User-Agent': 'Mozilla/5.0'}
         r = requests.get(url, headers=headers, timeout=10)
         if r.status_code == 200:
-            tables = pd.read_html(io.BytesIO(r.content))
+            tables = pd.read_html(io.BytesIO(r.content), flavor='bs4')
             for df in tables:
                 text_rep = df.to_string()
-                if 'קבוצה' in text_rep and ('ניצ' in text_rep or 'נק' in text_rep):
+                if 'קבוצה' in text_rep and ('ניצחונות' in text_rep or 'נקודות' in text_rep or 'נק\'' in text_rep):
                     standings_text = df.to_string(index=False)
                     break
     except Exception as e:
@@ -78,37 +78,45 @@ def update_insights(model, games_list):
 
     # יצירת סיכום של תוצאות מהאקסל כדי לעזור למודל לעדכן את הנתונים
     results_summary = "\n".join([
-        f"מחזור {g['mahzor']} ({g['date_obj'].strftime('%d/%m')}): {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
+        f"מחזור {g['mahzor']} ({g['date_obj'].strftime('%d/%m/%Y')}): {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
         for g in games_list if g['home_score'] != '-' and g['away_score'] != '-'
     ])
 
     try:
         prompt_he = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים ומעודכנים מהטבלה הרשמית של איגוד הכדורסל בישראל:
+        אתה פרשן כדורסל מומחה לניתוח נתונים. להלן נתונים גולמיים מהטבלה הרשמית (יתכן שהיא לא מעודכנת ב-100%):
         {standings_text}
 
-        בנוסף, להלן תוצאות המשחקים האחרונים שחולצו מקובץ האקסל המעודכן ביותר:
+        שים לב! להלן רשימת כל המשחקים עם תוצאות סופיות שחולצו ישירות מקובץ האקסל המעודכן. 
+        עליך להשתמש ברשימה זו כדי לעדכן את הנתונים מהטבלה הרשמית במידה והם חסרים:
         {results_summary}
 
         כתוב 3 פסקאות קצרות ומקצועיות של מסקנות סטטיסטיות על מצבה של קבוצת 'מכבי רחובות' (או מכבי ברק רחובות).
-        התייחס למאבק על המקום ה-2, ליתרון הביתיות (מקומות 2-5) ולסכנות מול הקבוצות שמתחתיה לקראת הפלייאוף.
-        אל תנחש, תתבסס רק על המתמטיקה והמאזנים שמופיעים בטקסט.
+        משימות הניתוח:
+        1. חשב את המאזן המדויק (משחקים, ניצחונות, הפסדים, נקודות) של רחובות על סמך שילוב הטבלה והתוצאות החדשות.
+        2. נתח את המאבק על המקום ה-2 ויתרון הביתיות (מקומות 2-5).
+        3. הערך סיכונים מול הקבוצות הדולקות אחריה (כמו נהריה וחיפה).
+        
+        דגשים: אל תנחש, תתבסס רק על המתמטיקה. השתמש בתגיות HTML של <p> ו-<strong> בלבד.
         חובה להשתמש בתגיות HTML של <p> ו-<strong> בלבד.
         אל תוסיף כותרות, טקסט הקדמה או פורמט Markdown. החזר אך ורק את הפסקאות.
         """
 
         prompt_en = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        You are a statistical basketball commentator. Below is raw, updated data from the official Israeli Basketball Association standings:
+        You are an expert basketball data analyst. Below is raw data from the official standings:
         {standings_text}
 
-        Additionally, here are the latest game results extracted from the Excel file:
+        IMPORTANT: The official table above may be outdated. Use the following game results to calculate the most accurate "Live Standings":
         {results_summary}
 
         Write 3 short, professional paragraphs of statistical conclusions regarding the status of the team 'Maccabi Rehovot' (or Maccabi Barak Rehovot).
-        Address the battle for 2nd place, home-court advantage (places 2-5), and the threats from teams ranked below them approaching the playoffs.
-        Do not guess; base your conclusions solely on the math and records shown in the text.
+        1. Calculate the exact current record (Games played, Wins, Losses, Points) for Rehovot by combining the table and new results.
+        2. Analyze the battle for 2nd place and home-court advantage.
+        3. Evaluate threats from teams ranked below (e.g., Nahariya, Haifa).
+
+        Use ONLY <p> and <strong> HTML tags. No Markdown. No headers.
         You must use ONLY <p> and <strong> HTML tags.
         Do not add headers, introductory text, or Markdown formatting. Return strictly the paragraphs.
         """
