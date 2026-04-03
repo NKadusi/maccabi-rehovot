@@ -114,51 +114,41 @@ def update_insights(model, games_list):
     ])
 
     try:
-        # הגדרות בטיחות מתירניות למניעת חסימות שגויות בניתוחי ספורט
         safety_settings = [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"}, # מאפשר תוכן שעלול להיות מזוהה בטעות כהטרדה
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"}, # מאפשר תוכן שעלול להיות מזוהה בטעות כהשמצה
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"}, # מאפשר תוכן שעלול להיות מזוהה בטעות כמיני
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}, # מאפשר תוכן שעלול להיות מזוהה בטעות כמסוכן
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
         ]
 
         prompt_he = f"""
-        Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הכללית עבור שאר הקבוצות (שיכולה להיות לא מעודכנת):
+        Season: 2025/2026. Date: {datetime.now().strftime('%d/%m/%Y')}
+        אתה פרשן כדורסל מומחה. עליך לנתח את מצב מכבי רחובות בלבד.
+        להלן נתוני הטבלה עבור שאר הקבוצות:
         {filtered_standings_text}
 
-        נתוני אמת של מכבי רחובות (השתמש רק בהם!):
-        מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות.
+        נתוני אמת בלעדיים למכבי רחובות (חובה להשתמש רק בהם!):
+        מאזן נוכחי: {rehovot_wins} ניצחונות ו-{rehovot_losses} הפסדים (סה"כ {rehovot_gp} משחקים).
 
         תוצאות המשחקים האחרונים של רחובות:
         {results_summary}
 
-        משימה: כתוב 3 פסקאות ניתוח על מצבה של מכבי רחובות בטבלה. 
-        השתמש במאזן המדויק שסופק לעיל עבור מכבי רחובות.
-        נתח את הסיכויים שלה מול נהריה והפועל חיפה, תוך התבססות על נתוני האמת של רחובות ונתוני הטבלה של שאר הקבוצות.
-        
-        דגשים:
-        1. אל תוסיף הקדמות. החזר רק פסקאות עטופות ב-<p>. 
-        השתמש ב-<strong> להדגשת שמות קבוצות ומספרים. המר כל סימון Markdown של כוכביות לתגיות HTML.
+        משימה: כתוב 3 פסקאות ניתוח מקצועיות בעברית. 
+        השתמש במאזן המדויק שסופק לעיל. נתח את המאבק בצמרת מול נהריה והפועל חיפה.
+        חוקים: ללא הקדמות. השתמש ב-<strong> להדגשות. החזר רק תגיות <p>.
         """
 
         prompt_en = f"""
-        Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        Official Standings Table for other teams (may be outdated):
+        Season 2025/2026. Expert Analysis for Maccabi Rehovot.
+        Standings context:
         {filtered_standings_text}
-
-        Verified Live Stats for Maccabi Rehovot (MUST USE THESE ONLY):
-        Maccabi Rehovot: {rehovot_gp} games, {rehovot_wins} wins, {rehovot_losses} losses, {rehovot_points} points.
+        Verified Rehovot Record: {rehovot_wins} Wins, {rehovot_losses} Losses.
 
         Recent Rehovot Results:
         {results_summary}
 
         Task: Write 3 analytical paragraphs in English. 
-        Maccabi Rehovot has exactly {rehovot_wins} wins and {rehovot_losses} losses.
-        Analyze the race for 2nd place against Ironi Nahariya and Hapoel Haifa, using Rehovot's updated stats and the standings data for other teams.
-
-        Use ONLY <p> and <strong> tags. Convert all Markdown bold (**) to <strong>.
-        Return only the HTML content.
+        Focus on the battle for 2nd place. No intros. Use only <p> and <strong>.
         """
 
         def process_ai_response(response_text, lang_class):
@@ -185,12 +175,19 @@ def update_insights(model, games_list):
                     wrapped += f'<p class="{lang_class}">{clean_p}</p>\n'
             return wrapped
 
-        # בדיקה שהתגובה אכן מכילה טקסט לפני הגישה ל-.text
-        res_he = model.generate_content(prompt_he, safety_settings=safety_settings)
-        new_insights_he = process_ai_response(res_he.text, "lang-he") if (res_he and res_he.candidates) else ""
+        def get_safe_response(prompt):
+            try:
+                res = model.generate_content(prompt, safety_settings=safety_settings)
+                if res and res.candidates and len(res.candidates) > 0:
+                    if res.candidates[0].content.parts:
+                        return res.text
+                return ""
+            except Exception as e:
+                logging.error(f"Gemini API error: {e}")
+                return ""
 
-        res_en = model.generate_content(prompt_en, safety_settings=safety_settings)
-        new_insights_en = process_ai_response(res_en.text, "lang-en") if (res_en and res_en.candidates) else ""
+        new_insights_he = process_ai_response(get_safe_response(prompt_he), "lang-he")
+        new_insights_en = process_ai_response(get_safe_response(prompt_en), "lang-en")
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
@@ -440,10 +437,10 @@ def main():
                 with open(step_summary, 'a', encoding='utf-8') as sf:
                     sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
             
-            # ביטוי רגולרי גמיש שמוצא את ה-div גם אם יש רווחים או שינויים קלים
-            insights_pattern = r'(<div\s+class\s*=\s*["\']insights-content["\'][^>]*>).*?(</div>)'
+            # שימוש בסמני הערות להחלפה בטוחה של המסקנות
+            insights_pattern = r'(<!-- INSIGHTS_START -->).*?(<!-- INSIGHTS_END -->)'
             if re.search(insights_pattern, html_content, flags=re.DOTALL):
-                html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
+                html_content = re.sub(insights_pattern, rf'\1\n{new_insights_html}\n\2', html_content, flags=re.DOTALL)
                 logging.info("Insights section prepared for update.")
             else:
                 logging.error("Could not find <div class='insights-content'> in index.html")
