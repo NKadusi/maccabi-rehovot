@@ -274,7 +274,7 @@ def update_games(excel_url):
             time_str = "00:00"
             if time_col and pd.notna(row[time_col]):
                 time_val = row[time_col]
-                if isinstance(time_val, time):
+                if isinstance(time_val, datetime_time):
                     time_str = time_val.strftime('%H:%M')
                 else:
                     time_str = str(time_val).strip()[:5]
