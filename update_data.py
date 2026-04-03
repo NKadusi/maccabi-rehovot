@@ -60,23 +60,21 @@ def update_insights(client, games_list):
     for g in games_list:
         if 'רחובות' in g['home'] or 'רחובות' in g['away']:
             if g['home_score'] != '-' and g['away_score'] != '-':
-                rehovot_gp += 1
                 try:
                     h_score = int(g['home_score'])
                     a_score = int(g['away_score'])
-                    # ספירה רק אם המשחק באמת התקיים (תוצאה שונה מ-0:0)
-                    if h_score > 0 or a_score > 0:
+                    # ספירה רק אם המשחק באמת התקיים (לפחות קבוצה אחת קלעה)
+                    if h_score > 10 or a_score > 10:
                         rehovot_gp += 1
-                        if 'רחובות' in g['home']:
-                            if h_score > a_score: rehovot_wins += 1
-                            else: rehovot_losses += 1
+                        is_home = 'רחובות' in g['home']
+                        if (is_home and h_score > a_score) or (not is_home and a_score > h_score):
+                            rehovot_wins += 1
                         else:
-                            if a_score > h_score: rehovot_wins += 1
-                            else: rehovot_losses += 1
+                            rehovot_losses += 1
                 except: continue
     
     rehovot_points = (rehovot_wins * 2) + rehovot_losses
-    live_stats_msg = f"מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות."
+    live_stats_msg = f"מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות ליגה."
     
     if not client:
         logging.warning("Gemini client not initialized. Using fallback stats.")
@@ -130,13 +128,14 @@ def update_insights(client, games_list):
         
         Task: Analyze the current standing of the team 'Maccabi Rehovot'.
         
-        Reference Standings (Other teams): {filtered_standings_text}
+        League Context (Standings Table): {full_standings_context}
         Maccabi Rehovot Verified Stats: {rehovot_wins} wins, {rehovot_losses} losses ({rehovot_gp} games total).
         Recent Results: {results_summary}
 
         Output Instructions:
         1. Write exactly 3 professional paragraphs in HEBREW.
-        2. Focus on the competition with Ironi Nahariya and Hapoel Haifa.
+        2. Focus on the RANKING and CHANCES to advance or maintain position.
+        3. Analyze the race against Ironi Nahariya and Hapoel Haifa specifically.
         3. Return ONLY HTML <p> tags. Use <strong> for team names and numbers.
         4. No introductory phrases or conversational filler.
         """
@@ -145,13 +144,14 @@ def update_insights(client, games_list):
         You are a professional basketball analyst providing an objective sports update.
         Season: 2025/2026. Date: {datetime.now().strftime('%d/%m/%Y')}
 
-        Standings context: {filtered_standings_text}
+        Standings context: {full_standings_context}
         Maccabi Rehovot Record: {rehovot_wins} Wins, {rehovot_losses} Losses.
         Recent Results: {results_summary}
 
         Output Instructions:
         1. Write 3 professional paragraphs in ENGLISH.
-        2. Focus on the race for 2nd place.
+        2. Focus on the ranking and the PROBABILITY of promotion/playoff advantage.
+        3. Mention the gap from 1st and 3rd places.
         3. Return ONLY HTML <p> tags. Use <strong> for names and numbers.
         4. No introductory phrases or conversational filler.
         """
