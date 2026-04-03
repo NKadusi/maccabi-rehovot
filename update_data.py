@@ -60,7 +60,7 @@ def update_insights(model, games_list):
         timestamp = int(datetime.now().timestamp())
         url = f"https://ibasketball.co.il/league/2025-2/?league_id=119474&nocache={timestamp}"
         headers = {'User-Agent': 'Mozilla/5.0'}
-        r = requests.get(url, headers=headers, timeout=10)
+        r = requests.get(url, headers=headers, timeout=15)
         if r.status_code == 200:
             tables = pd.read_html(io.BytesIO(r.content))
             for df in tables:
@@ -114,7 +114,6 @@ def update_insights(model, games_list):
     ])
 
     try:
-        # הגדרות בטיחות למניעת חסימות שווא של תוכן ספורט
         safety_settings = [
             {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
             {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -127,20 +126,19 @@ def update_insights(model, games_list):
         אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הכללית עבור שאר הקבוצות (שיכולה להיות לא מעודכנת):
         {filtered_standings_text}
 
-        נתוני אמת מעודכנים עבור מכבי רחובות (חובה להשתמש רק בהם עבור רחובות!):
+        נתוני אמת של מכבי רחובות (השתמש רק בהם!):
         {live_stats_msg}
 
         תוצאות המשחקים האחרונים של רחובות:
         {results_summary}
 
-        משימה: כתוב 3 פסקאות ניתוח מקצועיות על מצבה של מכבי רחובות. 
-        השתמש במאזן המדויק: {rehovot_wins} ניצחונות ו-{rehovot_losses} הפסדים ({rehovot_points} נקודות).
-        נתח את המאבק בצמרת מול נהריה והפועל חיפה על בסיס נתוני האמת שסופקו כאן.
+        משימה: כתוב 3 פסקאות ניתוח על מצבה של מכבי רחובות בטבלה. 
+        השתמש במאזן המדויק שסופק לעיל: {rehovot_wins} ניצחונות ו-{rehovot_losses} הפסדים.
+        נתח את הסיכויים מול נהריה והפועל חיפה.
         
-        דגשים חשובים:
-        1. אל תוסיף הקדמות כמו "הנה הניתוח". החזר רק פסקאות עטופות ב-<p>. 
+        דגשים:
+        1. אל תוסיף הקדמות. החזר רק פסקאות עטופות ב-<p>. 
         השתמש ב-<strong> להדגשת שמות קבוצות ומספרים. המר כל סימון Markdown של כוכביות לתגיות HTML.
-        2. אם נתוני הטבלה הכללית סותרים את נתוני האמת של רחובות, התעלם מהטבלה והשתמש רק בנתוני האמת.
         """
 
         prompt_en = f"""
@@ -148,7 +146,7 @@ def update_insights(model, games_list):
         Official Standings Table for other teams (may be outdated):
         {filtered_standings_text}
 
-        Verified Live Stats for Maccabi Rehovot (Use these!):
+        Verified Live Stats for Maccabi Rehovot (MUST USE THESE):
         {live_stats_msg}
 
         Recent Rehovot Results:
@@ -163,7 +161,7 @@ def update_insights(model, games_list):
         """
 
         def process_ai_response(response_text, lang_class):
-            if not response_text or len(response_text) < 10: return ""
+            if not response_text or len(response_text) < 20: return ""
             # ניקוי פורמט Markdown
             text = re.sub(r'```(?:html|markdown)?\s*', '', response_text, flags=re.IGNORECASE)
             text = text.replace('```', '').strip()
@@ -175,7 +173,6 @@ def update_insights(model, games_list):
             paragraphs = [m.strip() for m in p_matches if m.strip()] if p_matches else [p.strip() for p in re.split(r'\n+', text) if p.strip()]
             
             wrapped = ""
-            # הגדרת ביטויי פתיחה לניקוי
             intros = ('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח', 'להלן הניתוח', 'בבקשה', 'ניתוח מצבה')
             for p in paragraphs:
                 clean_p = re.sub(r'</?p\b[^>]*>', '', p, flags=re.IGNORECASE).strip()
@@ -189,10 +186,10 @@ def update_insights(model, games_list):
 
         # בדיקה שהתגובה אכן מכילה טקסט לפני הגישה ל-.text
         res_he = model.generate_content(prompt_he, safety_settings=safety_settings)
-        new_insights_he = process_ai_response(res_he.text, "lang-he") if res_he and res_he.candidates else ""
+        new_insights_he = process_ai_response(res_he.text, "lang-he") if (res_he and res_he.candidates) else ""
 
         res_en = model.generate_content(prompt_en, safety_settings=safety_settings)
-        new_insights_en = process_ai_response(res_en.text, "lang-en") if res_en and res_en.candidates else ""
+        new_insights_en = process_ai_response(res_en.text, "lang-en") if (res_en and res_en.candidates) else ""
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
@@ -435,15 +432,15 @@ def main():
                 else:
                     logging.info("לוח המשחקים נשאר ללא שינוי.")
 
-        if new_insights_html and len(new_insights_html.strip()) > 50:
+        if new_insights_html and len(new_insights_html.strip()) > 20:
             # כתיבת התשובה לסיכום הריצה ב-GitHub לצורך ניפוי שגיאות
             step_summary = os.environ.get('GITHUB_STEP_SUMMARY')
             if step_summary:
                 with open(step_summary, 'a', encoding='utf-8') as sf:
                     sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
             
-            # שימוש בביטוי רגולרי גמיש יותר לזיהוי ה-div
-            insights_pattern = r'(<div\s+[^>]*class=["\'][^"\']*insights-content[^"\']*["\'][^>]*>)\s*.*?\s*(</div>)'
+            # ביטוי רגולרי פשוט ואמין יותר לזיהוי ה-div
+            insights_pattern = r'(<div class="insights-content">).*?(</div>)'
             if re.search(insights_pattern, html_content, flags=re.DOTALL):
                 html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
                 logging.info("Insights section prepared for update.")
