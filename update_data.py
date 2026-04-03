@@ -62,19 +62,21 @@ def update_insights(model, games_list):
         headers = {'User-Agent': 'Mozilla/5.0'}
         r = requests.get(url, headers=headers, timeout=10)
         if r.status_code == 200:
-            tables = pd.read_html(io.BytesIO(r.content), flavor='bs4')
+            tables = pd.read_html(io.BytesIO(r.content))
             for df in tables:
                 text_rep = df.to_string()
-                if 'קבוצה' in text_rep and ('ניצחונות' in text_rep or 'נקודות' in text_rep or 'נק\'' in text_rep):
+                if 'קבוצה' in text_rep and any(k in text_rep for k in ['ניצחונות', 'נקודות', 'נק\'', 'משחקים']):
                     standings_text = df.to_string(index=False)
                     break
     except Exception as e:
         logging.warning(f"Failed to fetch standings from association site: {e}")
-    logging.info(f"Standings data fetched. Length: {len(standings_text)} chars.")
 
-    if not standings_text or len(standings_text) < 100:
-        logging.error("No standings data found.")
-        return None # מחזיר None כדי לא לדרוס את הקיים במקרה של שגיאה
+    # אם לא נמצאה טבלה, נבנה טקסט בסיסי מרשימת המשחקים כגיבוי
+    if not standings_text:
+        logging.warning("No standings table found, using game list as primary source.")
+        standings_text = "Official table unavailable. Use game results for calculations."
+    else:
+        logging.info(f"Standings data fetched. Length: {len(standings_text)} chars.")
 
     # יצירת סיכום של תוצאות מהאקסל כדי לעזור למודל לעדכן את הנתונים
     results_summary = "\n".join([
@@ -111,20 +113,21 @@ def update_insights(model, games_list):
         IMPORTANT: The official table above may be outdated. Use the following game results to calculate the most accurate "Live Standings":
         {results_summary}
 
-        Write 3 short, professional paragraphs of statistical conclusions regarding the status of the team 'Maccabi Rehovot' (or Maccabi Barak Rehovot).
-        1. Calculate the exact current record (Games played, Wins, Losses, Points) for Rehovot by combining the table and new results.
-        2. Analyze the battle for 2nd place and home-court advantage.
-        3. Evaluate threats from teams ranked below (e.g., Nahariya, Haifa).
-
-        Use ONLY <p> and <strong> HTML tags. No Markdown. No headers.
-        You must use ONLY <p> and <strong> HTML tags.
-        Do not add headers, introductory text, or Markdown formatting. Return strictly the paragraphs.
+        Tasks:
+        1. Count actual games played from the result list.
+        2. Update the record for Maccabi Rehovot if the official table is lagging.
+        3. Write 3 analytical paragraphs in English.
+        
+        Use ONLY <p> and <strong> tags. Convert all Markdown bold (**) to <strong>.
+        Return only the HTML content.
         """
 
         def process_ai_response(response_text, lang_class):
             # ניקוי פורמט Markdown אם קיים
             text = re.sub(r'^```[a-zA-Z]*\s*', '', response_text.strip(), flags=re.IGNORECASE)
             text = re.sub(r'\s*```$', '', text).strip()
+            # המרת Markdown Bold ל-HTML Strong
+            text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
             # פירוק לפסקאות ועטיפה בתגיות HTML עם המחלקה המתאימה לשפה
             paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
             wrapped = ""
@@ -383,6 +386,12 @@ def main():
                     logging.info("לוח המשחקים נשאר ללא שינוי.")
 
         if new_insights_html:
+            # כתיבת התשובה לסיכום הריצה ב-GitHub לצורך ניפוי שגיאות
+            step_summary = os.environ.get('GITHUB_STEP_SUMMARY')
+            if step_summary:
+                with open(step_summary, 'a', encoding='utf-8') as sf:
+                    sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
+            
             insights_pattern = r'(<div class="insights-content">).*?(</div>)'
             html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
             logging.info("Insights section prepared for update.")
