@@ -116,31 +116,30 @@ def update_insights(model, games_list):
     try:
         # הגדרות בטיחות מתירניות למניעת חסימות שגויות בניתוחי ספורט
         safety_settings = [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"}, # מאפשר תוכן שעלול להיות מזוהה בטעות כהטרדה
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"}, # מאפשר תוכן שעלול להיות מזוהה בטעות כהשמצה
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"}, # מאפשר תוכן שעלול להיות מזוהה בטעות כמיני
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}, # מאפשר תוכן שעלול להיות מזוהה בטעות כמסוכן
         ]
 
         prompt_he = f"""
-        עונה: 2025/2026. תאריך: {datetime.now().strftime('%d/%m/%Y')}
-        אתה פרשן כדורסל מומחה. עליך לנתח אך ורק את מצבה של מכבי רחובות.
-        להלן נתוני הטבלה עבור שאר הקבוצות:
+        Today's Date: {datetime.now().strftime('%d/%m/%Y')}
+        אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הכללית עבור שאר הקבוצות (שיכולה להיות לא מעודכנת):
         {filtered_standings_text}
 
-        נתוני אמת בלעדיים למכבי רחובות (חובה להשתמש רק בהם!):
-        {live_stats_msg}
+        נתוני אמת של מכבי רחובות (השתמש רק בהם!):
+        מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות.
 
         תוצאות המשחקים האחרונים של רחובות:
         {results_summary}
 
         משימה: כתוב 3 פסקאות ניתוח על מצבה של מכבי רחובות בטבלה. 
-        השתמש במאזן המדויק שסופק לעיל: {rehovot_wins} ניצחונות ו-{rehovot_losses} הפסדים.
-        נתח את הסיכויים מול נהריה והפועל חיפה.
+        השתמש במאזן המדויק שסופק לעיל עבור מכבי רחובות.
+        נתח את הסיכויים שלה מול נהריה והפועל חיפה, תוך התבססות על נתוני האמת של רחובות ונתוני הטבלה של שאר הקבוצות.
         
         דגשים:
-        1. אל תוסיף הקדמות. החזר רק קוד HTML של פסקאות <p>. 
-        2. השתמש ב-<strong> להדגשת שמות ומספרים. המר כוכביות (**) לתגיות <strong>.
+        1. אל תוסיף הקדמות. החזר רק פסקאות עטופות ב-<p>. 
+        השתמש ב-<strong> להדגשת שמות קבוצות ומספרים. המר כל סימון Markdown של כוכביות לתגיות HTML.
         """
 
         prompt_en = f"""
@@ -148,14 +147,14 @@ def update_insights(model, games_list):
         Official Standings Table for other teams (may be outdated):
         {filtered_standings_text}
 
-        Verified Live Stats for Maccabi Rehovot (MUST USE THESE):
-        {live_stats_msg}
+        Verified Live Stats for Maccabi Rehovot (MUST USE THESE ONLY):
+        Maccabi Rehovot: {rehovot_gp} games, {rehovot_wins} wins, {rehovot_losses} losses, {rehovot_points} points.
 
         Recent Rehovot Results:
         {results_summary}
 
         Task: Write 3 analytical paragraphs in English. 
-        Maccabi Rehovot has exactly {rehovot_points} points from {rehovot_gp} games.
+        Maccabi Rehovot has exactly {rehovot_wins} wins and {rehovot_losses} losses.
         Analyze the race for 2nd place against Ironi Nahariya and Hapoel Haifa, using Rehovot's updated stats and the standings data for other teams.
 
         Use ONLY <p> and <strong> tags. Convert all Markdown bold (**) to <strong>.
@@ -175,7 +174,7 @@ def update_insights(model, games_list):
             paragraphs = [m.strip() for m in p_matches if m.strip()] if p_matches else [p.strip() for p in re.split(r'\n+', text) if p.strip()]
             
             wrapped = ""
-            intros = ('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח', 'להלן הניתוח', 'בבקשה', 'ניתוח מצבה')
+            intros = ('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח', 'להלן הניתוח', 'בבקשה', 'ניתוח מצבה', 'as an expert', 'in summary')
             for p in paragraphs:
                 clean_p = re.sub(r'</?p\b[^>]*>', '', p, flags=re.IGNORECASE).strip()
                 for intro in intros:
@@ -186,18 +185,12 @@ def update_insights(model, games_list):
                     wrapped += f'<p class="{lang_class}">{clean_p}</p>\n'
             return wrapped
 
-        def safe_get_text(prompt):
-            try:
-                response = model.generate_content(prompt, safety_settings=safety_settings)
-                if response and response.candidates and response.candidates[0].content.parts:
-                    return response.text
-                return ""
-            except Exception as e:
-                logging.error(f"AI Error: {e}")
-                return ""
+        # בדיקה שהתגובה אכן מכילה טקסט לפני הגישה ל-.text
+        res_he = model.generate_content(prompt_he, safety_settings=safety_settings)
+        new_insights_he = process_ai_response(res_he.text, "lang-he") if (res_he and res_he.candidates) else ""
 
-        new_insights_he = process_ai_response(safe_get_text(prompt_he), "lang-he")
-        new_insights_en = process_ai_response(safe_get_text(prompt_en), "lang-en")
+        res_en = model.generate_content(prompt_en, safety_settings=safety_settings)
+        new_insights_en = process_ai_response(res_en.text, "lang-en") if (res_en and res_en.candidates) else ""
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
@@ -448,7 +441,7 @@ def main():
                     sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
             
             # ביטוי רגולרי גמיש שמוצא את ה-div גם אם יש רווחים או שינויים קלים
-            insights_pattern = r'(<div[^>]*class=["\'][^"\']*insights-content[^"\']*["\'][^>]*>).*?(</div>)'
+            insights_pattern = r'(<div\s+class\s*=\s*["\']insights-content["\'][^>]*>).*?(</div>)'
             if re.search(insights_pattern, html_content, flags=re.DOTALL):
                 html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
                 logging.info("Insights section prepared for update.")
