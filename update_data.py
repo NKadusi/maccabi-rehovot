@@ -48,9 +48,9 @@ def get_gemini_model():
         logging.error(f"Error connecting to Gemini: {e}")
     return None
 
-def update_insights(model):
+def update_insights(model, games_list):
     """מפיק תובנות סטטיסטיות על הקבוצה ומחזיר אותן כ-HTML."""
-    if not model:
+    if not model or not games_list:
         return None
     
     standings_text = ""
@@ -75,11 +75,20 @@ def update_insights(model):
         logging.error("No standings data found.")
         return None # מחזיר None כדי לא לדרוס את הקיים במקרה של שגיאה
 
+    # יצירת סיכום של תוצאות מהאקסל כדי לעזור למודל לעדכן את הנתונים
+    results_summary = "\n".join([
+        f"מחזור {g['mahzor']}: {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
+        for g in games_list if g['home_score'] != '-' and g['away_score'] != '-'
+    ])
+
     try:
         prompt_he = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
         אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים ומעודכנים מהטבלה הרשמית של איגוד הכדורסל בישראל:
         {standings_text}
+
+        בנוסף, להלן תוצאות המשחקים האחרונים שחולצו מקובץ האקסל המעודכן ביותר:
+        {results_summary}
 
         כתוב 3 פסקאות קצרות ומקצועיות של מסקנות סטטיסטיות על מצבה של קבוצת 'מכבי רחובות' (או מכבי ברק רחובות).
         התייחס למאבק על המקום ה-2, ליתרון הביתיות (מקומות 2-5) ולסכנות מול הקבוצות שמתחתיה לקראת הפלייאוף.
@@ -92,6 +101,9 @@ def update_insights(model):
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
         You are a statistical basketball commentator. Below is raw, updated data from the official Israeli Basketball Association standings:
         {standings_text}
+
+        Additionally, here are the latest game results extracted from the Excel file:
+        {results_summary}
 
         Write 3 short, professional paragraphs of statistical conclusions regarding the status of the team 'Maccabi Rehovot' (or Maccabi Barak Rehovot).
         Address the battle for 2nd place, home-court advantage (places 2-5), and the threats from teams ranked below them approaching the playoffs.
@@ -222,14 +234,14 @@ def update_games(excel_url):
         if not is_rehovot_game and is_top_game:
             other_games_by_round[g['mahzor']].append(g)
 
-    # מציאת האינדקס של המשחק האחרון ששוחק
+    # מציאת האינדקס של המשחק האחרון ששוחק (כולל היום)
     past_game_indices = [i for i, g in enumerate(rehovot_games) if g['date_obj'] < today]
     last_played_game_idx = past_game_indices[-1] if past_game_indices else -1
 
     hidden_past_html = ""
     visible_html = ""
 
-    # מציאת המשחק הבא עבור שעון העצר
+    # מציאת המשחק הבא עבור שעון העצר (המשחק הראשון שזמנו גדול מהנוכחי)
     next_game_date_str = None
     first_future_game = next((g for g in rehovot_games if g['date_obj'] >= today), None)
     if first_future_game:
@@ -302,18 +314,18 @@ def update_games(excel_url):
         </tr>'''
         final_html = toggle_row + hidden_past_html + visible_html
         
-    return final_html, next_game_date_str
+    return final_html, next_game_date_str, all_games
 
 def main():
     """הפונקציה הראשית שמריצה את תהליך העדכון."""
     logging.info("Starting data update process.")
     
-    # עדכון התובנות מהטבלה הרשמית והמשחקים מקובץ האקסל
-    gemini_model = get_gemini_model()
-    new_insights_html = update_insights(gemini_model)
-    
     excel_url = "https://ibasketball.co.il/league/2025-2/?feed=xlsx&league_id=119474"
-    new_games_html, next_game_date_str = update_games(excel_url)
+    new_games_html, next_game_date_str, all_games = update_games(excel_url)
+
+    # עדכון התובנות - כעת שולחים גם את רשימת המשחקים שחולצה מהאקסל
+    gemini_model = get_gemini_model()
+    new_insights_html = update_insights(gemini_model, all_games)
 
     # 3. עדכון קובץ ה-HTML
     try:
