@@ -107,6 +107,9 @@ def update_insights(model, games_list):
     
     rehovot_points = (rehovot_wins * 2) + rehovot_losses
     live_stats_msg = f"מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות."
+    
+    # יצירת טקסט גיבוי למקרה שה-AI נכשל
+    fallback_html = f'<p class="lang-he"><strong>עדכון סטטיסטי:</strong> {live_stats_msg}</p>'
 
     # יצירת סיכום של תוצאות מהאקסל כדי לעזור למודל לעדכן את הנתונים
     results_summary = "\n".join([
@@ -204,12 +207,13 @@ def update_insights(model, games_list):
         new_insights_he = process_ai_response(res_he_raw, "lang-he")
         new_insights_en = process_ai_response(res_en_raw, "lang-en")
 
-        new_insights = f"{new_insights_he}\n{new_insights_en}"
-        return new_insights
+        combined_insights = f"{new_insights_he}\n{new_insights_en}".strip()
+        
+        return combined_insights if len(combined_insights) > 20 else fallback_html
+        
     except Exception as e:
         logging.error(f"Error generating insights: {e}")
-        return None
-
+        return fallback_html
 
 def update_games(excel_url):
     """קורא את לוח המשחקים, ממיין לפי תאריך, ומקבץ משחקי עבר."""
@@ -445,15 +449,15 @@ def main():
                 else:
                     logging.info("לוח המשחקים נשאר ללא שינוי.")
 
-        if new_insights_html and len(new_insights_html.strip()) > 20:
+        if new_insights_html:
             # כתיבת התשובה לסיכום הריצה ב-GitHub לצורך ניפוי שגיאות
             step_summary = os.environ.get('GITHUB_STEP_SUMMARY')
             if step_summary:
                 with open(step_summary, 'a', encoding='utf-8') as sf:
                     sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
             
-            # הזרקה בטוחה באמצעות פונקציית למדא למניעת שגיאות תווים מיוחדים
-            insights_pattern = r'(<!-- INSIGHTS_START -->).*?(<!-- INSIGHTS_END -->)'
+            # שימוש ב-Regex גמיש יותר שמתעלם מרווחים מיותרים בסמנים
+            insights_pattern = r'(<!--\s*INSIGHTS_START\s*-->).*?(<!--\s*INSIGHTS_END\s*-->)'
             if re.search(insights_pattern, html_content, flags=re.DOTALL):
                 html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
                 logging.info(f"Successfully injected {len(new_insights_html)} chars into insights section.")
