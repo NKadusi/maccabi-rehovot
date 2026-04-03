@@ -8,7 +8,7 @@ from collections import defaultdict
 import logging
 import pandas as pd
 import io
-import datetime
+from datetime import datetime, timedelta, time
 import urllib.parse
 from dotenv import load_dotenv
 
@@ -57,7 +57,7 @@ def update_insights(model):
     # משיכת טבלת הדירוג הרשמית מאתר איגוד הכדורסל 
     # עקיפת זיכרון מטמון (Cache) כדי לקבל נתונים טריים כמו באקסל
     try:
-        timestamp = int(datetime.datetime.now().timestamp())
+        timestamp = int(datetime.now().timestamp())
         url = f"https://ibasketball.co.il/league/2025-2/?nocache={timestamp}"
         headers = {'User-Agent': 'Mozilla/5.0'}
         r = requests.get(url, headers=headers, timeout=10)
@@ -71,12 +71,13 @@ def update_insights(model):
     except Exception as e:
         logging.warning(f"Failed to fetch standings from association site: {e}")
 
-    if not standings_text:
+    if not standings_text or len(standings_text) < 100:
         logging.error("No standings data found.")
         return None # מחזיר None כדי לא לדרוס את הקיים במקרה של שגיאה
 
     try:
         prompt_he = f"""
+        Today's Date: {datetime.now().strftime('%d/%m/%Y')}
         אתה פרשן סטטיסטי של כדורסל. להלן נתונים גולמיים ומעודכנים מהטבלה הרשמית של איגוד הכדורסל בישראל:
         {standings_text}
 
@@ -88,6 +89,7 @@ def update_insights(model):
         """
 
         prompt_en = f"""
+        Today's Date: {datetime.now().strftime('%d/%m/%Y')}
         You are a statistical basketball commentator. Below is raw, updated data from the official Israeli Basketball Association standings:
         {standings_text}
 
@@ -161,8 +163,8 @@ def update_games(excel_url):
     home_col = find_col(['מארחת', 'קבוצה א', 'home', 'קבוצהא'])
     away_col = find_col(['אורחת', 'קבוצה ב', 'away', 'קבוצהב'])
     arena_col = find_col(['אולם', 'מגרש', 'venue', 'arena'])
-    home_score_col = find_col(['home score', 'תוצאה קבוצה א', 'תוצאת מארחת', 'תוצאה א', 'נקודות קבוצה א', 'נקודות בית'])
-    away_score_col = find_col(['away score', 'תוצאה קבוצה ב', 'תוצאת אורחת', 'תוצאה ב', 'נקודות קבוצה ב', 'נקודות חוץ'])
+    home_score_col = find_col(['home score', 'תוצאה קבוצה א', 'תוצאת מארחת', 'תוצאה א', 'תוצאה', 'נקודות בית'])
+    away_score_col = find_col(['away score', 'תוצאה קבוצה ב', 'תוצאת אורחת', 'תוצאה ב', 'תוצאה.1', 'נקודות חוץ'])
 
     all_games = []
     for index, row in df.iterrows():
@@ -179,7 +181,7 @@ def update_games(excel_url):
             time_str = "00:00"
             if time_col and pd.notna(row[time_col]):
                 time_val = row[time_col]
-                if isinstance(time_val, datetime.time):
+                if isinstance(time_val, time):
                     time_str = time_val.strftime('%H:%M')
                 else:
                     time_str = str(time_val).strip()[:5]
@@ -209,6 +211,9 @@ def update_games(excel_url):
 
     rehovot_games = sorted([g for g in all_games if 'רחובות' in g['home'] or 'רחובות' in g['away']], key=lambda x: x['date_obj'])
     
+    # הגדרת 'היום' לפי שעון ישראל (UTC+3) לצורך השוואה נכונה של משחקי עבר/עתיד
+    today = datetime.utcnow() + timedelta(hours=3)
+    
     other_games_by_round = defaultdict(list)
     top_teams_keywords = ["נהריה", "הפועל חיפה"]
     for g in all_games:
@@ -216,8 +221,6 @@ def update_games(excel_url):
         is_top_game = any(t in g['home'] or t in g['away'] for t in top_teams_keywords)
         if not is_rehovot_game and is_top_game:
             other_games_by_round[g['mahzor']].append(g)
-
-        today = datetime.datetime.now()
 
     # מציאת האינדקס של המשחק האחרון ששוחק
     past_game_indices = [i for i, g in enumerate(rehovot_games) if g['date_obj'] < today]
@@ -317,10 +320,6 @@ def main():
         with open('index.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
             
-        # ניקוי אוטומטי של שורות ישנות (כולל "שורות רפאים" שהשתכפלו מחוץ לטבלה)
-        cleanup_pattern = r'(<tbody id="games-table-body">).*?(</table>)'
-        html_content = re.sub(cleanup_pattern, r'\1\n</tbody>\n        \2', html_content, flags=re.DOTALL)
-
         # בדיקה האם יש שינויים בלוח המשחקים (משחקים חדשים או שינוי זמנים)
         if new_games_html:
             check_pattern = r'(<tbody id="games-table-body">)(.*?)(</tbody>)'
