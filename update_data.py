@@ -78,6 +78,13 @@ def update_insights(model, games_list):
     else:
         logging.info(f"Standings data fetched. Length: {len(standings_text)} chars.")
 
+    # אם standings_text זמין, ננסה להסיר את השורה של מכבי רחובות כדי למנוע נתונים סותרים
+    filtered_standings_text = standings_text
+    if standings_text and ("מכבי רחובות" in standings_text or "Maccabi Rehovot" in standings_text):
+        lines = standings_text.split('\n')
+        filtered_lines = [line for line in lines if "מכבי רחובות" not in line and "Maccabi Rehovot" not in line]
+        filtered_standings_text = "\n".join(filtered_lines)
+        logging.info("Removed Maccabi Rehovot's row from official standings to prevent data conflict.")
     # חישוב מאזן מדויק עבור רחובות ישירות מהאקסל (Live Stats)
     rehovot_wins = 0
     rehovot_losses = 0
@@ -116,18 +123,18 @@ def update_insights(model, games_list):
 
         prompt_he = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הרשמית (יתכן שהיא לא מעודכנת):
-        {standings_text}
+        אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הרשמית עבור שאר הקבוצות (יתכן שהיא לא מעודכנת):
+        {filtered_standings_text}
 
-        נתוני אמת מחושבים עבור מכבי רחובות (השתמש רק בהם!):
+        נתוני אמת מחושבים עבור מכבי רחובות (השתמש רק בהם! אלו הנתונים המדויקים והמעודכנים ביותר):
         {live_stats_msg}
 
         תוצאות המשחקים האחרונים של רחובות:
         {results_summary}
 
         משימה: כתוב 3 פסקאות ניתוח על מצבה של מכבי רחובות. 
-        השתמש במאזן המדויק שצוין לעיל ({rehovot_points} נקודות מ-{rehovot_gp} משחקים).
-        נתח את המאבק על המקום ה-2 מול נהריה והפועל חיפה.
+        השתמש במאזן המדויק שצוין לעיל ({rehovot_points} נקודות מ-{rehovot_gp} משחקים) עבור מכבי רחובות.
+        נתח את המאבק על המקום ה-2 מול נהריה והפועל חיפה, תוך התבססות על הנתונים המעודכנים של רחובות ונתוני הטבלה של שאר הקבוצות.
         
         דגשים: אל תוסיף הקדמות. החזר רק פסקאות עטופות ב-<p>. 
         השתמש ב-<strong> להדגשת שמות קבוצות ומספרים. המר כל סימון Markdown של כוכביות לתגיות HTML.
@@ -135,8 +142,8 @@ def update_insights(model, games_list):
 
         prompt_en = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        Official Standings Table (may be outdated):
-        {standings_text}
+        Official Standings Table for other teams (may be outdated):
+        {filtered_standings_text}
 
         Verified Live Stats for Maccabi Rehovot (Use these!):
         {live_stats_msg}
@@ -146,7 +153,7 @@ def update_insights(model, games_list):
 
         Task: Write 3 analytical paragraphs in English. 
         Maccabi Rehovot has exactly {rehovot_points} points from {rehovot_gp} games.
-        Analyze the race for 2nd place against Ironi Nahariya and Hapoel Haifa.
+        Analyze the race for 2nd place against Ironi Nahariya and Hapoel Haifa, using Rehovot's updated stats and the standings data for other teams.
 
         Use ONLY <p> and <strong> tags. Convert all Markdown bold (**) to <strong>.
         Return only the HTML content.
