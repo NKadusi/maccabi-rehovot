@@ -58,7 +58,7 @@ def update_insights(model, games_list):
     # עקיפת זיכרון מטמון (Cache) כדי לקבל נתונים טריים כמו באקסל
     try:
         timestamp = int(datetime.now().timestamp())
-        url = f"https://ibasketball.co.il/league/2025-2/?nocache={timestamp}"
+        url = f"https://ibasketball.co.il/league/2025-2/?league_id=119474&nocache={timestamp}"
         headers = {'User-Agent': 'Mozilla/5.0'}
         r = requests.get(url, headers=headers, timeout=10)
         if r.status_code == 200:
@@ -70,6 +70,7 @@ def update_insights(model, games_list):
                     break
     except Exception as e:
         logging.warning(f"Failed to fetch standings from association site: {e}")
+    logging.info(f"Standings data fetched. Length: {len(standings_text)} chars.")
 
     if not standings_text or len(standings_text) < 100:
         logging.error("No standings data found.")
@@ -77,7 +78,7 @@ def update_insights(model, games_list):
 
     # יצירת סיכום של תוצאות מהאקסל כדי לעזור למודל לעדכן את הנתונים
     results_summary = "\n".join([
-        f"מחזור {g['mahzor']}: {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
+        f"מחזור {g['mahzor']} ({g['date_obj'].strftime('%d/%m')}): {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
         for g in games_list if g['home_score'] != '-' and g['away_score'] != '-'
     ])
 
@@ -112,17 +113,25 @@ def update_insights(model, games_list):
         Do not add headers, introductory text, or Markdown formatting. Return strictly the paragraphs.
         """
 
+        def process_ai_response(response_text, lang_class):
+            # ניקוי פורמט Markdown אם קיים
+            text = re.sub(r'^```[a-zA-Z]*\s*', '', response_text.strip(), flags=re.IGNORECASE)
+            text = re.sub(r'\s*```$', '', text).strip()
+            # פירוק לפסקאות ועטיפה בתגיות HTML עם המחלקה המתאימה לשפה
+            paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+            wrapped = ""
+            for p in paragraphs:
+                # הסרת תגיות P קיימות כדי למנוע כפילות
+                clean_p = re.sub(r'</?p.*?>', '', p, flags=re.IGNORECASE).strip()
+                if clean_p:
+                    wrapped += f'<p class="{lang_class}">{clean_p}</p>\n'
+            return wrapped
+
         response_he = model.generate_content(prompt_he)
-        new_insights_he = response_he.text.strip()
-        new_insights_he = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights_he, flags=re.IGNORECASE)
-        new_insights_he = re.sub(r'\s*```$', '', new_insights_he).strip()
-        new_insights_he = re.sub(r'<p>', '<p class="lang-he">', new_insights_he, flags=re.IGNORECASE)
+        new_insights_he = process_ai_response(response_he.text, "lang-he")
 
         response_en = model.generate_content(prompt_en)
-        new_insights_en = response_en.text.strip()
-        new_insights_en = re.sub(r'^```[a-zA-Z]*\s*', '', new_insights_en, flags=re.IGNORECASE)
-        new_insights_en = re.sub(r'\s*```$', '', new_insights_en).strip()
-        new_insights_en = re.sub(r'<p>', '<p class="lang-en">', new_insights_en, flags=re.IGNORECASE)
+        new_insights_en = process_ai_response(response_en.text, "lang-en")
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
