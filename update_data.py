@@ -153,32 +153,36 @@ def update_insights(model, games_list):
         """
 
         def process_ai_response(response_text, lang_class):
-            # ניקוי פורמט Markdown ובלוקי קוד בצורה יסודית
-            text = re.sub(r'```(?:html|markdown)?\s*', '', response_text, flags=re.IGNORECASE).strip()
+            if not response_text: return ""
+            # ניקוי פורמט Markdown
+            text = re.sub(r'```(?:html|markdown)?\s*', '', response_text, flags=re.IGNORECASE)
             text = text.replace('```', '').strip()
             
             # המרת Markdown Bold ל-HTML Strong
             text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
             
-            # ניסיון חילוץ פסקאות מתוך תגיות <p> אם קיימות, אחרת פיצול לפי שורות
             p_matches = re.findall(r'<p\b[^>]*>(.*?)</p>', text, flags=re.IGNORECASE | re.DOTALL)
-            if p_matches:
-                paragraphs = [m.strip() for m in p_matches if m.strip()]
-            else:
-                paragraphs = [p.strip() for p in re.split(r'\n+', text) if p.strip()]
+            paragraphs = [m.strip() for m in p_matches if m.strip()] if p_matches else [p.strip() for p in re.split(r'\n+', text) if p.strip()]
             
             wrapped = ""
+            intros = ('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח', 'להלן הניתוח', 'בבקשה')
             for p in paragraphs:
                 clean_p = re.sub(r'</?p\b[^>]*>', '', p, flags=re.IGNORECASE).strip()
-                if clean_p and not clean_p.lower().startswith(('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח')):
+                # במקום למחוק את כל הפסקה, ננקה רק את משפט הפתיחה אם הוא קיים
+                for intro in intros:
+                    if clean_p.lower().startswith(intro):
+                        clean_p = re.sub(f'^{intro}:?\\s*', '', clean_p, flags=re.IGNORECASE).strip()
+                
+                if clean_p:
                     wrapped += f'<p class="{lang_class}">{clean_p}</p>\n'
             return wrapped
 
-        response_he = model.generate_content(prompt_he, safety_settings=safety_settings)
-        new_insights_he = process_ai_response(response_he.text, "lang-he")
+        # בדיקה שהתגובה אכן מכילה טקסט לפני הגישה ל-.text
+        res_he = model.generate_content(prompt_he, safety_settings=safety_settings)
+        new_insights_he = process_ai_response(res_he.text, "lang-he") if res_he.candidates else ""
 
-        response_en = model.generate_content(prompt_en, safety_settings=safety_settings)
-        new_insights_en = process_ai_response(response_en.text, "lang-en")
+        res_en = model.generate_content(prompt_en, safety_settings=safety_settings)
+        new_insights_en = process_ai_response(res_en.text, "lang-en") if res_en.candidates else ""
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
