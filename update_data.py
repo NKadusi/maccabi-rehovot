@@ -179,15 +179,23 @@ def update_insights(model, games_list):
             try:
                 res = model.generate_content(prompt, safety_settings=safety_settings)
                 if res and res.candidates and len(res.candidates) > 0:
-                    if res.candidates[0].content.parts:
-                        return res.text
+                    # בדיקה אם יש תוכן בתוך ה-candidate הראשון
+                    if hasattr(res.candidates[0].content, 'parts') and res.candidates[0].content.parts:
+                        return res.candidates[0].content.parts[0].text
+                logging.warning(f"Gemini returned empty response for prompt. Feedback: {res.prompt_feedback if hasattr(res, 'prompt_feedback') else 'No feedback'}")
                 return ""
             except Exception as e:
-                logging.error(f"Gemini API error: {e}")
+                logging.error(f"Critical Gemini API error: {e}")
                 return ""
 
-        new_insights_he = process_ai_response(get_safe_response(prompt_he), "lang-he")
-        new_insights_en = process_ai_response(get_safe_response(prompt_en), "lang-en")
+        res_he_raw = get_safe_response(prompt_he)
+        res_en_raw = get_safe_response(prompt_en)
+        
+        logging.info(f"AI Raw Response HE length: {len(res_he_raw)}")
+        logging.info(f"AI Raw Response EN length: {len(res_en_raw)}")
+
+        new_insights_he = process_ai_response(res_he_raw, "lang-he")
+        new_insights_en = process_ai_response(res_en_raw, "lang-en")
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
         return new_insights
@@ -437,18 +445,18 @@ def main():
                 with open(step_summary, 'a', encoding='utf-8') as sf:
                     sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
             
-            # שימוש בסמני הערות להחלפה בטוחה של המסקנות
+            # הזרקה בטוחה באמצעות פונקציית למדא למניעת שגיאות תווים מיוחדים
             insights_pattern = r'(<!-- INSIGHTS_START -->).*?(<!-- INSIGHTS_END -->)'
             if re.search(insights_pattern, html_content, flags=re.DOTALL):
-                html_content = re.sub(insights_pattern, rf'\1\n{new_insights_html}\n\2', html_content, flags=re.DOTALL)
-                logging.info("Insights section prepared for update.")
+                html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
+                logging.info(f"Successfully injected {len(new_insights_html)} chars into insights section.")
             else:
-                logging.error("Could not find <div class='insights-content'> in index.html")
+                logging.error("Could not find Insights Markers in index.html")
                 if step_summary:
                     with open(step_summary, 'a', encoding='utf-8') as sf:
-                        sf.write("⚠️ שגיאה: לא נמצא אלמנט `insights-content` בקובץ ה-HTML.\n")
+                        sf.write("⚠️ שגיאה: סמני ה-Markers לא נמצאו בקובץ ה-HTML.\n")
         else:
-            logging.warning("Insights update skipped due to missing data or error.")
+            logging.warning(f"Insights update skipped. Content length: {len(new_insights_html.strip()) if new_insights_html else 'None'}")
 
         # עדכון לוח המשחקים
         if new_games_html:
