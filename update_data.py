@@ -78,46 +78,69 @@ def update_insights(model, games_list):
     else:
         logging.info(f"Standings data fetched. Length: {len(standings_text)} chars.")
 
+    # חישוב מאזן מדויק עבור רחובות ישירות מהאקסל (Live Stats)
+    rehovot_wins = 0
+    rehovot_losses = 0
+    rehovot_gp = 0
+    for g in games_list:
+        if 'רחובות' in g['home'] or 'רחובות' in g['away']:
+            if g['home_score'] != '-' and g['away_score'] != '-':
+                rehovot_gp += 1
+                try:
+                    h_score = int(g['home_score'])
+                    a_score = int(g['away_score'])
+                    if 'רחובות' in g['home']:
+                        if h_score > a_score: rehovot_wins += 1
+                        else: rehovot_losses += 1
+                    else:
+                        if a_score > h_score: rehovot_wins += 1
+                        else: rehovot_losses += 1
+                except: continue
+    
+    rehovot_points = (rehovot_wins * 2) + rehovot_losses
+    live_stats_msg = f"מכבי רחובות: {rehovot_gp} משחקים, {rehovot_wins} ניצחונות, {rehovot_losses} הפסדים, {rehovot_points} נקודות."
+
     # יצירת סיכום של תוצאות מהאקסל כדי לעזור למודל לעדכן את הנתונים
     results_summary = "\n".join([
-        f"מחזור {g['mahzor']} ({g['date_obj'].strftime('%d/%m/%Y')}): {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
-        for g in games_list if g['home_score'] != '-' and g['away_score'] != '-'
+        f"מחזור {g['mahzor']}: {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
+        for g in games_list if (g['home_score'] != '-' and g['away_score'] != '-') and ('רחובות' in g['home'] or 'רחובות' in g['away'])
     ])
 
     try:
         prompt_he = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        אתה פרשן כדורסל מומחה לניתוח נתונים. להלן נתונים גולמיים מהטבלה הרשמית (יתכן שהיא לא מעודכנת ב-100%):
+        אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הרשמית (יתכן שהיא לא מעודכנת):
         {standings_text}
 
-        שים לב! להלן רשימת כל המשחקים עם תוצאות סופיות שחולצו ישירות מקובץ האקסל המעודכן. 
-        עליך להשתמש ברשימה זו כדי לעדכן את הנתונים מהטבלה הרשמית במידה והם חסרים:
+        נתוני אמת מחושבים עבור מכבי רחובות (השתמש רק בהם!):
+        {live_stats_msg}
+
+        תוצאות המשחקים האחרונים של רחובות:
         {results_summary}
 
-        כתוב 3 פסקאות קצרות ומקצועיות של מסקנות סטטיסטיות על מצבה של קבוצת 'מכבי רחובות' (או מכבי ברק רחובות).
-        משימות הניתוח:
-        1. חשב את המאזן המדויק (משחקים, ניצחונות, הפסדים, נקודות) של רחובות על סמך שילוב הטבלה והתוצאות החדשות.
-        2. נתח את המאבק על המקום ה-2 ויתרון הביתיות (מקומות 2-5).
-        3. הערך סיכונים מול הקבוצות הדולקות אחריה (כמו נהריה וחיפה).
+        משימה: כתוב 3 פסקאות ניתוח על מצבה של מכבי רחובות. 
+        השתמש במאזן המדויק שצוין לעיל ({rehovot_points} נקודות מ-{rehovot_gp} משחקים).
+        נתח את המאבק על המקום ה-2 מול נהריה והפועל חיפה.
         
-        דגשים: אל תנחש, תתבסס רק על המתמטיקה. השתמש בתגיות HTML של <p> ו-<strong> בלבד.
-        חובה להשתמש בתגיות HTML של <p> ו-<strong> בלבד.
-        אל תוסיף כותרות, טקסט הקדמה או פורמט Markdown. החזר אך ורק את הפסקאות.
+        דגשים: אל תוסיף הקדמות. החזר רק פסקאות עטופות ב-<p>. 
+        השתמש ב-<strong> להדגשת שמות קבוצות ומספרים. המר כל סימון Markdown של כוכביות לתגיות HTML.
         """
 
         prompt_en = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
-        You are an expert basketball data analyst. Below is raw data from the official standings:
+        Official Standings Table (may be outdated):
         {standings_text}
 
-        IMPORTANT: The official table above may be outdated. Use the following game results to calculate the most accurate "Live Standings":
+        Verified Live Stats for Maccabi Rehovot (Use these!):
+        {live_stats_msg}
+
+        Recent Rehovot Results:
         {results_summary}
 
-        Tasks:
-        1. Count actual games played from the result list.
-        2. Update the record for Maccabi Rehovot if the official table is lagging.
-        3. Write 3 analytical paragraphs in English.
-        
+        Task: Write 3 analytical paragraphs in English. 
+        Maccabi Rehovot has exactly {rehovot_points} points from {rehovot_gp} games.
+        Analyze the race for 2nd place against Ironi Nahariya and Hapoel Haifa.
+
         Use ONLY <p> and <strong> tags. Convert all Markdown bold (**) to <strong>.
         Return only the HTML content.
         """
