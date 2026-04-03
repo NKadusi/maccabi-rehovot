@@ -8,7 +8,8 @@ from collections import defaultdict
 import logging
 import pandas as pd
 import io
-from datetime import datetime, timedelta, time
+import time as time_module
+from datetime import datetime, timedelta, time as datetime_time
 import urllib.parse
 from dotenv import load_dotenv
 
@@ -41,8 +42,8 @@ def get_gemini_model():
             logging.error("GEMINI_API_KEY not found in environment variables.")
             return None
         genai.configure(api_key=api_key)
-        # שימוש במודל העדכני והמהיר של ג'מיני
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # שימוש בגרסה יציבה יותר למניעת חסימות שווא
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         return model
     except Exception as e:
         logging.error(f"Error connecting to Gemini: {e}")
@@ -115,40 +116,42 @@ def update_insights(model, games_list):
 
     try:
         safety_settings = [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_ONLY_HIGH"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_ONLY_HIGH"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_ONLY_HIGH"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_ONLY_HIGH"},
         ]
 
         prompt_he = f"""
+        You are a professional basketball analyst providing an objective sports update.
         Season: 2025/2026. Date: {datetime.now().strftime('%d/%m/%Y')}
-        אתה פרשן כדורסל מומחה. עליך לנתח את מצב מכבי רחובות בלבד.
-        להלן נתוני הטבלה עבור שאר הקבוצות:
-        {filtered_standings_text}
+        
+        Task: Analyze the current standing of the team 'Maccabi Rehovot'.
+        
+        Reference Standings (Other teams): {filtered_standings_text}
+        Maccabi Rehovot Verified Stats: {rehovot_wins} wins, {rehovot_losses} losses ({rehovot_gp} games total).
+        Recent Results: {results_summary}
 
-        נתוני אמת בלעדיים למכבי רחובות (חובה להשתמש רק בהם!):
-        מאזן נוכחי: {rehovot_wins} ניצחונות ו-{rehovot_losses} הפסדים (סה"כ {rehovot_gp} משחקים).
-
-        תוצאות המשחקים האחרונים של רחובות:
-        {results_summary}
-
-        משימה: כתוב 3 פסקאות ניתוח מקצועיות בעברית. 
-        השתמש במאזן המדויק שסופק לעיל. נתח את המאבק בצמרת מול נהריה והפועל חיפה.
-        חוקים: ללא הקדמות. השתמש ב-<strong> להדגשות. החזר רק תגיות <p>.
+        Output Instructions:
+        1. Write exactly 3 professional paragraphs in HEBREW.
+        2. Focus on the competition with Ironi Nahariya and Hapoel Haifa.
+        3. Return ONLY HTML <p> tags. Use <strong> for team names and numbers.
+        4. No introductory phrases or conversational filler.
         """
 
         prompt_en = f"""
-        Season 2025/2026. Expert Analysis for Maccabi Rehovot.
-        Standings context:
-        {filtered_standings_text}
-        Verified Rehovot Record: {rehovot_wins} Wins, {rehovot_losses} Losses.
+        You are a professional basketball analyst providing an objective sports update.
+        Season: 2025/2026. Date: {datetime.now().strftime('%d/%m/%Y')}
 
-        Recent Rehovot Results:
-        {results_summary}
+        Standings context: {filtered_standings_text}
+        Maccabi Rehovot Record: {rehovot_wins} Wins, {rehovot_losses} Losses.
+        Recent Results: {results_summary}
 
-        Task: Write 3 analytical paragraphs in English. 
-        Focus on the battle for 2nd place. No intros. Use only <p> and <strong>.
+        Output Instructions:
+        1. Write 3 professional paragraphs in ENGLISH.
+        2. Focus on the race for 2nd place.
+        3. Return ONLY HTML <p> tags. Use <strong> for names and numbers.
+        4. No introductory phrases or conversational filler.
         """
 
         def process_ai_response(response_text, lang_class):
@@ -177,18 +180,22 @@ def update_insights(model, games_list):
 
         def get_safe_response(prompt):
             try:
-                res = model.generate_content(prompt, safety_settings=safety_settings)
-                if res and res.candidates and len(res.candidates) > 0:
-                    # בדיקה אם יש תוכן בתוך ה-candidate הראשון
-                    if hasattr(res.candidates[0].content, 'parts') and res.candidates[0].content.parts:
-                        return res.candidates[0].content.parts[0].text
-                logging.warning(f"Gemini returned empty response for prompt. Feedback: {res.prompt_feedback if hasattr(res, 'prompt_feedback') else 'No feedback'}")
+                response = model.generate_content(prompt, safety_settings=safety_settings)
+                if response.candidates:
+                    try:
+                        return response.text
+                    except ValueError:
+                        # This triggers if Gemini blocks the response (HARM_CATEGORY)
+                        logging.warning(f"Gemini blocked the response. Reason: {response.candidates[0].finish_reason}")
+                else:
+                    logging.warning("Gemini returned no candidates.")
                 return ""
             except Exception as e:
-                logging.error(f"Critical Gemini API error: {e}")
+                logging.error(f"Gemini API Error: {e}")
                 return ""
 
         res_he_raw = get_safe_response(prompt_he)
+        time_module.sleep(1) # Small delay to prevent rate issues
         res_en_raw = get_safe_response(prompt_en)
         
         logging.info(f"AI Raw Response HE length: {len(res_he_raw)}")
