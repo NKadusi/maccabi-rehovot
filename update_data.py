@@ -107,6 +107,13 @@ def update_insights(model, games_list):
     ])
 
     try:
+        safety_settings = [
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+        ]
+
         prompt_he = f"""
         Today's Date: {datetime.now().strftime('%d/%m/%Y')}
         אתה פרשן כדורסל מומחה. להלן נתוני הטבלה הרשמית (יתכן שהיא לא מעודכנת):
@@ -146,25 +153,31 @@ def update_insights(model, games_list):
         """
 
         def process_ai_response(response_text, lang_class):
-            # ניקוי פורמט Markdown אם קיים
-            text = re.sub(r'^```[a-zA-Z]*\s*', '', response_text.strip(), flags=re.IGNORECASE)
-            text = re.sub(r'\s*```$', '', text).strip()
+            # ניקוי פורמט Markdown ובלוקי קוד בצורה יסודית
+            text = re.sub(r'```(?:html|markdown)?\s*', '', response_text, flags=re.IGNORECASE).strip()
+            text = text.replace('```', '').strip()
+            
             # המרת Markdown Bold ל-HTML Strong
             text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
-            # פירוק לפסקאות ועטיפה בתגיות HTML עם המחלקה המתאימה לשפה
-            paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+            
+            # ניסיון חילוץ פסקאות מתוך תגיות <p> אם קיימות, אחרת פיצול לפי שורות
+            p_matches = re.findall(r'<p\b[^>]*>(.*?)</p>', text, flags=re.IGNORECASE | re.DOTALL)
+            if p_matches:
+                paragraphs = [m.strip() for m in p_matches if m.strip()]
+            else:
+                paragraphs = [p.strip() for p in re.split(r'\n+', text) if p.strip()]
+            
             wrapped = ""
             for p in paragraphs:
-                # הסרת תגיות P קיימות כדי למנוע כפילות
-                clean_p = re.sub(r'</?p.*?>', '', p, flags=re.IGNORECASE).strip()
-                if clean_p:
+                clean_p = re.sub(r'</?p\b[^>]*>', '', p, flags=re.IGNORECASE).strip()
+                if clean_p and not clean_p.lower().startswith(('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח')):
                     wrapped += f'<p class="{lang_class}">{clean_p}</p>\n'
             return wrapped
 
-        response_he = model.generate_content(prompt_he)
+        response_he = model.generate_content(prompt_he, safety_settings=safety_settings)
         new_insights_he = process_ai_response(response_he.text, "lang-he")
 
-        response_en = model.generate_content(prompt_en)
+        response_en = model.generate_content(prompt_en, safety_settings=safety_settings)
         new_insights_en = process_ai_response(response_en.text, "lang-en")
 
         new_insights = f"{new_insights_he}\n{new_insights_en}"
@@ -185,7 +198,7 @@ def update_games(excel_url):
         df_raw = pd.read_excel(io.BytesIO(response.content), header=None, engine='openpyxl')
     except Exception as e:
         logging.error(f"Failed to fetch or parse Excel data: {e}")
-        return ""
+        return "", None, []
 
     header_idx = -1
     for idx, row in df_raw.head(20).iterrows():
@@ -196,7 +209,7 @@ def update_games(excel_url):
     
     if header_idx == -1:
         logging.error("Could not find header row in Excel.")
-        return ""
+        return "", None, []
         
     df = df_raw.iloc[header_idx + 1:].copy()
     df.columns = df_raw.iloc[header_idx]
@@ -408,24 +421,34 @@ def main():
                 else:
                     logging.info("לוח המשחקים נשאר ללא שינוי.")
 
-        if new_insights_html:
+        if new_insights_html and len(new_insights_html.strip()) > 50:
             # כתיבת התשובה לסיכום הריצה ב-GitHub לצורך ניפוי שגיאות
             step_summary = os.environ.get('GITHUB_STEP_SUMMARY')
             if step_summary:
                 with open(step_summary, 'a', encoding='utf-8') as sf:
                     sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
             
-            insights_pattern = r'(<div class="insights-content">).*?(</div>)'
-            html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
-            logging.info("Insights section prepared for update.")
+            # שימוש בביטוי רגולרי גמיש יותר לזיהוי ה-div
+            insights_pattern = r'(<div\s+[^>]*class=["\'][^"\']*insights-content[^"\']*["\'][^>]*>).*?(</div>)'
+            if re.search(insights_pattern, html_content, flags=re.DOTALL):
+                html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
+                logging.info("Insights section prepared for update.")
+            else:
+                logging.error("Could not find <div class='insights-content'> in index.html")
+                if step_summary:
+                    with open(step_summary, 'a', encoding='utf-8') as sf:
+                        sf.write("⚠️ שגיאה: לא נמצא אלמנט `insights-content` בקובץ ה-HTML.\n")
         else:
             logging.warning("Insights update skipped due to missing data or error.")
 
         # עדכון לוח המשחקים
         if new_games_html:
-            games_pattern = r'(<tbody id="games-table-body">).*?(</tbody>)'
-            html_content = re.sub(games_pattern, lambda m: f"{m.group(1)}\n{new_games_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
-            logging.info("Games schedule prepared for update.")
+            games_pattern = r'(<tbody\s+[^>]*id=["\']games-table-body["\'][^>]*>).*?(</tbody>)'
+            if re.search(games_pattern, html_content, flags=re.DOTALL):
+                html_content = re.sub(games_pattern, lambda m: f"{m.group(1)}\n{new_games_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
+                logging.info("Games schedule prepared for update.")
+            else:
+                logging.error("Could not find <tbody id='games-table-body'> in index.html")
         else:
             logging.warning("Games schedule is empty. HTML will not be updated for games.")
 
