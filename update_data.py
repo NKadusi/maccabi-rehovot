@@ -439,8 +439,8 @@ def main():
                 with open(step_summary, 'a', encoding='utf-8') as sf:
                     sf.write(f"### 🤖 Gemini Insights Generated\nContent length: {len(new_insights_html)} characters.\n")
             
-            # ביטוי רגולרי פשוט ואמין יותר לזיהוי ה-div
-            insights_pattern = r'(<div class="insights-content">).*?(</div>)'
+            # ביטוי רגולרי גמיש שמוצא את ה-div גם אם יש רווחים או שינויים קלים
+            insights_pattern = r'(<div[^>]*class=["\'][^"\']*insights-content[^"\']*["\'][^>]*>).*?(</div>)'
             if re.search(insights_pattern, html_content, flags=re.DOTALL):
                 html_content = re.sub(insights_pattern, lambda m: f"{m.group(1)}\n{new_insights_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
                 logging.info("Insights section prepared for update.")
@@ -454,7 +454,8 @@ def main():
 
         # עדכון לוח המשחקים
         if new_games_html:
-            games_pattern = r'(<tbody\s+[^>]*id=["\']games-table-body["\'][^>]*>).*?(</tbody>)'
+            # תיקון שגיאת הכתיב מ-[^+]* ל-[^>]*
+            games_pattern = r'(<tbody[^>]*id=["\']games-table-body["\'][^>]*>).*?(</tbody>)'
             if re.search(games_pattern, html_content, flags=re.DOTALL):
                 html_content = re.sub(games_pattern, lambda m: f"{m.group(1)}\n{new_games_html}\n{m.group(2)}", html_content, flags=re.DOTALL)
                 logging.info("Games schedule prepared for update.")
