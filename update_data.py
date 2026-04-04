@@ -89,7 +89,6 @@ def update_insights(client, games_list):
     # עקיפת זיכרון מטמון (Cache) כדי לקבל נתונים טריים כמו באקסל
     try:
         timestamp = int(datetime.now().timestamp())
-        url = f"https://ibasketball.co.il/league/2026-2/?league_id=119474&nocache={timestamp}"
         url = f"https://ibasketball.co.il/league/2026-2/?league_id=132145&nocache={timestamp}"
         headers = {'User-Agent': 'Mozilla/5.0'}
         r = requests.get(url, headers=headers, timeout=15)
@@ -127,11 +126,9 @@ def update_insights(client, games_list):
     relevant_games = [g for g in games_list if (g['home_score'] != '-' and g['away_score'] != '-') and ('רחובות' in g['home'] or 'רחובות' in g['away'])]
     results_summary = "\n".join([
         f"מחזור {g['mahzor']}: {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
-        for g in games_list if (g['home_score'] != '-' and g['away_score'] != '-') and ('רחובות' in g['home'] or 'רחובות' in g['away'])
-    ])
         for g in relevant_games
     ]) if relevant_games else "No games played yet in the current data source."
-
+    
     try:
         prompt_he = f"""
         You are a professional basketball analyst providing an objective sports update.
@@ -140,13 +137,10 @@ def update_insights(client, games_list):
         Task: Analyze the current standing of the team 'Maccabi Rehovot'.
         
         League Context (Standings Table): {full_standings_context}
-        Maccabi Rehovot Verified Stats: {rehovot_wins} wins, {rehovot_losses} losses ({rehovot_gp} games total).
         Maccabi Rehovot Real-Time Stats (from Excel): {rehovot_wins} wins, {rehovot_losses} losses ({rehovot_gp} games total).
         Recent Results from Excel: {results_summary}
 
         Output Instructions:
-        1. Write exactly 3 professional paragraphs in HEBREW.
-        2. Focus on the RANKING and the PROBABILITY of promotion to the first division.
         1. Write exactly 3 deep, professional paragraphs in HEBREW.
         2. Analyze the PROBABILITY of promotion to the 'Winner League' (top division).
         3. Compare Rehovot's performance to the league leaders shown in the table.
@@ -163,8 +157,6 @@ def update_insights(client, games_list):
         Recent Results: {results_summary}
 
         Output Instructions:
-        1. Write 3 professional paragraphs in ENGLISH.
-        2. Focus on the ranking and the PROBABILITY of promotion/playoff advantage.
         1. Write 3 deep, professional paragraphs in ENGLISH.
         2. Perform a DEEP ANALYSIS of promotion chances and tactical standing.
         3. Mention the gap from 1st and 3rd places.
@@ -182,12 +174,7 @@ def update_insights(client, games_list):
             text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
             
             p_matches = re.findall(r'<p\b[^>]*>(.*?)</p>', text, flags=re.IGNORECASE | re.DOTALL)
-            paragraphs = [m.strip() for m in p_matches if m.strip()] if p_matches else [p.strip() for p in re.split(r'\n+', text) if p.strip()]
-            if p_matches:
-                paragraphs = [m.strip() for m in p_matches if m.strip()]
-            else:
-                # Fallback: Split by double newlines if no <p> tags found
-                paragraphs = [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
+            paragraphs = [m.strip() for m in p_matches if m.strip()] if p_matches else [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
             
             wrapped = ""
             intros = ('here is', 'certainly', 'analysis:', 'sure', 'הנה הניתוח', 'להלן הניתוח', 'בבקשה', 'ניתוח מצבה', 'as an expert', 'in summary')
@@ -226,7 +213,6 @@ def update_insights(client, games_list):
 
         combined_insights = f"{new_insights_he}\n{new_insights_en}".strip()
         
-        return combined_insights if len(combined_insights) > 50 else f'<p class="lang-he"><strong>עדכון סטטיסטי:</strong> {live_stats_msg}</p>'
         return combined_insights if len(combined_insights) > 100 else f'<p class="lang-he"><strong>עדכון סטטיסטי:</strong> {live_stats_msg}</p>'
         
     except Exception as e:
@@ -440,7 +426,6 @@ def main():
     """הפונקציה הראשית שמריצה את תהליך העדכון."""
     logging.info("Starting data update process.")
     
-    excel_url = "https://ibasketball.co.il/league/2026-2/?feed=xlsx&league_id=119474"
     excel_url = "https://ibasketball.co.il/league/2026-2/?feed=xlsx&league_id=132145"
     new_games_html, next_game_date_str, all_games = update_games(excel_url)
 
