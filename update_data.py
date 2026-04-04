@@ -112,6 +112,14 @@ def update_insights(client, games_list):
     # הגדרת המשתנה החסר עבור ה-AI - שימוש בטבלה המלאה כהקשר לניתוח הסיכויים
     # הגדרת המשתנה החסר שגרם ל-AI להיכשל
     full_standings_context = standings_text if standings_text else "Official standings table currently unavailable."
+    # Prepare the league context by removing Maccabi Rehovot's row to avoid data conflict with our live stats
+    if standings_text and ("מכבי רחובות" in standings_text or "Maccabi Rehovot" in standings_text):
+        lines = standings_text.split('\n')
+        full_standings_context = "\n".join([line for line in lines if "מכבי רחובות" not in line and "Maccabi Rehovot" not in line])
+        logging.info("Filtered official standings row from AI context.")
+    else:
+        full_standings_context = standings_text if standings_text else "Official standings table currently unavailable."
+
     logging.info("Contextual standings prepared for AI analysis.")
 
     # אם standings_text זמין, ננסה להסיר את השורה של מכבי רחובות כדי למנוע נתונים סותרים
@@ -129,6 +137,9 @@ def update_insights(client, games_list):
         for g in relevant_games
     ]) if relevant_games else "No games played yet in the current data source."
     
+    results_summary = "\n".join([f"מחזור {g['mahzor']}: {g['home']} {g['home_score']} - {g['away_score']} {g['away']}" for g in relevant_games]) \
+        if relevant_games else "No games played yet in the current data source."
+
     try:
         prompt_he = f"""
         You are a professional basketball analyst providing an objective sports update.
@@ -146,6 +157,8 @@ def update_insights(client, games_list):
         3. Compare Rehovot's performance to the league leaders shown in the table.
         3. Return ONLY HTML <p> tags. Use <strong> for team names and numbers.
         4. No introductory phrases or conversational filler.
+        4. Return ONLY HTML <p> tags. Use <strong> for team names and numbers.
+        5. No introductory phrases or conversational filler.
         """
 
         prompt_en = f"""
@@ -162,6 +175,8 @@ def update_insights(client, games_list):
         3. Mention the gap from 1st and 3rd places.
         3. Return ONLY HTML <p> tags. Use <strong> for names and numbers.
         4. No introductory phrases or conversational filler.
+        4. Return ONLY HTML <p> tags. Use <strong> for names and numbers.
+        5. No introductory phrases or conversational filler.
         """
 
         def process_ai_response(response_text, lang_class):
