@@ -109,9 +109,6 @@ def update_insights(client, games_list):
     else:
         logging.info(f"Standings data fetched. Length: {len(standings_text)} chars.")
 
-    # הגדרת המשתנה החסר עבור ה-AI - שימוש בטבלה המלאה כהקשר לניתוח הסיכויים
-    # הגדרת המשתנה החסר שגרם ל-AI להיכשל
-    full_standings_context = standings_text if standings_text else "Official standings table currently unavailable."
     # Prepare the league context by removing Maccabi Rehovot's row to avoid data conflict with our live stats
     if standings_text and ("מכבי רחובות" in standings_text or "Maccabi Rehovot" in standings_text):
         lines = standings_text.split('\n')
@@ -122,21 +119,8 @@ def update_insights(client, games_list):
 
     logging.info("Contextual standings prepared for AI analysis.")
 
-    # אם standings_text זמין, ננסה להסיר את השורה של מכבי רחובות כדי למנוע נתונים סותרים
-    filtered_standings_text = standings_text
-    if standings_text and "מכבי רחובות" in standings_text:
-        lines = standings_text.split('\n')
-        filtered_lines = [line for line in lines if "מכבי רחובות" not in line and "Maccabi Rehovot" not in line]
-        filtered_standings_text = "\n".join(filtered_lines)
-        logging.info("Removed Maccabi Rehovot's row from official standings to prevent data conflict.")
-
     # יצירת סיכום של תוצאות מהאקסל כדי לעזור למודל לעדכן את הנתונים
     relevant_games = [g for g in games_list if (g['home_score'] != '-' and g['away_score'] != '-') and ('רחובות' in g['home'] or 'רחובות' in g['away'])]
-    results_summary = "\n".join([
-        f"מחזור {g['mahzor']}: {g['home']} {g['home_score']} - {g['away_score']} {g['away']}"
-        for g in relevant_games
-    ]) if relevant_games else "No games played yet in the current data source."
-    
     results_summary = "\n".join([f"מחזור {g['mahzor']}: {g['home']} {g['home_score']} - {g['away_score']} {g['away']}" for g in relevant_games]) \
         if relevant_games else "No games played yet in the current data source."
 
@@ -155,8 +139,6 @@ def update_insights(client, games_list):
         1. Write exactly 3 deep, professional paragraphs in HEBREW.
         2. Analyze the PROBABILITY of promotion to the 'Winner League' (top division).
         3. Compare Rehovot's performance to the league leaders shown in the table.
-        3. Return ONLY HTML <p> tags. Use <strong> for team names and numbers.
-        4. No introductory phrases or conversational filler.
         4. Return ONLY HTML <p> tags. Use <strong> for team names and numbers.
         5. No introductory phrases or conversational filler.
         """
@@ -173,8 +155,6 @@ def update_insights(client, games_list):
         1. Write 3 deep, professional paragraphs in ENGLISH.
         2. Perform a DEEP ANALYSIS of promotion chances and tactical standing.
         3. Mention the gap from 1st and 3rd places.
-        3. Return ONLY HTML <p> tags. Use <strong> for names and numbers.
-        4. No introductory phrases or conversational filler.
         4. Return ONLY HTML <p> tags. Use <strong> for names and numbers.
         5. No introductory phrases or conversational filler.
         """
