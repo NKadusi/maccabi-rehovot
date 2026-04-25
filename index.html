@@ -6,6 +6,9 @@
     <title>פורטל משחקים - מכבי רחובות 25/26</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <!-- Excel Parsing Library -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-8VQKQ3BHCW"></script>
 <script>
@@ -188,7 +191,13 @@
         .timer-display { font-size: 1.8em; font-weight: bold; color: #007bff; }
         .insights-box { padding: 20px 30px; border-radius: 15px; margin-bottom: 30px; width: 100%; max-width: 1050px; box-sizing: border-box; }
         .insights-header { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-        .insights-content p { line-height: 1.6; margin-bottom: 12px; }
+        .insights-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .stat-card { background: rgba(19, 93, 255, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(19, 93, 255, 0.1); }
+        .dark-mode .stat-card { background: rgba(58, 134, 255, 0.1); border-color: var(--dark-border); }
+        .stat-card strong { display: block; font-size: 1.2em; color: var(--main-blue); margin-bottom: 5px; }
+        .dark-mode .stat-card strong { color: var(--dark-primary); }
+        .stat-label { font-size: 0.9em; color: #666; }
+        .dark-mode .stat-label { color: var(--dark-text-secondary); }
         .bracket-container { width: 100%; max-width: 1050px; padding: 25px; border-radius: 20px; margin-bottom: 30px; box-sizing: border-box; }
         .bracket-wrapper { display: flex; flex-direction: column; overflow-x: auto; }
         .bracket-headers { display: flex; gap: 20px; margin-bottom: 20px; min-width: 750px; }
@@ -276,6 +285,13 @@
 
 <div class="logo-container">
     <img src="https://i.ibb.co/W41jh0Vq/Copy-of-01.png" alt="לוגו מכבי רחובות">
+</div>
+
+<div class="sync-container">
+    <label for="excel-upload" class="file-input-label">
+        <i class="fas fa-file-excel"></i> <span data-i18n="upload_excel">טען קובץ תוצאות מהמנהלת</span>
+    </label>
+    <input type="file" id="excel-upload" accept=".xlsx, .xls">
 </div>
 
 <div class="countdown-box">
@@ -637,11 +653,9 @@
 
 <div class="insights-box">
     <div class="insights-header" data-i18n="insights_title">ניתוח סטטיסטי וסיכויי פלייאוף</div>
-    <div class="insights-content">
-        <!-- INSIGHTS_START -->
-<p class="lang-he"><strong>עדכון סטטיסטי:</strong> מכבי רחובות: 24 משחקים, 9 ניצחונות, 15 הפסדים, 33 נקודות ליגה.</p>
-<!-- INSIGHTS_END -->
-</div>
+    <div id="insights-dynamic-content" class="insights-content">
+        <p>טוען נתונים סטטיסטיים...</p>
+    </div>
 </div>
 
 <div class="bracket-container">
@@ -711,7 +725,25 @@
             timer_loading: "טוען שעון...",
             timer_days: " ימים | ",
             series: "סדרה",
-            timer_ended: "המשחק משוחק כעת / הסתיים"
+            timer_ended: "המשחק משוחק כעת / הסתיים",
+            upload_excel: "טען קובץ תוצאות (Excel)",
+            stat_offense: "ממוצע זכות",
+            stat_defense: "ממוצע חובה",
+            stat_efficiency: "מדד יעילות (+/-)",
+            stat_win_pct: "% ניצחונות",
+            win: "ניצחונות",
+            loss: "הפסדים",
+            stat_total: "משחקים ששוחקו",
+            stat_win_rate: "אחוז הצלחה",
+            stat_record: "מאזן (נ-ה)",
+            stat_home_away: "בית / חוץ",
+            stat_avg_score: "ממוצע נקודות",
+            stat_diff: "הפרש סלים מצטבר",
+            stat_streak: "רצף נוכחי",
+            win: "נצחונות",
+            loss: "הפסדים",
+            home: "בית",
+            away: "חוץ"
         },
         en: {
             title: "Games Portal - Maccabi Rehovot",
@@ -741,7 +773,25 @@
             timer_loading: "Loading timer...",
             timer_days: " Days | ",
             series: "Series",
-            timer_ended: "Game in progress / Finished"
+            timer_ended: "Game in progress / Finished",
+            upload_excel: "Upload Results (Excel)",
+            stat_offense: "PPG (Offense)",
+            stat_defense: "PPG (Defense)",
+            stat_efficiency: "Net Rating",
+            stat_win_pct: "Win %",
+            win: "W",
+            loss: "L",
+            stat_total: "Games Played",
+            stat_win_rate: "Win Rate",
+            stat_record: "Record (W-L)",
+            stat_home_away: "Home / Away",
+            stat_avg_score: "Avg Points",
+            stat_diff: "Total Point Diff",
+            stat_streak: "Current Streak",
+            win: "W",
+            loss: "L",
+            home: "Home",
+            away: "Away"
         }
     };
 
@@ -839,6 +889,7 @@
             }
         });
 
+        updateStatistics();
         render(); // Update JS-generated Bracket titles
     }
 
@@ -909,6 +960,113 @@
         
         let url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startTime}/${endTime}&location=${encodeURIComponent(location)}`;
         window.open(url, '_blank');
+    }
+
+    // מנגנון קריאת אקסל
+    document.getElementById('excel-upload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const data = evt.target.result;
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(sheet);
+            processExcelData(json);
+        };
+        reader.readAsBinaryString(file);
+    });
+
+    function processExcelData(data) {
+        // כאן תתבצע הלוגיקה של רינדור הטבלה מחדש על בסיס הנתונים מהאקסל
+        // כרגע נעדכן את הסטטיסטיקה ישירות מהנתונים שנטענו
+        updateStatistics(data);
+    }
+
+    function updateStatistics(externalData = null) {
+        let games = [];
+        
+        if (externalData) {
+            games = externalData; // כאן יש להתאים את שמות השדות לפי מבנה קובץ המנהלת
+        } else {
+            // Fallback: סריקת הטבלה הקיימת
+            const rows = document.querySelectorAll('#games-table-body tr.game-row:not(#past-games-toggle-row)');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 7) return;
+                const homeScore = parseInt(cells[4].innerText);
+                const awayScore = parseInt(cells[5].innerText);
+                if (!isNaN(homeScore)) {
+                    games.push({
+                        rehovotScore: cells[3].classList.contains('rehovot-highlight') ? homeScore : awayScore,
+                        oppScore: cells[3].classList.contains('rehovot-highlight') ? awayScore : homeScore,
+                        isHome: cells[3].classList.contains('rehovot-highlight')
+                    });
+                }
+            });
+        }
+
+        const stats = games.reduce((acc, game) => {
+            acc.total++;
+            acc.scored += game.rehovotScore;
+            acc.conceded += game.oppScore;
+            
+            if (game.rehovotScore > game.oppScore) {
+                acc.wins++;
+                acc.streak.push('W');
+                game.isHome ? acc.homeWins++ : acc.awayWins++;
+            } else {
+                acc.losses++;
+                acc.streak.push('L');
+                game.isHome ? acc.homeLosses++ : acc.awayLosses++;
+            }
+            return acc;
+        }, { total: 0, wins: 0, losses: 0, homeWins: 0, homeLosses: 0, awayWins: 0, awayLosses: 0, scored: 0, conceded: 0, streak: [] });
+
+        const winPct = stats.total > 0 ? ((stats.wins / stats.total) * 100).toFixed(1) : "0";
+        const offAvg = stats.total > 0 ? (stats.scored / stats.total).toFixed(1) : "0";
+        const defAvg = stats.total > 0 ? (stats.conceded / stats.total).toFixed(1) : "0";
+        const netRating = (offAvg - defAvg).toFixed(1);
+
+        // חישוב רצף נוכחי
+        let streakCount = 0;
+        if (stats.streak.length > 0) {
+            const lastResult = stats.streak[stats.streak.length - 1];
+            for (let i = stats.streak.length - 1; i >= 0; i--) {
+                if (stats.streak[i] === lastResult) streakCount++;
+                else break;
+            }
+            stats.currentStreak = `${streakCount}${lastResult}`;
+        }
+
+        const container = document.getElementById('insights-dynamic-content');
+        const t = translations[currentLang];
+
+        container.innerHTML = `
+            <div class="stat-card"><span class="stat-label">${t.stat_win_pct}</span><strong>${winPct}%</strong></div>
+            <div class="stat-card"><span class="stat-label">${t.stat_record}</span><strong>${stats.wins} - ${stats.losses}</strong></div>
+            <div class="stat-card"><span class="stat-label">${t.stat_offense}</span><strong>${offAvg}</strong></div>
+            <div class="stat-card"><span class="stat-label">${t.stat_defense}</span><strong>${defAvg}</strong></div>
+            <div class="stat-card"><span class="stat-label">${t.stat_efficiency}</span><strong style="color:${netRating >= 0 ? '#28a745':'#dc3545'}">${netRating > 0 ? '+':''}${netRating}</strong></div>
+            <div class="stat-card">
+                <span class="stat-label">${t.stat_home_away}</span>
+                <div style="font-size: 1em; font-weight: bold; margin-top:5px;">H: ${stats.homeWins}-${stats.homeLosses} | A: ${stats.awayWins}-${stats.awayLosses}</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">${t.stat_streak}</span>
+                <strong style="color:${stats.currentStreak?.includes('W') ? '#28a745':'#dc3545'}">${formatStreak(stats.currentStreak)}</strong>
+            </div>
+        `;
+    }
+
+    function formatStreak(streakStr) {
+        if (!streakStr) return "-";
+        const count = streakStr.slice(0, -1);
+        const type = streakStr.slice(-1);
+        if (currentLang === 'he') {
+            return `${count} ${type === 'W' ? 'נצחונות' : 'הפסדים'}`;
+        }
+        return `${count}${type}`;
     }
 
     const bracketData = {
